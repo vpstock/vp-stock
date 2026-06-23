@@ -447,6 +447,11 @@ tbody tr:hover td { background:#faf5ff; }
     </div>
     <div class="form-field"><label>Quantity</label><input type="number" id="editItemQty" min="0" /></div>
     <div class="form-field"><label>Low Stock Alert (optional)</label><input type="number" id="editItemLow" placeholder="e.g. 5" min="0" /></div>
+    <div id="editPhotoRow" style="display:none;margin-bottom:12px;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;">
+      <img id="editPhotoPreview" src="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" />
+      <div style="flex:1;font-size:0.85rem;font-weight:600;color:#991b1b;">Photo assigned</div>
+      <button onclick="removeItemPhoto()" style="background:none;border:none;color:#ef4444;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Inter,sans-serif;">🗑️ Remove</button>
+    </div>
     <div class="modal-actions">
       <button class="btn-confirm" onclick="saveEditItem()">✅ Save Changes</button>
       <button class="btn-cancel" onclick="closeModal('editItemModal')">Cancel</button>
@@ -790,7 +795,7 @@ function applyBulkQty() {
 
 // EMAIL ALERTS
 const EJ_KEYS = { service:'vp_ej_service', template:'vp_ej_template', pubkey:'vp_ej_pubkey', email:'vp_alert_email', threshold:'vp_alert_threshold' };
-let lastAlertedItems = {};
+let lastAlertedItems = JSON.parse(localStorage.getItem('vp_last_alerted')||'{}');
 
 function openEmailAlertModal() {
   document.getElementById('ejServiceId').value  = localStorage.getItem(EJ_KEYS.service)||'';
@@ -862,10 +867,15 @@ function _doSendLowStockEmail() {
   const allLow = Object.values(stock).filter(i=>i.qty<=thr&&i.qty>=0);
   if(!allLow.length) return;
   // Only alert if something is newly low since last alert
+  // 24-hour cooldown — don't send more than once per day
+  const lastSent = parseInt(localStorage.getItem('vp_last_alert_time')||'0');
+  if(Date.now() - lastSent < 24*60*60*1000) return;
   const newlyLow = allLow.filter(i=>!lastAlertedItems[i.name]||lastAlertedItems[i.name]>thr);
   if(!newlyLow.length) return;
-  // Mark all current low items as alerted
+  // Mark all current low items as alerted and save
   allLow.forEach(i=>lastAlertedItems[i.name]=i.qty);
+  localStorage.setItem('vp_last_alerted', JSON.stringify(lastAlertedItems));
+  localStorage.setItem('vp_last_alert_time', Date.now().toString());
   const outOfStock = allLow.filter(i=>i.qty===0);
   const low        = allLow.filter(i=>i.qty>0);
   const date = new Date().toLocaleString('en-AU',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
@@ -1021,6 +1031,9 @@ function editItem(barcode) {
   document.getElementById('editItemCategory').value = item.category||'';
   document.getElementById('editItemQty').value = item.qty;
   document.getElementById('editItemLow').value = item.lowAt??'';
+  const photoRow = document.getElementById('editPhotoRow');
+  if(item.photo){ photoRow.style.display='flex'; document.getElementById('editPhotoPreview').src=item.photo; }
+  else { photoRow.style.display='none'; }
   document.getElementById('editItemModal').classList.add('active');
   setTimeout(()=>document.getElementById('editItemName').focus(),50);
 }
@@ -1038,6 +1051,11 @@ function saveEditItem() {
   save(); showToast(`✅ ${name} updated`,'green'); closeModal('editItemModal');
 }
 
+function removeItemPhoto() {
+  const barcode = document.getElementById('editItemKey').value;
+  if(stock[barcode]){ delete stock[barcode].photo; save(); showToast('Photo removed','red'); }
+  document.getElementById('editPhotoRow').style.display='none';
+}
 function closeModal(id) { document.getElementById(id).classList.remove('active'); barcodeInput.focus(); }
 function deleteItem(barcode) {
   if(!confirm(`Delete "${stock[barcode]?.name}"? This cannot be undone.`)) return;
