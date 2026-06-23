@@ -643,16 +643,18 @@ function save() {
 }
 
 // CLOUD SYNC
-function pushToCloud() {
+function pushToCloud(silent=false) {
   const url = getFbUrl(); if(!url) return;
-  setSyncStatus('yellow','Syncing...');
+  if(!silent) setSyncStatus('yellow','Syncing...');
   const stockToSave = {};
   Object.keys(stock).forEach(k=>{ const item={...stock[k]}; delete item.photo; stockToSave[k]=item; });
   const count = Object.keys(stockToSave).length;
-  if(count === 0){ setSyncStatus('red','Nothing to push — no items found'); showToast('No items to push','red'); return; }
-  fetch(url+'/vp_stock.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(stockToSave) })
-    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error(t||r.status); }); setSyncStatus('green','Synced ✓ ('+count+' items)'); showToast('✅ '+count+' items pushed to cloud','green'); })
-    .catch(e=>{ setSyncStatus('red','Push failed: '+e.message); showToast('Push failed: '+e.message,'red'); });
+  if(count === 0){ if(!silent){ setSyncStatus('red','Nothing to push'); showToast('No items to push','red'); } return; }
+  const users = JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+  const payload = { vp_stock: stockToSave, vp_users: users };
+  fetch(url+'/vp_data.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error(t||r.status); }); setSyncStatus('green','Synced ✓'); if(!silent) showToast('✅ '+count+' items pushed to cloud','green'); })
+    .catch(e=>{ setSyncStatus('red','Sync error'); if(!silent) showToast('Push failed: '+e.message,'red'); });
 }
 
 function pullFromCloud(manual) {
