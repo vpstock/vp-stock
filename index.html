@@ -265,6 +265,18 @@ tbody tr:hover td { background:#eff6ff; }
   .fs-confirm-btn { width:90%; }
   .modal { padding:24px 20px; }
 }
+
+/* CELEBRATION OVERLAY */
+#celebrationOverlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; align-items:center; justify-content:center; flex-direction:column; }
+#celebrationOverlay.active { display:flex; }
+.celeb-emoji { font-size:6rem; animation:celebPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+.celeb-message { font-size:1.3rem; font-weight:900; color:white; text-shadow:0 2px 12px rgba(0,0,0,0.4); margin-top:16px; animation:celebFadeUp 0.4s ease 0.1s both; text-align:center; padding:0 24px; }
+@keyframes celebPop { 0%{transform:scale(0) rotate(-20deg);opacity:0;} 70%{transform:scale(1.2) rotate(5deg);} 100%{transform:scale(1) rotate(0deg);opacity:1;} }
+@keyframes celebFadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+
+/* CONFETTI PIECES */
+.confetti-piece { position:fixed; width:10px; height:10px; border-radius:2px; pointer-events:none; animation:confettiFall linear forwards; }
+@keyframes confettiFall { 0%{opacity:1;} 80%{opacity:1;} 100%{transform:translateY(100vh) rotate(720deg);opacity:0;} }
 </style>
 </head>
 <body>
@@ -1022,7 +1034,7 @@ function confirmTake() {
   item.takeLog.push({by:currentUser.name,qty:qty,from:prev,to:item.qty,ts:new Date().toISOString()});
   save(); updateStats(); renderTable();
   closeModal('takeModal');
-  showToast('✅ '+currentUser.name+' took '+qty+' × '+item.name, 'green');
+  showToast('✅ '+currentUser.name+' took '+qty+' × '+item.name, 'green');showCelebration('✅','Got it! '+qty+' × '+item.name);
   barcodeInput.focus();
 }
 
@@ -1389,6 +1401,13 @@ function doOpenPrintWindow(){
   </div>
 </div>
 
+
+<!-- CELEBRATION OVERLAY -->
+<div id="celebrationOverlay">
+  <div class="celeb-emoji" id="celebEmoji"></div>
+  <div class="celeb-message" id="celebMessage"></div>
+</div>
+
 </body></html>`); win.document.close();
 }
 
@@ -1418,6 +1437,29 @@ function toggleToolMenu() {
   arrow.textContent = open ? '▴' : '▾';
 }
 
+
+// CELEBRATION
+const CONFETTI_COLORS = ['#1b3a5c','#2563a8','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#ffffff'];
+function showCelebration(emoji, message, duration=1800) {
+  const overlay = document.getElementById('celebrationOverlay');
+  overlay.style.background = 'rgba(15,33,55,0.55)';
+  overlay.style.backdropFilter = 'blur(4px)';
+  document.getElementById('celebEmoji').textContent = emoji;
+  document.getElementById('celebMessage').textContent = message;
+  overlay.classList.add('active');
+  spawnConfetti();
+  setTimeout(()=>{ overlay.classList.remove('active'); }, duration);
+}
+function spawnConfetti() {
+  for(let i=0;i<60;i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}vw;top:${-10 - Math.random()*20}px;background:${CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)]};transform:rotate(${Math.random()*360}deg) scale(${0.5+Math.random()});width:${6+Math.random()*8}px;height:${6+Math.random()*14}px;border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${0.8+Math.random()*1.2}s;animation-delay:${Math.random()*0.4}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2000);
+  }
+}
+
 // AUTH
 const APP_PASS = 'VP@2o2siX';
 const AUTH_KEY = 'vp_auth';
@@ -1434,14 +1476,14 @@ function showAdminLogin(){document.getElementById('staffLoginForm').style.displa
 function showStaffLogin(){document.getElementById('adminLoginForm').style.display='none';document.getElementById('staffLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('staffNameInput').focus(),50);}
 function doAdminLogin(){
   const val=document.getElementById('loginInput').value;const err=document.getElementById('loginError');
-  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');startApp();}
+  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');startApp();setTimeout(()=>showCelebration('🎉','Welcome back, Admin!'),300);}
   else{err.style.display='block';err.textContent='Incorrect password.';document.getElementById('loginInput').value='';document.getElementById('loginInput').focus();}
 }
 function doStaffLogin(){
   const name=document.getElementById('staffNameInput').value.trim();const pin=document.getElementById('staffPinInput').value.trim();const err=document.getElementById('loginError');
   if(!name||!pin){err.style.display='block';err.textContent='Enter your name and PIN.';return;}
   const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(u=>u.name.toLowerCase()===name.toLowerCase()&&u.pin===pin);
-  if(found){localStorage.setItem(SESSION_KEY,JSON.stringify({name:found.name,pin:found.pin}));localStorage.removeItem(AUTH_KEY);currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');startApp();}
+  if(found){localStorage.setItem(SESSION_KEY,JSON.stringify({name:found.name,pin:found.pin}));localStorage.removeItem(AUTH_KEY);currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');startApp();setTimeout(()=>showCelebration('👋','Welcome, '+found.name+'!'),300);}
   else{err.style.display='block';err.textContent='Name or PIN not recognised.';document.getElementById('staffPinInput').value='';document.getElementById('staffPinInput').focus();}
 }
 function doLogout(){localStorage.removeItem(AUTH_KEY);localStorage.removeItem(SESSION_KEY);currentUser=null;location.reload();}
