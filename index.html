@@ -710,15 +710,29 @@ function handlePhotoPack(event) {
   reader.onload = function(e) {
     let pack;
     try { pack = JSON.parse(e.target.result); } catch(err) { showToast('Invalid photo pack file','red'); return; }
-    const packNames = Object.keys(pack);
+    const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+    const packEntries = Object.keys(pack).map(n => ({ key: n, norm: norm(n) }));
     let matched = 0, skipped = 0;
     const ts = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
     Object.keys(stock).forEach(k => {
-      const itemName = stock[k].name.toLowerCase().trim();
-      // Try exact match first, then partial match
-      let photoKey = packNames.find(n => n.toLowerCase().trim() === itemName);
-      if(!photoKey) photoKey = packNames.find(n => itemName.includes(n.toLowerCase().trim()) || n.toLowerCase().trim().includes(itemName));
-      if(photoKey) { stock[k].photo = pack[photoKey]; stock[k].updated = ts; matched++; }
+      const itemNorm = norm(stock[k].name);
+      // 1. Exact normalised match
+      let found = packEntries.find(e => e.norm === itemNorm);
+      // 2. One contains the other
+      if(!found) found = packEntries.find(e => itemNorm.includes(e.norm) || e.norm.includes(itemNorm));
+      // 3. Word overlap score (>=75% words match)
+      if(!found) {
+        const itemWords = itemNorm.split(' ').filter(w=>w.length>2);
+        let best = null, bestScore = 0;
+        packEntries.forEach(e => {
+          const packWords = e.norm.split(' ').filter(w=>w.length>2);
+          const shared = itemWords.filter(w=>packWords.includes(w)).length;
+          const score = shared / Math.max(itemWords.length, packWords.length);
+          if(score > bestScore && score >= 0.75) { bestScore = score; best = e; }
+        });
+        found = best;
+      }
+      if(found) { stock[k].photo = pack[found.key]; stock[k].updated = ts; matched++; }
       else skipped++;
     });
     save();
