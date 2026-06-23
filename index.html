@@ -815,7 +815,7 @@ barcodeInput.addEventListener('keydown', function(e){
   if(e.key==='Enter'){ const v=this.value.trim(); if(!v) return; handleScan(v); this.value=''; }
 });
 document.addEventListener('click', function(){
-  if(!document.querySelector('.modal-overlay.active') && !document.querySelector('.fullscreen-overlay.active') && !document.getElementById('cameraOverlay').classList.contains('active'))
+  if(!document.querySelector('.modal-overlay.active') && !document.querySelector('.fullscreen-overlay.active') && !document.getElementById('cameraOverlay').classList.contains('active') && !document.getElementById('loginScreen').classList.contains('active'))
     barcodeInput.focus();
 });
 
