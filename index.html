@@ -338,6 +338,9 @@ tbody tr:hover td { background:#faf5ff; }
     <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Stock Tools</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn-tool" onclick="openBulkQty()">📦 Bulk Update Qty</button>
+      <label class="btn-tool" style="cursor:pointer;">📷 Import Photos
+        <input type="file" id="photoPackInput" accept=".json" style="display:none;position:absolute;opacity:0;width:1px;height:1px;" onchange="handlePhotoPack(event)" />
+      </label>
       <button class="btn-tool" onclick="openBulkCat()">🏷 Bulk Category</button>
       <button class="btn-tool" onclick="printLabels()">🖨 Print Labels</button>
       <label class="btn-tool blue" style="cursor:pointer;">
@@ -693,6 +696,31 @@ function applyBulkCat() {
   checked.forEach(c=>{ const k=c.dataset.key; if(stock[k]){ stock[k].category=cat; stock[k].updated=ts; } });
   save(); showToast(`✅ ${checked.length} item${checked.length!==1?'s':''} assigned to ${cat}`,'green');
   closeModal('bulkCatModal');
+}
+
+// PHOTO PACK IMPORT
+function handlePhotoPack(event) {
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let pack;
+    try { pack = JSON.parse(e.target.result); } catch(err) { showToast('Invalid photo pack file','red'); return; }
+    const packNames = Object.keys(pack);
+    let matched = 0, skipped = 0;
+    const ts = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    Object.keys(stock).forEach(k => {
+      const itemName = stock[k].name.toLowerCase().trim();
+      // Try exact match first, then partial match
+      let photoKey = packNames.find(n => n.toLowerCase().trim() === itemName);
+      if(!photoKey) photoKey = packNames.find(n => itemName.includes(n.toLowerCase().trim()) || n.toLowerCase().trim().includes(itemName));
+      if(photoKey) { stock[k].photo = pack[photoKey]; stock[k].updated = ts; matched++; }
+      else skipped++;
+    });
+    save();
+    showToast(`✅ ${matched} photos imported, ${skipped} not matched`, 'green');
+    event.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // BULK QTY UPDATE
