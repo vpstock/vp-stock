@@ -658,9 +658,12 @@ function pushToCloud() {
 function pullFromCloud(manual) {
   const url = getFbUrl(); if(!url){ if(manual) showToast('No sync URL set — tap ☁️ Cloud Sync to set it up','red'); return; }
   setSyncStatus('yellow','Pulling...');
-  fetch(url+'/vp_stock.json')
+  fetch(url+'/vp_data.json')
     .then(r=>{ if(!r.ok) throw new Error(); return r.json(); })
-    .then(data=>{
+    .then(payload=>{
+      // Support both new combined format and old vp_stock-only format
+      const data = (payload && payload.vp_stock) ? payload.vp_stock : payload;
+      const remoteUsers = (payload && payload.vp_users) ? payload.vp_users : null;
       if(data && typeof data==='object'){
         Object.keys(data).forEach(k=>{
           const remote=data[k];
@@ -676,8 +679,9 @@ function pullFromCloud(manual) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stock));
         renderCatFilters(); renderTable(); updateStats();
       }
+      if(remoteUsers) { localStorage.setItem(USERS_KEY, JSON.stringify(remoteUsers)); }
       setSyncStatus('green','Synced ✓');
-      if(manual) showToast('✅ Stock updated from cloud','green');
+      if(manual) showToast('✅ Stock + users updated from cloud','green');
     })
     .catch(()=>{ setSyncStatus('red','Sync failed'); if(manual) showToast('Could not reach cloud — check your Firebase URL','red'); });
 }
