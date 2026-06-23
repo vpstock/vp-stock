@@ -243,17 +243,18 @@ tbody tr:hover td { background:#faf5ff; }
   .search-wrap { width:100%; }
   table thead { display:none; }
   table, tbody { display:block; width:100%; }
-  tbody tr { display:grid; grid-template-columns:64px 64px 1fr auto; grid-template-rows:auto auto auto; gap:4px 10px; padding:14px 16px; border-bottom:1px solid #f3f4f6; align-items:start; }
+  tbody tr { display:grid; grid-template-columns:52px 1fr 48px; gap:3px 10px; padding:12px 14px; border-bottom:1px solid #f3f4f6; align-items:start; }
   tbody tr td { display:block; padding:0; border:none; }
   tbody tr td.td-photo  { grid-column:1; grid-row:1/4; align-self:center; }
-  tbody tr td.td-qr     { grid-column:2; grid-row:1/4; align-self:center; }
-  tbody tr td.td-name   { grid-column:3; grid-row:1; font-size:0.95rem; }
-  tbody tr td.td-id     { grid-column:3; grid-row:2; }
-  tbody tr td.td-qty    { grid-column:3; grid-row:3; }
+  tbody tr td.td-qr     { display:none; }
+  tbody tr td.td-name   { grid-column:2; grid-row:1; font-size:0.93rem; }
+  tbody tr td.td-status { grid-column:2; grid-row:2; }
+  tbody tr td.td-id     { grid-column:2; grid-row:3; }
+  tbody tr td.td-qty    { display:none; }
   tbody tr td.td-low, tbody tr td.td-updated { display:none; }
-  tbody tr td.td-status  { grid-column:4; grid-row:1; }
-  tbody tr td.td-actions { grid-column:4; grid-row:2/4; display:flex; flex-direction:column; gap:4px; align-items:center; }
+  tbody tr td.td-actions { grid-column:3; grid-row:1/4; display:flex; flex-direction:column; gap:8px; align-items:center; justify-content:center; }
   .btn-row-action { width:36px; height:36px; font-size:1rem; }
+  .photo-cell { width:52px; height:52px; }
   .fs-item-name { font-size:1.7rem; }
   .fs-qty-item-name { font-size:1.4rem; }
   .fs-btn-add,.fs-btn-sub { width:148px; height:110px; }
@@ -544,7 +545,9 @@ tbody tr:hover td { background:#faf5ff; }
       <button class="btn-cancel" onclick="closeModal('syncModal')">Cancel</button>
     </div>
     <div style="margin-top:12px;text-align:center;">
-      <button onclick="pullFromCloud(true)" style="background:none;border:none;color:#6d28d9;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">🔄 Pull latest from cloud</button>
+      <button onclick="pushToCloud()" style="background:none;border:none;color:#6d28d9;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">⬆️ Push to cloud</button>
+      &nbsp;·&nbsp;
+      <button onclick="pullFromCloud(true)" style="background:none;border:none;color:#6d28d9;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">⬇️ Pull from cloud</button>
       &nbsp;·&nbsp;
       <button onclick="removeSyncUrl()" style="background:none;border:none;color:#ef4444;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">✕ Remove sync</button>
     </div>
@@ -587,9 +590,11 @@ function pushToCloud() {
   setSyncStatus('yellow','Syncing...');
   const stockToSave = {};
   Object.keys(stock).forEach(k=>{ const item={...stock[k]}; delete item.photo; stockToSave[k]=item; });
+  const count = Object.keys(stockToSave).length;
+  if(count === 0){ setSyncStatus('red','Nothing to push — no items found'); showToast('No items to push','red'); return; }
   fetch(url+'/vp_stock.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(stockToSave) })
-    .then(r=>{ if(!r.ok) throw new Error(); setSyncStatus('green','Synced ✓'); })
-    .catch(()=>setSyncStatus('red','Sync failed'));
+    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error(t||r.status); }); setSyncStatus('green','Synced ✓ ('+count+' items)'); showToast('✅ '+count+' items pushed to cloud','green'); })
+    .catch(e=>{ setSyncStatus('red','Push failed: '+e.message); showToast('Push failed: '+e.message,'red'); });
 }
 
 function pullFromCloud(manual) {
@@ -961,7 +966,7 @@ function renderTable() {
         <td class="td-photo"><div class="photo-cell" onclick="triggerPhotoUpload('${esc(k)}')">${photoHTML}</div></td>
         <td class="td-qr"><div class="qr-cell" id="${qrId}"></div></td>
         <td class="td-name"><span class="item-name-cell">${esc(item.name)}</span>${item.category?`<br><span class="cat-badge">${esc(item.category)}</span>`:''}</td>
-        <td class="td-id"><span class="barcode-cell">${esc(bd)}</span></td>
+        <td class="td-id"><span class="barcode-cell">${esc(bd)}</span> <span style="font-size:0.8rem;color:#6d28d9;font-weight:700;">Qty: ${item.qty}</span></td>
         <td class="td-qty"><span class="qty-value">${item.qty}</span></td>
         <td class="td-low" style="color:#9ca3af;font-size:0.85rem;">${low!==null?low:'—'}</td>
         <td class="td-status">${badge}</td>
