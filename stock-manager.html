@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VP Stock Manager</title>
+<meta name="description" content="Victorian Projects QR Stock Manager">
+<meta name="theme-color" content="#4338ca">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VP Stock">
+<link rel="manifest" id="manifest-placeholder">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #f5f7ff; color: #1e1b4b; min-height: 100vh; }
+
+/* HEADER */
+header { background: linear-gradient(135deg,#4338ca 0%,#6d28d9 50%,#7c3aed 100%); padding:0; position:relative; overflow:hidden; padding-top:env(safe-area-inset-top); }
+header::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:rgba(255,255,255,0.06); border-radius:50%; }
+header::after  { content:''; position:absolute; bottom:-80px; left:30%; width:200px; height:200px; background:rgba(255,255,255,0.04); border-radius:50%; }
+.header-inner { max-width:1000px; margin:0 auto; padding:28px 24px 24px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; flex-wrap:wrap; gap:12px; }
+.header-logo { width:46px; height:46px; background:rgba(255,255,255,0.2); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-right:4px; flex-shrink:0; border:1.5px solid rgba(255,255,255,0.3); }
+.header-text-group { display:flex; flex-direction:column; }
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-left h1 { color:white; font-size:1.7rem; font-weight:900; letter-spacing:-0.5px; text-shadow:0 2px 8px rgba(0,0,0,0.2); }
+.header-left p  { color:rgba(255,255,255,0.9); font-size:0.88rem; margin-top:3px; font-weight:500; text-shadow:0 1px 4px rgba(0,0,0,0.15); }
+.header-right { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
+.stat-pill { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:7px 16px; color:white; font-size:0.82rem; font-weight:600; }
+.stat-pill span { opacity:0.75; font-weight:400; }
+
+/* STATS */
+.stats-row { max-width:1000px; margin:0 auto; padding:16px 24px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.stat-card { background:white; border-radius:16px; padding:20px 24px; box-shadow:0 4px 24px rgba(99,87,210,0.12); display:flex; align-items:center; gap:16px; }
+.stat-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+.stat-icon.purple { background:linear-gradient(135deg,#ede9fe,#ddd6fe); }
+.stat-icon.green  { background:linear-gradient(135deg,#d1fae5,#a7f3d0); }
+.stat-icon.orange { background:linear-gradient(135deg,#ffedd5,#fed7aa); }
+.stat-info p  { font-size:0.78rem; color:#9ca3af; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; }
+.stat-info h3 { font-size:1.9rem; font-weight:900; color:#1e1b4b; line-height:1; margin-top:2px; }
+
+/* CONTAINER */
+.container { max-width:1000px; margin:0 auto; padding:0 24px 40px; }
+
+/* SCAN CARD */
+.scan-card { background:linear-gradient(135deg,#4338ca,#7c3aed); border-radius:20px; padding:36px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden; box-shadow:0 8px 32px rgba(99,87,210,0.3); }
+.scan-card::before { content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; background:rgba(255,255,255,0.07); border-radius:50%; }
+.scan-card::after  { content:''; position:absolute; bottom:-50px; left:-20px; width:140px; height:140px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.scan-card-inner { position:relative; z-index:1; }
+.scan-card h2 { color:rgba(255,255,255,0.8); font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; margin-bottom:12px; }
+.scan-pulse { display:inline-flex; align-items:center; justify-content:center; width:72px; height:72px; background:rgba(255,255,255,0.15); border-radius:50%; font-size:2rem; margin-bottom:20px; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.3);} 50%{box-shadow:0 0 0 16px rgba(255,255,255,0);} }
+#barcodeInput { width:100%; max-width:440px; padding:16px 22px; font-size:1.1rem; font-family:'Inter',sans-serif; font-weight:600; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.3); border-radius:12px; text-align:center; outline:none; color:white; letter-spacing:3px; transition:all 0.2s; }
+#barcodeInput::placeholder { color:rgba(255,255,255,0.5); letter-spacing:1px; font-size:0.9rem; font-weight:400; }
+#barcodeInput:focus { border-color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.2); }
+.scan-hint { color:rgba(255,255,255,0.55); font-size:0.8rem; margin-top:10px; font-weight:500; }
+.btn-camera { margin-top:18px; padding:14px 32px; background:white; color:#6d28d9; border:none; border-radius:12px; font-size:1rem; font-weight:800; font-family:'Inter',sans-serif; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+.btn-camera:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.2); }
+
+/* CAMERA OVERLAY */
+#cameraOverlay { display:none; position:fixed; inset:0; background:#000; z-index:500; flex-direction:column; align-items:center; justify-content:center; }
+#cameraOverlay.active { display:flex; }
+#cameraVideo { width:100%; max-width:480px; display:block; }
+.camera-frame { position:absolute; width:220px; height:220px; border:3px solid #a78bfa; border-radius:16px; box-shadow:0 0 0 9999px rgba(0,0,0,0.55); pointer-events:none; }
+.camera-corner { position:absolute; width:28px; height:28px; border-color:white; border-style:solid; }
+.camera-corner.tl { top:-3px; left:-3px; border-width:4px 0 0 4px; border-radius:4px 0 0 0; }
+.camera-corner.br { bottom:-3px; right:-3px; border-width:0 4px 4px 0; border-radius:0 0 4px 0; }
+.camera-hint { position:absolute; bottom:130px; color:rgba(255,255,255,0.8); font-size:0.9rem; font-weight:600; text-align:center; padding:0 24px; }
+.camera-status { position:absolute; top:60px; background:rgba(0,0,0,0.6); color:#a78bfa; font-size:0.8rem; font-weight:700; padding:6px 16px; border-radius:20px; letter-spacing:1px; }
+.btn-close-camera { position:absolute; bottom:48px; padding:14px 40px; background:rgba(255,255,255,0.12); color:white; border:1.5px solid rgba(255,255,255,0.25); border-radius:40px; font-size:1rem; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; }
+
+/* TOOLBAR */
+.toolbar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.btn-tool { display:flex; align-items:center; gap:7px; padding:10px 18px; background:white; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.85rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; color:#374151; transition:all 0.15s; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.btn-tool:hover       { border-color:#6d28d9; color:#6d28d9; background:#faf5ff; transform:translateY(-1px); }
+.btn-tool.blue:hover  { border-color:#3b82f6; color:#3b82f6; background:#eff6ff; }
+.btn-tool.red:hover   { border-color:#ef4444; color:#ef4444; background:#fff5f5; }
+.btn-tool.green:hover { border-color:#10b981; color:#10b981; background:#f0fdf4; }
+.btn-tool-menu { display:flex; align-items:center; gap:7px; padding:10px 18px; background:white; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.85rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; color:#374151; transition:all 0.15s; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.btn-tool-menu:hover { border-color:#6d28d9; color:#6d28d9; background:#faf5ff; }
+
+/* CATEGORY FILTERS */
+.cat-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.cat-btn { padding:7px 16px; border-radius:20px; border:1.5px solid #e5e7eb; background:white; font-size:0.8rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; color:#6b7280; transition:all 0.15s; }
+.cat-btn:hover  { border-color:#6d28d9; color:#6d28d9; }
+.cat-btn.active { background:#6d28d9; border-color:#6d28d9; color:white; }
+
+/* STOCK CARD */
+.stock-card { background:white; border-radius:20px; box-shadow:0 4px 24px rgba(99,87,210,0.08); overflow:hidden; }
+.stock-header { padding:22px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #f3f4f6; background:linear-gradient(to right,#fafbff,white); flex-wrap:wrap; gap:12px; }
+.stock-header-left h2 { font-size:1rem; font-weight:800; color:#1e1b4b; }
+.stock-header-left p  { font-size:0.78rem; color:#9ca3af; margin-top:2px; }
+.search-wrap { position:relative; }
+.search-wrap::before { content:'🔍'; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:0.85rem; pointer-events:none; }
+.search-box { padding:9px 14px 9px 34px; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.88rem; font-family:'Inter',sans-serif; outline:none; width:220px; transition:border-color 0.2s; color:#374151; }
+.search-box:focus { border-color:#6d28d9; }
+
+table { width:100%; border-collapse:collapse; }
+thead { background:#f9fafb; }
+th { padding:11px 20px; text-align:left; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9ca3af; border-bottom:1px solid #f3f4f6; }
+td { padding:15px 20px; border-bottom:1px solid #f9fafb; font-size:0.9rem; color:#374151; }
+tr:last-child td { border-bottom:none; }
+tbody tr { transition:background 0.1s; }
+tbody tr:hover td { background:#faf5ff; }
+
+.item-name-cell { font-weight:700; color:#1e1b4b; font-size:0.93rem; }
+.barcode-cell { font-family:monospace; font-size:0.8rem; color:#9ca3af; background:#f9fafb; padding:3px 8px; border-radius:5px; display:inline-block; }
+.qty-value { font-size:1.2rem; font-weight:900; color:#1e1b4b; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+.badge-ok   { background:#d1fae5; color:#065f46; }
+.badge-low  { background:#ffedd5; color:#9a3412; }
+.badge-zero { background:#fee2e2; color:#991b1b; }
+.cat-badge  { display:inline-block; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:700; background:#ede9fe; color:#6d28d9; margin-top:3px; }
+.cat-group-header td { padding:10px 20px 6px; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:#6d28d9; background:#faf5ff; border-bottom:1px solid #ede9fe; }
+
+.photo-cell { width:64px; height:64px; border-radius:12px; overflow:hidden; cursor:pointer; position:relative; flex-shrink:0; background:#f3f4f6; border:2px dashed #e5e7eb; display:flex; align-items:center; justify-content:center; transition:border-color 0.2s,background 0.2s; }
+.photo-cell:hover { border-color:#6d28d9; background:#faf5ff; }
+.photo-cell img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-cell .photo-placeholder { font-size:1.4rem; opacity:0.4; }
+.photo-cell .photo-overlay { position:absolute; inset:0; background:rgba(109,40,217,0.7); color:white; font-size:0.65rem; font-weight:700; display:none; align-items:center; justify-content:center; text-align:center; border-radius:10px; }
+.photo-cell:hover .photo-overlay { display:flex; }
+.qr-cell canvas, .qr-cell img { width:56px !important; height:56px !important; display:block; border-radius:4px; }
+
+.btn-row-action { background:none; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:all 0.15s; color:#d1d5db; }
+.btn-row-action:hover.edit { background:#ede9fe; color:#6d28d9; }
+.btn-row-action:hover.del  { background:#fee2e2; color:#dc2626; }
+
+.empty-state { text-align:center; padding:70px 20px; color:#d1d5db; }
+.empty-state .empty-icon { font-size:3rem; margin-bottom:12px; }
+.empty-state h3 { font-size:1rem; font-weight:700; color:#9ca3af; margin-bottom:6px; }
+.empty-state p { font-size:0.85rem; }
+
+/* FULLSCREEN OVERLAYS */
+.fullscreen-overlay { display:none; position:fixed; inset:0; z-index:200; flex-direction:column; align-items:center; justify-content:center; animation:fadeIn 0.2s ease; }
+.fullscreen-overlay.active { display:flex; }
+@keyframes fadeIn { from{opacity:0;transform:scale(0.97);} to{opacity:1;transform:scale(1);} }
+
+#stepAction { background:linear-gradient(160deg,#1e1b4b 0%,#312e81 60%,#4338ca 100%); }
+.fs-cancel-btn { position:absolute; top:24px; right:28px; background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:9px 18px; font-size:0.85rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; }
+.fs-cancel-btn:hover { background:rgba(255,255,255,0.18); color:white; }
+.fs-item-label { color:rgba(255,255,255,0.45); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:3px; margin-bottom:12px; }
+.fs-item-name { color:white; font-size:2.4rem; font-weight:900; text-align:center; padding:0 32px; margin-bottom:10px; line-height:1.15; }
+.fs-current-qty { color:rgba(255,255,255,0.4); font-size:0.95rem; margin-bottom:60px; }
+.fs-current-qty span { color:rgba(255,255,255,0.85); font-weight:800; }
+.fs-question { color:rgba(255,255,255,0.6); font-size:1rem; margin-bottom:24px; font-weight:500; }
+.fs-action-buttons { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; padding:0 24px; }
+.fs-btn-add,.fs-btn-sub { width:210px; height:130px; border:none; border-radius:20px; font-family:'Inter',sans-serif; font-weight:900; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; }
+.fs-btn-add { background:linear-gradient(135deg,#059669,#10b981); color:white; box-shadow:0 8px 32px rgba(16,185,129,0.35); }
+.fs-btn-add:hover { transform:translateY(-4px) scale(1.02); }
+.fs-btn-sub { background:linear-gradient(135deg,#dc2626,#ef4444); color:white; box-shadow:0 8px 32px rgba(239,68,68,0.35); }
+.fs-btn-sub:hover { transform:translateY(-4px) scale(1.02); }
+.fs-btn-emoji { font-size:2rem; }
+.fs-btn-label { font-size:0.95rem; font-weight:700; opacity:0.9; }
+
+#stepQty { background:#f5f7ff; }
+.fs-action-header { font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:3px; margin-bottom:10px; padding:6px 16px; border-radius:20px; }
+.fs-action-header.add { background:#d1fae5; color:#065f46; }
+.fs-action-header.sub { background:#fee2e2; color:#991b1b; }
+.fs-qty-item-name { font-size:1.8rem; font-weight:900; color:#1e1b4b; margin-bottom:6px; text-align:center; padding:0 32px; }
+.fs-qty-current { color:#9ca3af; font-size:0.9rem; margin-bottom:52px; }
+.fs-qty-label { font-size:0.85rem; color:#9ca3af; margin-bottom:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+.fs-qty-input { font-size:5.5rem; font-weight:900; font-family:'Inter',sans-serif; color:#1e1b4b; border:none; border-bottom:4px solid #6d28d9; background:transparent; text-align:center; width:260px; outline:none; margin-bottom:52px; padding-bottom:8px; }
+.fs-confirm-btn { width:300px; padding:20px; font-size:1.1rem; font-weight:800; font-family:'Inter',sans-serif; color:white; border:none; border-radius:16px; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; margin-bottom:16px; }
+.fs-confirm-btn.add { background:linear-gradient(135deg,#059669,#10b981); box-shadow:0 8px 24px rgba(16,185,129,0.35); }
+.fs-confirm-btn.add:hover { transform:translateY(-2px); }
+.fs-confirm-btn.sub { background:linear-gradient(135deg,#dc2626,#ef4444); box-shadow:0 8px 24px rgba(239,68,68,0.35); }
+.fs-confirm-btn.sub:hover { transform:translateY(-2px); }
+.fs-back-btn { background:none; border:none; color:#9ca3af; font-size:0.88rem; font-family:'Inter',sans-serif; font-weight:600; cursor:pointer; padding:8px 16px; border-radius:8px; }
+.fs-back-btn:hover { color:#374151; background:#f3f4f6; }
+
+/* MODALS */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(30,27,75,0.5); z-index:300; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-overlay.active { display:flex; }
+.modal { background:white; border-radius:24px; padding:36px; width:90%; max-width:460px; box-shadow:0 32px 80px rgba(30,27,75,0.25); animation:popIn 0.2s ease; max-height:90vh; overflow-y:auto; }
+@keyframes popIn { from{transform:scale(0.92) translateY(10px);opacity:0;} to{transform:scale(1) translateY(0);opacity:1;} }
+.modal-icon { font-size:2rem; margin-bottom:12px; }
+.modal h2 { font-size:1.3rem; font-weight:800; color:#1e1b4b; margin-bottom:4px; }
+.modal > p { color:#9ca3af; font-size:0.88rem; margin-bottom:24px; }
+.form-field { margin-bottom:16px; }
+.form-field label { display:block; font-size:0.8rem; font-weight:700; color:#6b7280; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+.form-field input { width:100%; padding:12px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.95rem; font-family:'Inter',sans-serif; outline:none; color:#1e1b4b; transition:border-color 0.2s; }
+.form-field input:focus { border-color:#6d28d9; }
+.form-field select { width:100%; padding:12px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.95rem; font-family:'Inter',sans-serif; outline:none; color:#1e1b4b; background:white; transition:border-color 0.2s; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; cursor:pointer; }
+.form-field select:focus { border-color:#6d28d9; }
+.barcode-display { background:#faf5ff; border:1.5px solid #ddd6fe; border-radius:10px; padding:11px 14px; font-family:monospace; font-size:0.95rem; letter-spacing:2px; color:#6d28d9; font-weight:700; }
+.modal-actions { display:flex; gap:10px; margin-top:24px; }
+.btn-confirm { flex:2; padding:14px; background:linear-gradient(135deg,#4338ca,#6d28d9); color:white; border:none; border-radius:12px; font-size:0.95rem; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(109,40,217,0.3); }
+.btn-confirm:hover { transform:translateY(-1px); }
+.btn-cancel { flex:1; padding:14px; background:#f3f4f6; color:#6b7280; border:none; border-radius:12px; font-size:0.95rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; }
+.btn-cancel:hover { background:#e5e7eb; }
+
+/* SYNC PILL */
+.sync-pill { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:7px 14px; color:white; font-size:0.8rem; font-weight:600; cursor:pointer; transition:background 0.2s; }
+.sync-pill:hover { background:rgba(255,255,255,0.25); }
+.sync-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.sync-dot.grey   { background:#9ca3af; }
+.sync-dot.green  { background:#34d399; box-shadow:0 0 6px #34d399; }
+.sync-dot.yellow { background:#fbbf24; animation:blink 1s infinite; }
+.sync-dot.red    { background:#f87171; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* TOAST */
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(100px); background:#1e1b4b; color:white; padding:13px 26px; border-radius:40px; font-size:0.88rem; font-weight:600; z-index:999; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); white-space:nowrap; box-shadow:0 8px 32px rgba(30,27,75,0.25); }
+.toast.show  { transform:translateX(-50%) translateY(0); }
+.toast.green { background:linear-gradient(135deg,#059669,#10b981); }
+.toast.red   { background:linear-gradient(135deg,#dc2626,#ef4444); }
+
+/* MOBILE */
+@media(max-width:640px){
+  .header-inner { flex-direction:column; align-items:flex-start; padding:20px 16px 18px; }
+  .header-left h1 { font-size:1.4rem; }
+  .header-logo { width:40px; height:40px; font-size:1.3rem; }
+  .header-right { display:flex; flex-wrap:wrap; gap:8px; }
+  .stat-pill { display:none; }
+  .stats-row { grid-template-columns:1fr 1fr; gap:10px; padding:12px 12px 0; }
+  .stats-row .stat-card:last-child { grid-column:1/-1; }
+  .stat-card { padding:14px 16px; }
+  .stat-icon { width:42px; height:42px; font-size:1.2rem; }
+  .stat-info h3 { font-size:1.5rem; }
+  .container { padding:0 12px 32px; }
+  .scan-card { padding:24px 16px; }
+  #barcodeInput { font-size:1rem; padding:14px 16px; }
+  .toolbar { gap:8px; }
+  .btn-tool { padding:12px 14px; font-size:0.82rem; flex:1 1 calc(50% - 8px); justify-content:center; }
+  .stock-header { flex-direction:column; align-items:flex-start; gap:12px; padding:16px; }
+  .search-box { width:100%; }
+  .search-wrap { width:100%; }
+  table thead { display:none; }
+  table, tbody { display:block; width:100%; }
+  tbody tr { display:grid; grid-template-columns:64px 64px 1fr auto; grid-template-rows:auto auto auto; gap:4px 10px; padding:14px 16px; border-bottom:1px solid #f3f4f6; align-items:start; }
+  tbody tr td { display:block; padding:0; border:none; }
+  tbody tr td.td-photo  { grid-column:1; grid-row:1/4; align-self:center; }
+  tbody tr td.td-qr     { grid-column:2; grid-row:1/4; align-self:center; }
+  tbody tr td.td-name   { grid-column:3; grid-row:1; font-size:0.95rem; }
+  tbody tr td.td-id     { grid-column:3; grid-row:2; }
+  tbody tr td.td-qty    { grid-column:3; grid-row:3; }
+  tbody tr td.td-low, tbody tr td.td-updated { display:none; }
+  tbody tr td.td-status  { grid-column:4; grid-row:1; }
+  tbody tr td.td-actions { grid-column:4; grid-row:2/4; display:flex; flex-direction:column; gap:4px; align-items:center; }
+  .btn-row-action { width:36px; height:36px; font-size:1rem; }
+  .fs-item-name { font-size:1.7rem; }
+  .fs-qty-item-name { font-size:1.4rem; }
+  .fs-btn-add,.fs-btn-sub { width:148px; height:110px; }
+  .fs-qty-input { font-size:4rem; width:200px; }
+  .fs-confirm-btn { width:90%; }
+  .modal { padding:24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-logo">📦</div>
+      <div class="header-text-group">
+        <h1>Victorian Projects</h1>
+        <p>QR Code Stock Manager — scan, track, stay on top</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="stat-pill" id="pillTotal">— <span>items</span></div>
+      <div class="stat-pill" id="pillLow" style="display:none">⚠ <span id="pillLowCount">0</span> <span>low</span></div>
+      <div class="sync-pill" id="syncPill" onclick="openSyncModal()" title="Cloud sync status">
+        <span id="syncDot" class="sync-dot grey"></span>
+        <span id="syncLabel">Set up sync</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-icon purple">📦</div><div class="stat-info"><p>Total Items</p><h3 id="statTotal">0</h3></div></div>
+  <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><p>In Stock</p><h3 id="statInStock">0</h3></div></div>
+  <div class="stat-card"><div class="stat-icon orange">⚠️</div><div class="stat-info"><p>Low / Out of Stock</p><h3 id="statLow">0</h3></div></div>
+</div>
+
+<div class="container">
+
+  <div class="scan-card">
+    <div class="scan-card-inner">
+      <h2>Ready to Scan QR Code</h2>
+      <div class="scan-pulse">📱</div><br>
+      <input type="text" id="barcodeInput" placeholder="USB scanner — or use camera button below..." autocomplete="off" autofocus />
+      <div class="scan-hint">USB scanner types here automatically · Use button below for phone camera</div>
+      <br>
+      <button class="btn-camera" onclick="openCamera()">📷 Scan with Phone Camera</button>
+    </div>
+  </div>
+
+  <!-- CAMERA OVERLAY -->
+  <div id="cameraOverlay">
+    <video id="cameraVideo" autoplay playsinline muted></video>
+    <canvas id="cameraCanvas" style="display:none"></canvas>
+    <div class="camera-frame">
+      <div class="camera-corner tl"></div>
+      <div class="camera-corner br"></div>
+    </div>
+    <div class="camera-status" id="cameraStatus">SCANNING...</div>
+    <div class="camera-hint">Point at a QR label on your stock item</div>
+    <button class="btn-close-camera" onclick="closeCamera()">✕ Close Camera</button>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="btn-tool" onclick="openAddItem()" style="background:linear-gradient(135deg,#4338ca,#6d28d9);color:white;border-color:#4338ca;font-weight:700;">➕ Add New Item</button>
+    <button class="btn-tool-menu" onclick="toggleToolMenu()" id="toolMenuBtn">⚙️ Tools <span id="toolMenuArrow">▾</span></button>
+  </div>
+  <div id="toolMenu" style="display:none;background:white;border:1.5px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 4px 24px rgba(99,87,210,0.1);">
+    <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Stock Tools</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-tool" onclick="openBulkCat()">🏷 Bulk Category</button>
+      <button class="btn-tool" onclick="printLabels()">🖨 Print Labels</button>
+      <label class="btn-tool blue" style="cursor:pointer;">
+        ⬆ Import Excel / CSV
+        <input type="file" id="csvImportInput" accept=".csv,.xlsx,.xls" style="display:none;position:absolute;opacity:0;width:1px;height:1px;" onchange="handleImport(event)" />
+      </label>
+      <button class="btn-tool green" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+    <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin:16px 0 12px;">Settings & Sync</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-tool" onclick="openSyncModal()">☁️ Cloud Sync</button>
+      <button class="btn-tool" onclick="openEmailAlertModal()">🔔 Email Alerts</button>
+      <button class="btn-tool red" onclick="clearAll()">🗑 Clear All Data</button>
+    </div>
+  </div>
+
+  <div class="cat-filters" id="catFilters"></div>
+
+  <div class="stock-card">
+    <div class="stock-header">
+      <div class="stock-header-left"><h2>Stock Levels</h2><p id="tableSubtitle">All items</p></div>
+      <div class="search-wrap"><input type="text" class="search-box" id="searchBox" placeholder="Search..." oninput="renderTable()" /></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th><th>QR</th><th>Item Name</th><th>QR Code ID</th>
+          <th>Qty</th><th>Low Alert</th><th>Status</th><th>Last Updated</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="stockBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="empty-icon">📭</div>
+      <h3>No items yet</h3>
+      <p>Import your Excel file or add your first item to get started.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="fullscreen-overlay" id="stepAction">
+  <button class="fs-cancel-btn" onclick="closeScanFlow()">✕ Cancel</button>
+  <div class="fs-item-label">Item Scanned</div>
+  <div class="fs-item-name" id="fsItemName"></div>
+  <div class="fs-current-qty">Current stock: <span id="fsCurrentQty"></span> units</div>
+  <div class="fs-question">What are you doing with this stock?</div>
+  <div class="fs-action-buttons">
+    <button class="fs-btn-add" onclick="goToQty('add')"><span class="fs-btn-emoji">📥</span><span class="fs-btn-label">Adding Stock</span></button>
+    <button class="fs-btn-sub" onclick="goToQty('subtract')"><span class="fs-btn-emoji">📤</span><span class="fs-btn-label">Taking Out Stock</span></button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="fullscreen-overlay" id="stepQty">
+  <button class="fs-cancel-btn" style="color:#9ca3af;background:#f3f4f6;border-color:#e5e7eb;" onclick="closeScanFlow()">✕ Cancel</button>
+  <div class="fs-action-header" id="fsActionHeader"></div>
+  <div class="fs-qty-item-name" id="fsQtyItemName"></div>
+  <div class="fs-qty-current" id="fsQtyCurrent"></div>
+  <div class="fs-qty-label">How many?</div>
+  <input type="number" class="fs-qty-input" id="fsQtyInput" value="1" min="1" inputmode="numeric" />
+  <button class="fs-confirm-btn" id="fsConfirmBtn" onclick="confirmAction()"></button>
+  <button class="fs-back-btn" onclick="goBack()">← Go Back</button>
+</div>
+
+<!-- NEW ITEM MODAL -->
+<div class="modal-overlay" id="newItemModal">
+  <div class="modal">
+    <div class="modal-icon">🆕</div>
+    <h2>New Item</h2>
+    <p>This QR code isn't registered yet. Fill in the details below.</p>
+    <div class="form-field"><label>QR Code ID</label><div class="barcode-display" id="newItemBarcode"></div></div>
+    <div class="form-field"><label>Item Name</label><input type="text" id="newItemName" placeholder="e.g. 600mm Refrigerant Pipe" /></div>
+    <div class="form-field"><label>Category</label>
+      <select id="newItemCategory">
+        <option value="">— Select category —</option>
+        <option>AC Materials</option><option>Electrical</option><option>Grilles</option>
+        <option>Nexcon</option><option>PVC</option><option>Screws and Consumables</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Initial Quantity</label><input type="number" id="newItemQty" placeholder="0" min="0" value="0" /></div>
+    <div class="form-field"><label>Low Stock Alert (optional)</label><input type="number" id="newItemLow" placeholder="e.g. 5" min="0" value="" /></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveNewItem()">✅ Save Item</button>
+      <button class="btn-cancel" onclick="closeModal('newItemModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ITEM MODAL -->
+<div class="modal-overlay" id="editItemModal">
+  <div class="modal">
+    <div class="modal-icon">✏️</div>
+    <h2>Edit Item</h2>
+    <p>Update details or adjust the stock quantity.</p>
+    <input type="hidden" id="editItemKey" />
+    <div class="form-field"><label>Item Name</label><input type="text" id="editItemName" /></div>
+    <div class="form-field"><label>Category</label>
+      <select id="editItemCategory">
+        <option value="">— No category —</option>
+        <option>AC Materials</option><option>Electrical</option><option>Grilles</option>
+        <option>Nexcon</option><option>PVC</option><option>Screws and Consumables</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Quantity</label><input type="number" id="editItemQty" min="0" /></div>
+    <div class="form-field"><label>Low Stock Alert (optional)</label><input type="number" id="editItemLow" placeholder="e.g. 5" min="0" /></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveEditItem()">✅ Save Changes</button>
+      <button class="btn-cancel" onclick="closeModal('editItemModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL ALERT MODAL -->
+<div class="modal-overlay" id="emailAlertModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-icon">📧</div>
+    <h2>Low Stock Email Alerts</h2>
+    <p>Get an automatic email when any item drops to 5 or below.</p>
+    <div class="form-field">
+      <label>Send alerts to</label>
+      <input type="email" id="alertEmail" placeholder="joy@victorianprojects.com.au" value="joy@victorianprojects.com.au" />
+    </div>
+    <div class="form-field">
+      <label>Alert when stock reaches</label>
+      <input type="number" id="alertThreshold" value="5" min="1" max="100" />
+    </div>
+    <div style="background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:0.82rem;font-weight:700;color:#6d28d9;margin-bottom:8px;">📋 One-time EmailJS setup (free):</div>
+      <div style="font-size:0.8rem;color:#7c3aed;line-height:1.9;">
+        1. Go to <strong>emailjs.com</strong> → Sign Up (free)<br>
+        2. Click <strong>Add New Service</strong> → choose <strong>Gmail</strong> → connect your Google account<br>
+        3. Copy your <strong>Service ID</strong> (e.g. service_xxxxxx)<br>
+        4. Click <strong>Email Templates → Create New Template</strong><br>
+        5. Set Subject: <code>⚠️ Low Stock Alert — Victorian Projects</code><br>
+        6. Set Body: <code>{{message}}</code> → Save → copy <strong>Template ID</strong><br>
+        7. Go to <strong>Account → General</strong> → copy <strong>Public Key</strong><br>
+        8. Paste all three below
+      </div>
+    </div>
+    <div class="form-field"><label>EmailJS Service ID</label><input type="text" id="ejServiceId" placeholder="service_xxxxxxx" /></div>
+    <div class="form-field"><label>EmailJS Template ID</label><input type="text" id="ejTemplateId" placeholder="template_xxxxxxx" /></div>
+    <div class="form-field"><label>EmailJS Public Key</label><input type="text" id="ejPublicKey" placeholder="xxxxxxxxxxxxxxxxxxxxxx" /></div>
+    <div id="emailAlertStatus" style="display:none;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveEmailAlert()">✅ Save & Test Alert</button>
+      <button class="btn-cancel" onclick="closeModal('emailAlertModal')">Cancel</button>
+    </div>
+    <div style="margin-top:12px;text-align:center;">
+      <button onclick="removeEmailAlert()" style="background:none;border:none;color:#ef4444;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">✕ Remove email alerts</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK CATEGORY MODAL -->
+<div class="modal-overlay" id="bulkCatModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-icon">🏷</div>
+    <h2>Bulk Assign Categories</h2>
+    <p>Select items and assign them a category all at once.</p>
+    <div class="form-field">
+      <label>Category to assign</label>
+      <select id="bulkCatSelect">
+        <option value="">— Select category —</option>
+        <option>AC Materials</option><option>Electrical</option><option>Grilles</option>
+        <option>Nexcon</option><option>PVC</option><option>Screws and Consumables</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <button onclick="bulkSelectAll()" style="padding:6px 14px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Select All</button>
+      <button onclick="bulkSelectNone()" style="padding:6px 14px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Clear All</button>
+      <button onclick="bulkSelectUncategorised()" style="padding:6px 14px;background:#ede9fe;border:1.5px solid #ddd6fe;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;color:#6d28d9;">Uncategorised only</button>
+    </div>
+    <div id="bulkItemList" style="max-height:300px;overflow-y:auto;border:1.5px solid #e5e7eb;border-radius:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="applyBulkCat()">✅ Apply Category</button>
+      <button class="btn-cancel" onclick="closeModal('bulkCatModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <div class="modal-icon">☁️</div>
+    <h2>Cloud Sync Setup</h2>
+    <p>Paste your Firebase Database URL below to sync stock across all devices automatically.</p>
+    <div class="form-field">
+      <label>Firebase Database URL</label>
+      <input type="url" id="fbUrlInput" placeholder="https://your-project-default-rtdb.firebaseio.com" />
+    </div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:8px;">
+      <div style="font-size:0.82rem;font-weight:700;color:#065f46;margin-bottom:8px;">📋 How to get your Firebase URL (2 minutes):</div>
+      <div style="font-size:0.8rem;color:#047857;line-height:1.8;">
+        1. Go to <strong>console.firebase.google.com</strong><br>
+        2. Click <strong>Create a project</strong> → name it "VP Stock"<br>
+        3. Click <strong>Build → Realtime Database → Create database</strong><br>
+        4. Choose <strong>Start in test mode</strong> → Enable<br>
+        5. Copy the URL shown (looks like <em>https://vp-stock-xxxx.firebaseio.com</em>)<br>
+        6. Paste it above and click Save
+      </div>
+    </div>
+    <div id="syncStatus" style="display:none;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveSyncUrl()">☁️ Save & Sync Now</button>
+      <button class="btn-cancel" onclick="closeModal('syncModal')">Cancel</button>
+    </div>
+    <div style="margin-top:12px;text-align:center;">
+      <button onclick="pullFromCloud(true)" style="background:none;border:none;color:#6d28d9;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">🔄 Pull latest from cloud</button>
+      &nbsp;·&nbsp;
+      <button onclick="removeSyncUrl()" style="background:none;border:none;color:#ef4444;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">✕ Remove sync</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'vp_stock_v1';
+const FB_KEY = 'vp_firebase_url';
+const CATEGORIES = ['AC Materials','Electrical','Grilles','Nexcon','PVC','Screws and Consumables'];
+let stock = {};
+let currentBarcode = null;
+let currentAction = 'add';
+let activeCategory = 'All';
+let syncTimer = null;
+
+function getFbUrl() { return localStorage.getItem(FB_KEY)||''; }
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  if(dot) { dot.className='sync-dot '+state; }
+  if(lbl) lbl.textContent = label;
+}
+
+function load() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if(r) stock = JSON.parse(r); } catch(e){ stock={}; }
+}
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stock));
+  renderCatFilters(); renderTable(); updateStats();
+  pushToCloud();
+  checkAndSendLowStockEmail();
+}
+
+// CLOUD SYNC
+function pushToCloud() {
+  const url = getFbUrl(); if(!url) return;
+  setSyncStatus('yellow','Syncing...');
+  const stockToSave = {};
+  Object.keys(stock).forEach(k=>{ const item={...stock[k]}; delete item.photo; stockToSave[k]=item; });
+  fetch(url+'/vp_stock.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(stockToSave) })
+    .then(r=>{ if(!r.ok) throw new Error(); setSyncStatus('green','Synced ✓'); })
+    .catch(()=>setSyncStatus('red','Sync failed'));
+}
+
+function pullFromCloud(manual) {
+  const url = getFbUrl(); if(!url){ if(manual) showToast('No sync URL set — tap ☁️ Cloud Sync to set it up','red'); return; }
+  setSyncStatus('yellow','Pulling...');
+  fetch(url+'/vp_stock.json')
+    .then(r=>{ if(!r.ok) throw new Error(); return r.json(); })
+    .then(data=>{
+      if(data && typeof data==='object'){
+        Object.keys(data).forEach(k=>{
+          const remote=data[k];
+          const local=stock[k];
+          if(!local){ stock[k]=remote; }
+          else {
+            // Keep local photo, take cloud for everything else if cloud is newer or same
+            const cloudNewer = !local.updated || !remote.updated || new Date(remote.updated)>=new Date(local.updated);
+            if(cloudNewer){ stock[k]={...remote, photo: local.photo||null}; }
+            else { stock[k]={...local}; }
+          }
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stock));
+        renderCatFilters(); renderTable(); updateStats();
+      }
+      setSyncStatus('green','Synced ✓');
+      if(manual) showToast('✅ Stock updated from cloud','green');
+    })
+    .catch(()=>{ setSyncStatus('red','Sync failed'); if(manual) showToast('Could not reach cloud — check your Firebase URL','red'); });
+}
+
+function openSyncModal() {
+  document.getElementById('fbUrlInput').value = getFbUrl();
+  document.getElementById('syncStatus').style.display='none';
+  document.getElementById('syncModal').classList.add('active');
+}
+function saveSyncUrl() {
+  const url = document.getElementById('fbUrlInput').value.trim().replace(/\/$/,'');
+  if(!url){ showToast('Please enter a Firebase URL','red'); return; }
+  localStorage.setItem(FB_KEY, url);
+  const status = document.getElementById('syncStatus');
+  status.style.display='block'; status.style.background='#fef9c3'; status.style.color='#854d0e'; status.style.border='1px solid #fde047';
+  status.textContent='Testing connection...';
+  fetch(url+'/vp_stock.json')
+    .then(r=>{ if(!r.ok) throw new Error();
+      status.style.background='#d1fae5'; status.style.color='#065f46'; status.style.border='1px solid #6ee7b7';
+      status.textContent='✅ Connected! Syncing your stock now...';
+      pushToCloud(); pullFromCloud(false);
+      setTimeout(()=>closeModal('syncModal'),1500);
+    })
+    .catch(()=>{ status.style.background='#fee2e2'; status.style.color='#991b1b'; status.style.border='1px solid #fca5a5';
+      status.textContent='❌ Could not connect. Check the URL and make sure test mode is enabled in Firebase.'; });
+}
+// BULK CATEGORY
+function openBulkCat() {
+  const list = document.getElementById('bulkItemList');
+  const keys = Object.keys(stock).sort((a,b)=>stock[a].name.localeCompare(stock[b].name));
+  list.innerHTML = keys.map(k=>`
+    <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f3f4f6;cursor:pointer;">
+      <input type="checkbox" class="bulk-cb" data-key="${esc(k)}" style="width:18px;height:18px;accent-color:#6d28d9;cursor:pointer;" />
+      <span style="flex:1;font-weight:600;font-size:0.9rem;">${esc(stock[k].name)}</span>
+      <span style="font-size:0.75rem;color:#9ca3af;">${stock[k].category||'<em>No category</em>'}</span>
+    </label>`).join('');
+  document.getElementById('bulkCatSelect').value = '';
+  document.getElementById('bulkCatModal').classList.add('active');
+}
+function bulkSelectAll()  { document.querySelectorAll('.bulk-cb').forEach(c=>c.checked=true); }
+function bulkSelectNone() { document.querySelectorAll('.bulk-cb').forEach(c=>c.checked=false); }
+function bulkSelectUncategorised() { document.querySelectorAll('.bulk-cb').forEach(c=>{ const k=c.dataset.key; c.checked=!stock[k]?.category; }); }
+function applyBulkCat() {
+  const cat = document.getElementById('bulkCatSelect').value;
+  if(!cat){ showToast('Please select a category first','red'); return; }
+  const checked = document.querySelectorAll('.bulk-cb:checked');
+  if(!checked.length){ showToast('Please select at least one item','red'); return; }
+  const ts = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  checked.forEach(c=>{ const k=c.dataset.key; if(stock[k]){ stock[k].category=cat; stock[k].updated=ts; } });
+  save(); showToast(`✅ ${checked.length} item${checked.length!==1?'s':''} assigned to ${cat}`,'green');
+  closeModal('bulkCatModal');
+}
+
+// EMAIL ALERTS
+const EJ_KEYS = { service:'vp_ej_service', template:'vp_ej_template', pubkey:'vp_ej_pubkey', email:'vp_alert_email', threshold:'vp_alert_threshold' };
+let lastAlertedItems = {};
+
+function openEmailAlertModal() {
+  document.getElementById('ejServiceId').value  = localStorage.getItem(EJ_KEYS.service)||'';
+  document.getElementById('ejTemplateId').value = localStorage.getItem(EJ_KEYS.template)||'';
+  document.getElementById('ejPublicKey').value  = localStorage.getItem(EJ_KEYS.pubkey)||'';
+  document.getElementById('alertEmail').value   = localStorage.getItem(EJ_KEYS.email)||'joy@victorianprojects.com.au';
+  document.getElementById('alertThreshold').value = localStorage.getItem(EJ_KEYS.threshold)||'5';
+  document.getElementById('emailAlertStatus').style.display='none';
+  document.getElementById('emailAlertModal').classList.add('active');
+}
+
+function saveEmailAlert() {
+  const svc  = document.getElementById('ejServiceId').value.trim();
+  const tmpl = document.getElementById('ejTemplateId').value.trim();
+  const pub  = document.getElementById('ejPublicKey').value.trim();
+  const email= document.getElementById('alertEmail').value.trim();
+  const thr  = parseInt(document.getElementById('alertThreshold').value)||5;
+  if(!svc||!tmpl||!pub||!email){ showToast('Please fill in all fields','red'); return; }
+  localStorage.setItem(EJ_KEYS.service, svc);
+  localStorage.setItem(EJ_KEYS.template, tmpl);
+  localStorage.setItem(EJ_KEYS.pubkey, pub);
+  localStorage.setItem(EJ_KEYS.email, email);
+  localStorage.setItem(EJ_KEYS.threshold, thr);
+  const st = document.getElementById('emailAlertStatus');
+  st.style.display='block'; st.style.background='#fef9c3'; st.style.color='#854d0e'; st.style.border='1px solid #fde047';
+  st.textContent='Sending test email...';
+  const lowItems = Object.values(stock).filter(i=>i.qty<=thr);
+  const date = new Date().toLocaleString('en-AU',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let testMsg;
+  if(lowItems.length){
+    testMsg = `LOW STOCK SUMMARY - Victorian Projects\nGenerated: ${date}\n\n`;
+    const out = lowItems.filter(i=>i.qty===0); const lo = lowItems.filter(i=>i.qty>0);
+    if(out.length){ testMsg+=`OUT OF STOCK (${out.length} item${out.length!==1?'s':''})\n`; out.forEach(i=>testMsg+=`  - ${i.name}${i.category?' ['+i.category+']':''}: 0 remaining\n`); testMsg+='\n'; }
+    if(lo.length){ testMsg+=`LOW STOCK (${lo.length} item${lo.length!==1?'s':''})\n`; lo.forEach(i=>testMsg+=`  - ${i.name}${i.category?' ['+i.category+']':''}: ${i.qty} remaining\n`); testMsg+='\n'; }
+    testMsg+=`Total items needing attention: ${lowItems.length}\n\nPlease arrange restocking.\n\n- VP Stock Manager`;
+  } else {
+    testMsg = `TEST EMAIL - VP Stock Manager\nGenerated: ${date}\n\nAll stock levels are currently OK. You will receive a summary email when any item drops to ${thr} or below.\n\n- VP Stock Manager`;
+  }
+  sendEmailViaAPI(svc, tmpl, pub, email, '⚠️ Low Stock Alert — Victorian Projects', testMsg)
+    .then(()=>{
+      st.style.background='#d1fae5'; st.style.color='#065f46'; st.style.border='1px solid #6ee7b7';
+      st.textContent=`✅ Test email sent to ${email}! Check your inbox.`;
+      setTimeout(()=>closeModal('emailAlertModal'),2000);
+    })
+    .catch(err=>{
+      st.style.background='#fee2e2'; st.style.color='#991b1b'; st.style.border='1px solid #fca5a5';
+      st.textContent='❌ Failed: '+(err.message||'Check your keys and make sure Gmail service is connected in EmailJS.');
+    });
+}
+
+function removeEmailAlert() {
+  Object.values(EJ_KEYS).forEach(k=>localStorage.removeItem(k));
+  showToast('Email alerts removed','red'); closeModal('emailAlertModal');
+}
+
+let alertDebounceTimer = null;
+function checkAndSendLowStockEmail() {
+  // Debounce — wait 8 seconds after last change before sending, so one summary goes out not many
+  clearTimeout(alertDebounceTimer);
+  alertDebounceTimer = setTimeout(_doSendLowStockEmail, 8000);
+}
+function _doSendLowStockEmail() {
+  const svc  = localStorage.getItem(EJ_KEYS.service);
+  const tmpl = localStorage.getItem(EJ_KEYS.template);
+  const pub  = localStorage.getItem(EJ_KEYS.pubkey);
+  const email= localStorage.getItem(EJ_KEYS.email);
+  const thr  = parseInt(localStorage.getItem(EJ_KEYS.threshold))||5;
+  if(!svc||!tmpl||!pub||!email) return;
+  const allLow = Object.values(stock).filter(i=>i.qty<=thr&&i.qty>=0);
+  if(!allLow.length) return;
+  // Only alert if something is newly low since last alert
+  const newlyLow = allLow.filter(i=>!lastAlertedItems[i.name]||lastAlertedItems[i.name]>thr);
+  if(!newlyLow.length) return;
+  // Mark all current low items as alerted
+  allLow.forEach(i=>lastAlertedItems[i.name]=i.qty);
+  const outOfStock = allLow.filter(i=>i.qty===0);
+  const low        = allLow.filter(i=>i.qty>0);
+  const date = new Date().toLocaleString('en-AU',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let msg = `LOW STOCK SUMMARY — Victorian Projects\n`;
+  msg += `Generated: ${date}\n`;
+  msg += `${'─'.repeat(40)}\n\n`;
+  if(outOfStock.length){
+    msg += `🔴 OUT OF STOCK (${outOfStock.length} item${outOfStock.length!==1?'s':''})\n`;
+    outOfStock.forEach(i=>{ msg += `  • ${i.name}${i.category?' ['+i.category+']':''} — 0 remaining\n`; });
+    msg += '\n';
+  }
+  if(low.length){
+    msg += `🟠 LOW STOCK (${low.length} item${low.length!==1?'s':''})\n`;
+    low.forEach(i=>{ msg += `  • ${i.name}${i.category?' ['+i.category+']':''} — ${i.qty} remaining\n`; });
+    msg += '\n';
+  }
+  msg += `${'─'.repeat(40)}\n`;
+  msg += `Total items needing attention: ${allLow.length}\n\n`;
+  msg += `Please arrange restocking as soon as possible.\n\n— VP Stock Manager`;
+  sendEmailViaAPI(svc, tmpl, pub, email, `⚠️ Low Stock Alert — ${allLow.length} item${allLow.length!==1?'s':''} need restocking`, msg)
+    .then(()=>showToast(`📧 Low stock summary sent to ${email}`,'green'))
+    .catch(()=>{});
+}
+
+function sendEmailViaAPI(serviceId, templateId, publicKey, toEmail, subject, message) {
+  return fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      template_params: { to_email: toEmail, subject: subject, message: message }
+    })
+  }).then(r => {
+    if(!r.ok) return r.text().then(t => { throw new Error(t||r.status); });
+    return r;
+  });
+}
+
+function removeSyncUrl() {
+  if(!confirm('Remove cloud sync? Your local data stays safe.')) return;
+  localStorage.removeItem(FB_KEY); setSyncStatus('grey','Set up sync'); closeModal('syncModal'); showToast('Sync removed','red');
+}
+
+function startAutoSync() {
+  if(getFbUrl()){ setSyncStatus('green','Synced ✓'); pullFromCloud(false); }
+  setInterval(()=>{ if(getFbUrl()) pullFromCloud(false); }, 30000);
+}
+function updateStats() {
+  const keys = Object.keys(stock);
+  const total = keys.length;
+  const low = keys.filter(k => stock[k].qty===0 || (stock[k].lowAt!==null && stock[k].qty<=stock[k].lowAt)).length;
+  const inStock = total - low;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statInStock').textContent = inStock;
+  document.getElementById('statLow').textContent = low;
+  document.getElementById('pillTotal').innerHTML = `${total} <span>item${total!==1?'s':''}</span>`;
+  const pl = document.getElementById('pillLow');
+  if(low>0){ pl.style.display=''; document.getElementById('pillLowCount').textContent=low; } else pl.style.display='none';
+  document.getElementById('tableSubtitle').textContent = total===0 ? 'No items yet' : `${total} item${total!==1?'s':''} tracked`;
+}
+
+// Barcode input
+const barcodeInput = document.getElementById('barcodeInput');
+barcodeInput.addEventListener('keydown', function(e){
+  if(e.key==='Enter'){ const v=this.value.trim(); if(!v) return; handleScan(v); this.value=''; }
+});
+document.addEventListener('click', function(){
+  if(!document.querySelector('.modal-overlay.active') && !document.querySelector('.fullscreen-overlay.active') && !document.getElementById('cameraOverlay').classList.contains('active'))
+    barcodeInput.focus();
+});
+
+function handleScan(barcode) {
+  currentBarcode = barcode;
+  if(stock[barcode]) openScanModal(barcode); else openNewItemModal(barcode);
+}
+
+// Scan flow
+function openScanModal(barcode) {
+  const item = stock[barcode];
+  document.getElementById('fsItemName').textContent = item.name;
+  document.getElementById('fsCurrentQty').textContent = item.qty;
+  document.getElementById('stepAction').classList.add('active');
+}
+function goToQty(action) {
+  currentAction = action;
+  const item = stock[currentBarcode];
+  const isAdd = action==='add';
+  document.getElementById('stepAction').classList.remove('active');
+  const h = document.getElementById('fsActionHeader');
+  h.textContent = isAdd ? '📥 ADDING STOCK' : '📤 TAKING OUT STOCK';
+  h.className = 'fs-action-header '+(isAdd?'add':'sub');
+  document.getElementById('fsQtyItemName').textContent = item.name;
+  document.getElementById('fsQtyCurrent').textContent = 'Current stock: '+item.qty+' units';
+  const btn = document.getElementById('fsConfirmBtn');
+  btn.textContent = isAdd ? '✅ Confirm — Add Stock' : '✅ Confirm — Take Out Stock';
+  btn.className = 'fs-confirm-btn '+(isAdd?'add':'sub');
+  document.getElementById('fsQtyInput').value = 1;
+  document.getElementById('stepQty').classList.add('active');
+  setTimeout(()=>document.getElementById('fsQtyInput').select(),100);
+}
+function goBack() { document.getElementById('stepQty').classList.remove('active'); document.getElementById('stepAction').classList.add('active'); }
+function closeScanFlow() { document.getElementById('stepAction').classList.remove('active'); document.getElementById('stepQty').classList.remove('active'); barcodeInput.focus(); }
+function confirmAction() {
+  const qty = parseInt(document.getElementById('fsQtyInput').value)||0;
+  if(qty<=0){ showToast('Enter a valid quantity','red'); return; }
+  const item = stock[currentBarcode];
+  const before = item.qty;
+  if(currentAction==='add'){ item.qty+=qty; showToast(`✅ ${item.name}: ${before} → ${item.qty}`,'green'); }
+  else { if(qty>item.qty){ showToast(`⚠ Can't remove more than current stock (${item.qty})`,'red'); return; } item.qty-=qty; showToast(`📤 ${item.name}: ${before} → ${item.qty}`,'red'); }
+  item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  save(); closeScanFlow();
+}
+
+// New item
+function openNewItemModal(barcode) {
+  document.getElementById('newItemBarcode').textContent = barcode;
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemCategory').value = '';
+  document.getElementById('newItemQty').value = '0';
+  document.getElementById('newItemLow').value = '';
+  document.getElementById('newItemModal').classList.add('active');
+  setTimeout(()=>document.getElementById('newItemName').focus(),50);
+}
+function saveNewItem() {
+  const name = document.getElementById('newItemName').value.trim();
+  if(!name){ showToast('Please enter an item name','red'); return; }
+  const qty = parseInt(document.getElementById('newItemQty').value)||0;
+  const low = parseInt(document.getElementById('newItemLow').value)||null;
+  const category = document.getElementById('newItemCategory').value||'';
+  stock[currentBarcode] = { name, qty, lowAt:low, category, updated: new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) };
+  save(); showToast(`✅ ${name} added to stock`,'green'); closeModal('newItemModal');
+}
+function openAddItem() {
+  currentBarcode = 'MANUAL_'+Date.now();
+  document.getElementById('newItemBarcode').textContent = '(auto-generated)';
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemCategory').value = '';
+  document.getElementById('newItemQty').value = '0';
+  document.getElementById('newItemLow').value = '';
+  document.getElementById('newItemModal').classList.add('active');
+  setTimeout(()=>document.getElementById('newItemName').focus(),50);
+}
+
+// Edit item
+function editItem(barcode) {
+  const item = stock[barcode];
+  document.getElementById('editItemKey').value = barcode;
+  document.getElementById('editItemName').value = item.name;
+  document.getElementById('editItemCategory').value = item.category||'';
+  document.getElementById('editItemQty').value = item.qty;
+  document.getElementById('editItemLow').value = item.lowAt??'';
+  document.getElementById('editItemModal').classList.add('active');
+  setTimeout(()=>document.getElementById('editItemName').focus(),50);
+}
+function saveEditItem() {
+  const barcode = document.getElementById('editItemKey').value;
+  const name = document.getElementById('editItemName').value.trim();
+  if(!name){ showToast('Name cannot be empty','red'); return; }
+  const qty = parseInt(document.getElementById('editItemQty').value)||0;
+  const lowRaw = document.getElementById('editItemLow').value.trim();
+  const low = lowRaw!=='' ? parseInt(lowRaw) : null;
+  const category = document.getElementById('editItemCategory').value||'';
+  const item = stock[barcode];
+  item.name=name; item.qty=qty; item.lowAt=low; item.category=category;
+  item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  save(); showToast(`✅ ${name} updated`,'green'); closeModal('editItemModal');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); barcodeInput.focus(); }
+function deleteItem(barcode) {
+  if(!confirm(`Delete "${stock[barcode]?.name}"? This cannot be undone.`)) return;
+  delete stock[barcode]; save(); showToast('Item deleted','red');
+}
+
+// Category filters
+function renderCatFilters() {
+  const cf = document.getElementById('catFilters');
+  const usedCats = new Set(Object.values(stock).map(i=>i.category||'').filter(Boolean));
+  if(usedCats.size===0){ cf.innerHTML=''; return; }
+  const all = ['All',...CATEGORIES.filter(c=>usedCats.has(c))];
+  cf.innerHTML = all.map(c=>`<button class="cat-btn ${activeCategory===c?'active':''}" onclick="setCategory('${c}')">${c}</button>`).join('');
+}
+function setCategory(cat) { activeCategory=cat; renderCatFilters(); renderTable(); }
+
+// Render table
+function renderTable() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const tbody = document.getElementById('stockBody');
+  const empty = document.getElementById('emptyState');
+  let keys = Object.keys(stock).filter(k=>{
+    const item=stock[k];
+    const ms=item.name.toLowerCase().includes(search)||k.toLowerCase().includes(search);
+    const mc=activeCategory==='All'||(item.category||'')===activeCategory;
+    return ms&&mc;
+  });
+  if(Object.keys(stock).length===0){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  keys.sort((a,b)=>{ const ca=stock[a].category||'Uncategorised',cb=stock[b].category||'Uncategorised'; return ca!==cb?ca.localeCompare(cb):stock[a].name.localeCompare(stock[b].name); });
+  const groups={};
+  keys.forEach(k=>{ const cat=stock[k].category||'Uncategorised'; if(!groups[cat]) groups[cat]=[]; groups[cat].push(k); });
+  let html='';
+  Object.keys(groups).sort().forEach(cat=>{
+    if(activeCategory==='All') html+=`<tr class="cat-group-header"><td colspan="9">📂 ${cat}</td></tr>`;
+    groups[cat].forEach(k=>{
+      const item=stock[k]; const low=item.lowAt;
+      let badge=item.qty===0?'<span class="badge badge-zero">🔴 Out of Stock</span>':low!==null&&item.qty<=low?'<span class="badge badge-low">🟠 Low</span>':'<span class="badge badge-ok">🟢 OK</span>';
+      const bd=k.startsWith('MANUAL_')?'(manual)':k;
+      const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
+      const photoHTML=item.photo?`<img src="${item.photo}" alt="${esc(item.name)}" /><div class="photo-overlay">📷 Change</div>`:`<span class="photo-placeholder">📷</span><div class="photo-overlay">📷 Add Photo</div>`;
+      html+=`<tr>
+        <td class="td-photo"><div class="photo-cell" onclick="triggerPhotoUpload('${esc(k)}')">${photoHTML}</div></td>
+        <td class="td-qr"><div class="qr-cell" id="${qrId}"></div></td>
+        <td class="td-name"><span class="item-name-cell">${esc(item.name)}</span>${item.category?`<br><span class="cat-badge">${esc(item.category)}</span>`:''}</td>
+        <td class="td-id"><span class="barcode-cell">${esc(bd)}</span></td>
+        <td class="td-qty"><span class="qty-value">${item.qty}</span></td>
+        <td class="td-low" style="color:#9ca3af;font-size:0.85rem;">${low!==null?low:'—'}</td>
+        <td class="td-status">${badge}</td>
+        <td class="td-updated" style="font-size:0.8rem;color:#9ca3af;">${item.updated||'—'}</td>
+        <td class="td-actions"><button class="btn-row-action edit" onclick="editItem('${esc(k)}')">✏️</button><button class="btn-row-action del" onclick="deleteItem('${esc(k)}')">🗑️</button></td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML=html;
+  setTimeout(()=>{
+    keys.forEach(k=>{
+      const code=k.startsWith('MANUAL_')?'VP-'+k.slice(-6):k;
+      const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
+      const el=document.getElementById(qrId);
+      if(el&&el.children.length===0){ try{ new QRCode(el,{text:code,width:56,height:56,correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+    });
+  },50);
+}
+
+function esc(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// Export/Import
+function exportCSV() {
+  const rows=[['Item Name','Barcode','Quantity','Category','Low Stock At','Last Updated']];
+  Object.keys(stock).forEach(k=>{ const i=stock[k]; rows.push([i.name,k.startsWith('MANUAL_')?'':k,i.qty,i.category||'',i.lowAt??'',i.updated||'']); });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='vp-stock-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  showToast('CSV exported','green');
+}
+function importCSV(){ document.getElementById('csvImportInput').click(); }
+function handleImport(event){
+  const file=event.target.files[0]; if(!file) return;
+  if(file.name.endsWith('.xlsx')||file.name.endsWith('.xls')){
+    const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=function(){
+      const r=new FileReader(); r.onload=function(e){
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        const hasHeader=rows[0]&&rows[0].some(c=>typeof c==='string'&&/name|item|barcode|qty|quantity/i.test(c));
+        const data=hasHeader?rows.slice(1):rows; let count=0;
+        data.forEach((row,idx)=>{ const name=String(row[0]||'').trim(); if(!name) return;
+          const barcode=String(row[1]||'').trim()||null; const qty=parseInt(row[2])||0;
+          const lowAt=row[3]!==''&&row[3]!==undefined?parseInt(row[3]):null;
+          const key=barcode||'VP-'+String(Date.now()+idx).slice(-6);
+          stock[key]={name,qty,lowAt:isNaN(lowAt)?null:lowAt,category:'',updated:new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}; count++; });
+        save(); showToast(`✅ Imported ${count} items`,'green');
+      }; r.readAsArrayBuffer(file);
+    }; document.head.appendChild(s);
+  } else {
+    const r=new FileReader(); r.onload=function(e){
+      const lines=e.target.result.split('\n'); const hasHeader=/name|item|barcode|qty|quantity/i.test(lines[0]||'');
+      const data=hasHeader?lines.slice(1):lines; let count=0;
+      data.forEach((line,idx)=>{ if(!line.trim()) return; const cols=line.split(',').map(c=>c.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+        const name=cols[0]; if(!name) return; const barcode=cols[1]||null; const qty=parseInt(cols[2])||0;
+        const lowAt=cols[3]&&cols[3]!==''?parseInt(cols[3]):null; const key=barcode||'VP-'+String(Date.now()+idx).slice(-6);
+        stock[key]={name,qty,lowAt:isNaN(lowAt)?null:lowAt,category:cols[4]||'',updated:new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}; count++; });
+      save(); showToast(`✅ Imported ${count} items`,'green');
+    }; r.readAsText(file);
+  }
+  event.target.value='';
+}
+
+// Photo upload
+let photoUploadKey=null;
+const photoInput=document.createElement('input'); photoInput.type='file'; photoInput.accept='image/*'; photoInput.style.display='none'; document.body.appendChild(photoInput);
+photoInput.addEventListener('change',function(){
+  const file=this.files[0]; if(!file||!photoUploadKey) return;
+  const reader=new FileReader(); reader.onload=function(e){
+    const img=new Image(); img.onload=function(){
+      const canvas=document.createElement('canvas'); const MAX=300;
+      const ratio=Math.min(MAX/img.width,MAX/img.height,1); canvas.width=img.width*ratio; canvas.height=img.height*ratio;
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      stock[photoUploadKey].photo=canvas.toDataURL('image/jpeg',0.82); save(); showToast('📷 Photo saved!','green');
+    }; img.src=e.target.result;
+  }; reader.readAsDataURL(file); this.value='';
+});
+function triggerPhotoUpload(barcode){ photoUploadKey=barcode; photoInput.click(); }
+
+// Camera scanner
+let cameraStream=null, cameraAnimFrame=null, lastScanned='', lastScannedTime=0;
+function openCamera(){
+  const overlay=document.getElementById('cameraOverlay'); const video=document.getElementById('cameraVideo');
+  overlay.classList.add('active'); document.getElementById('cameraStatus').textContent='STARTING CAMERA...';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+    .then(stream=>{ cameraStream=stream; video.srcObject=stream; video.play();
+      video.addEventListener('loadedmetadata',()=>{ document.getElementById('cameraStatus').textContent='SCANNING...'; scanFrame(); }); })
+    .catch(err=>{ document.getElementById('cameraStatus').textContent='CAMERA ERROR'; showToast('Camera not accessible — check browser permissions','red'); });
+}
+function scanFrame(){
+  const video=document.getElementById('cameraVideo'); const canvas=document.getElementById('cameraCanvas');
+  if(!video.videoWidth){ cameraAnimFrame=requestAnimationFrame(scanFrame); return; }
+  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+  const ctx=canvas.getContext('2d'); ctx.drawImage(video,0,0);
+  const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
+  if(code){ const now=Date.now();
+    if(code.data!==lastScanned||now-lastScannedTime>3000){ lastScanned=code.data; lastScannedTime=now;
+      closeCamera(); setTimeout(()=>handleScan(code.data),200); return; } }
+  cameraAnimFrame=requestAnimationFrame(scanFrame);
+}
+function closeCamera(){
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+  if(cameraAnimFrame){ cancelAnimationFrame(cameraAnimFrame); cameraAnimFrame=null; }
+  document.getElementById('cameraOverlay').classList.remove('active');
+  document.getElementById('cameraVideo').srcObject=null;
+}
+
+// Print labels
+function printLabels(){
+  const keys=Object.keys(stock); if(keys.length===0){ showToast('No items to print','red'); return; }
+  doOpenPrintWindow();
+}
+function doOpenPrintWindow(){
+  const keys=Object.keys(stock).sort((a,b)=>stock[a].name.localeCompare(stock[b].name));
+  const labelsHTML=keys.map(k=>{ const item=stock[k]; const code=k.startsWith('MANUAL_')?'VP-'+k.slice(-6):k;
+    return `<div class="label"><div class="label-name">${item.name}</div><div class="qr-wrap" id="qr_${k.replace(/[^a-zA-Z0-9]/g,'_')}"></div><div class="label-code">${code}</div></div>`; }).join('');
+  const codesJSON=JSON.stringify(keys.map(k=>{ const code=k.startsWith('MANUAL_')?'VP-'+k.slice(-6):k; return {id:k.replace(/[^a-zA-Z0-9]/g,'_'),code}; }));
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Victorian Projects — QR Labels</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:white;padding:10mm;}
+.no-print{margin-bottom:8mm;}.grid{display:flex;flex-wrap:wrap;gap:5mm;}
+.label{border:1.5px solid #e5e7eb;border-radius:8px;padding:4mm 5mm;width:60mm;text-align:center;page-break-inside:avoid;}
+.label-name{font-size:8.5px;font-weight:bold;color:#1e1b4b;margin-bottom:3mm;line-height:1.3;min-height:22px;display:flex;align-items:center;justify-content:center;}
+.qr-wrap{display:flex;justify-content:center;margin-bottom:2mm;}.qr-wrap canvas,.qr-wrap img{width:40mm!important;height:40mm!important;}
+.label-code{font-size:7.5px;color:#9ca3af;letter-spacing:1px;font-family:monospace;}
+@media print{.no-print{display:none;}body{padding:5mm;}}</style></head><body>
+<div class="no-print">
+  <button onclick="window.print()" style="padding:10px 24px;background:linear-gradient(135deg,#4338ca,#6d28d9);color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-right:10px;font-weight:700;">🖨 Print QR Labels</button>
+  <button onclick="window.close()" style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;font-size:14px;cursor:pointer;">Close</button>
+</div>
+<div class="grid">${labelsHTML}</div>
+<script>var codes=${codesJSON};window.onload=function(){codes.forEach(function(item){var el=document.getElementById('qr_'+item.id);if(el)new QRCode(el,{text:item.code,width:150,height:150,correctLevel:QRCode.CorrectLevel.M});});};<\/script>
+</body></html>`); win.document.close();
+}
+
+// Clear
+function clearAll(){ if(!confirm('⚠️ Delete ALL stock data permanently?')) return; localStorage.removeItem(STORAGE_KEY); stock={}; save(); showToast('All data cleared','red'); }
+
+// Toast
+function showToast(msg,type=''){
+  const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type;
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.className='toast',3000);
+}
+
+// Keyboard
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ closeScanFlow(); closeModal('newItemModal'); closeModal('editItemModal'); closeCamera(); }
+  if(e.key==='Enter'){
+    if(document.getElementById('stepQty').classList.contains('active')&&document.activeElement===document.getElementById('fsQtyInput')) confirmAction();
+    if(document.getElementById('newItemModal').classList.contains('active')&&document.activeElement===document.getElementById('newItemName')) document.getElementById('newItemQty').focus();
+  }
+});
+
+function toggleToolMenu() {
+  const menu = document.getElementById('toolMenu');
+  const arrow = document.getElementById('toolMenuArrow');
+  const open = menu.style.display === 'none';
+  menu.style.display = open ? 'block' : 'none';
+  arrow.textContent = open ? '▴' : '▾';
+}
+
+load(); renderCatFilters(); renderTable(); updateStats(); startAutoSync(); barcodeInput.focus();
+
+// PWA Manifest (injected inline so no server needed)
+(function(){
+  const manifest = {
+    name: "Victorian Projects Stock Manager",
+    short_name: "VP Stock",
+    description: "QR Code Stock Manager for Victorian Projects",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#4338ca",
+    theme_color: "#4338ca",
+    orientation: "portrait-primary",
+    icons: [
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%234338ca'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E📦%3C/text%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml" },
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%234338ca'/%3E%3Ctext y='360' x='256' text-anchor='middle' font-size='300'%3E📦%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('manifest-placeholder').href = url;
+})();
+
+// Install banner
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt = e;
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:1.4rem">📱</span>
+    <div style="flex:1;min-width:180px;">
+      <div style="font-weight:800;font-size:0.95rem;color:#1e1b4b;">Install as App</div>
+      <div style="font-size:0.78rem;color:#6b7280;margin-top:2px;">Add VP Stock to your home screen for quick access</div>
+    </div>
+    <button onclick="installApp()" style="padding:10px 20px;background:linear-gradient(135deg,#4338ca,#6d28d9);color:white;border:none;border-radius:10px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;font-size:0.88rem;white-space:nowrap;">Install App</button>
+    <button onclick="document.getElementById('installBanner').remove()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:1.2rem;padding:4px;">✕</button>
+  </div>`;
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:white;padding:16px 20px;box-shadow:0 -4px 24px rgba(30,27,75,0.12);z-index:400;border-top:1px solid #e5e7eb;';
+  document.body.appendChild(banner);
+});
+function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; const b=document.getElementById('installBanner'); if(b) b.remove(); showToast('✅ App installed!','green'); });
+}
+</script>
+</body>
+</html>
