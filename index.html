@@ -18,6 +18,19 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f5f7ff; color: #1e1b4b; min-height: 100vh; }
 
+/* LOGIN */
+#loginScreen { display:none; position:fixed; inset:0; background:linear-gradient(135deg,#4338ca 0%,#6d28d9 50%,#7c3aed 100%); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+#loginScreen.active { display:flex; }
+.login-box { background:white; border-radius:24px; padding:40px 36px; width:100%; max-width:380px; box-shadow:0 32px 80px rgba(30,27,75,0.3); text-align:center; }
+.login-logo { width:72px; height:72px; background:linear-gradient(135deg,#4338ca,#7c3aed); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 20px; }
+.login-box h1 { font-size:1.4rem; font-weight:900; color:#1e1b4b; margin-bottom:4px; }
+.login-box p { color:#9ca3af; font-size:0.88rem; margin-bottom:28px; }
+.login-input { width:100%; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:1rem; font-family:'Inter',sans-serif; outline:none; color:#1e1b4b; text-align:center; letter-spacing:2px; transition:border-color 0.2s; margin-bottom:12px; }
+.login-input:focus { border-color:#6d28d9; }
+.login-btn { width:100%; padding:15px; background:linear-gradient(135deg,#4338ca,#6d28d9); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:800; font-family:'Inter',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(109,40,217,0.3); transition:transform 0.15s; }
+.login-btn:hover { transform:translateY(-2px); }
+.login-error { color:#ef4444; font-size:0.85rem; font-weight:600; margin-top:10px; display:none; }
+
 /* HEADER */
 header { background: linear-gradient(135deg,#4338ca 0%,#6d28d9 50%,#7c3aed 100%); padding:0; position:relative; overflow:hidden; padding-top:env(safe-area-inset-top); }
 header::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:rgba(255,255,255,0.06); border-radius:50%; }
@@ -251,6 +264,18 @@ tbody tr:hover td { background:#faf5ff; }
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">📦</div>
+    <h1>Victorian Projects</h1>
+    <p>Stock Manager — enter password to continue</p>
+    <input type="password" class="login-input" id="loginInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="login-btn" onclick="doLogin()">🔐 Login</button>
+    <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+  </div>
+</div>
 
 <header>
   <div class="header-inner">
@@ -1100,7 +1125,23 @@ function toggleToolMenu() {
   arrow.textContent = open ? '▴' : '▾';
 }
 
-load(); renderCatFilters(); renderTable(); updateStats(); startAutoSync(); barcodeInput.focus();
+// PASSWORD
+const APP_PASS = 'VP@2o2siX';
+const AUTH_KEY = 'vp_auth';
+function checkAuth() {
+  if(localStorage.getItem(AUTH_KEY)===APP_PASS) { startApp(); }
+  else { document.getElementById('loginScreen').classList.add('active'); setTimeout(()=>document.getElementById('loginInput').focus(),100); }
+}
+function doLogin() {
+  const val = document.getElementById('loginInput').value;
+  const err = document.getElementById('loginError');
+  if(val===APP_PASS) { localStorage.setItem(AUTH_KEY,APP_PASS); document.getElementById('loginScreen').classList.remove('active'); startApp(); }
+  else { err.style.display='block'; document.getElementById('loginInput').value=''; document.getElementById('loginInput').focus(); }
+}
+function startApp() {
+  load(); renderCatFilters(); renderTable(); updateStats(); startAutoSync(); barcodeInput.focus();
+}
+checkAuth();
 
 // PWA Manifest (injected inline so no server needed)
 (function(){
