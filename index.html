@@ -345,7 +345,7 @@ tbody tr:hover td { background:#eff6ff; }
 
   <!-- CAMERA OVERLAY -->
   <div id="cameraOverlay">
-    <video id="cameraVideo" autoplay playsinline muted></video>
+    <video id="cameraVideo" playsinline muted autoplay playsinline muted></video>
     <canvas id="cameraCanvas" style="display:none"></canvas>
     <div class="camera-frame">
       <div class="camera-corner tl"></div>
@@ -1275,8 +1275,8 @@ let cameraStream=null, cameraAnimFrame=null, lastScanned='', lastScannedTime=0;
 function openCamera(){
   const overlay=document.getElementById('cameraOverlay'); const video=document.getElementById('cameraVideo');
   overlay.classList.add('active'); document.getElementById('cameraStatus').textContent='STARTING CAMERA...';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
-    .then(stream=>{ cameraStream=stream; video.srcObject=stream; video.play();
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})
+    .then(stream=>{ cameraStream=stream; video.srcObject=stream; video.setAttribute("playsinline",""); video.play();
       video.addEventListener('loadedmetadata',()=>{ document.getElementById('cameraStatus').textContent='SCANNING...'; scanFrame(); }); })
     .catch(err=>{ document.getElementById('cameraStatus').textContent='CAMERA ERROR'; showToast('Camera not accessible — check browser permissions','red'); });
 }
