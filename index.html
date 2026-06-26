@@ -345,16 +345,10 @@ tbody tr:hover td { background:#eff6ff; }
 
   <!-- CAMERA OVERLAY -->
   <div id="cameraOverlay">
-    <video id="cameraVideo" playsinline muted autoplay playsinline muted></video>
+    <div id="html5qr-reader" style="width:100%;height:100%;position:absolute;top:0;left:0;"></div>
     <canvas id="cameraCanvas" style="display:none"></canvas>
-    <div class="camera-frame">
-      <div class="camera-corner tl"></div>
-      <div class="camera-corner br"></div>
-    </div>
     <div class="camera-status" id="cameraStatus">SCANNING...</div>
     <div class="camera-hint">Point at a QR label on your stock item</div>
-    <button class="btn-ios-photo" onclick="document.getElementById('iosCameraInput').click()" style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);padding:18px 40px;background:#e74c3c;color:white;border:none;border-radius:40px;font-size:1.2rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;display:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.4);" id="iosCameraBtn">📷 Take Photo (iPhone)</button>
-    <input type="file" id="iosCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleIOSPhoto(event)" />
     <button class="btn-close-camera" onclick="closeCamera()">✕ Close Camera</button>
   </div>
 
@@ -1274,70 +1268,50 @@ function triggerPhotoUpload(barcode){ photoUploadKey=barcode; photoInput.click()
 
 // Camera scanner
 let cameraStream=null, cameraAnimFrame=null, lastScanned='', lastScannedTime=0;
-function handleIOSPhoto(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new window.Image();
-    img.onload = function() {
-      const canvas = document.getElementById('cameraCanvas');
-      canvas.width = img.width; canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts:'dontInvert'});
-      if(code && code.data) {
-        closeCamera();
-        handleScan(code.data);
-        showToast('✅ Scanned: '+code.data, 'green');
-      } else {
-        showToast('QR code not detected — try again closer', 'red');
-        document.getElementById('iosCameraInput').value = '';
-      }
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
 function openCamera(){
-  const overlay=document.getElementById('cameraOverlay'); const video=document.getElementById('cameraVideo');
-  overlay.classList.add('active'); document.getElementById('cameraStatus').textContent='STARTING CAMERA...';
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if(isIOS) { document.getElementById('iosCameraBtn').style.display='block'; document.getElementById('cameraStatus').textContent='TAP BUTTON BELOW TO SCAN'; }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})
-    .then(stream=>{ cameraStream=stream; video.srcObject=stream; video.setAttribute("playsinline",""); video.play();
-      video.addEventListener('loadedmetadata',()=>{ document.getElementById('cameraStatus').textContent='SCANNING...'; scanFrame(); }); })
-    .catch(err=>{
-    // Fallback for iOS Safari - show photo capture button
-    document.getElementById('cameraStatus').textContent='TAP BUTTON BELOW TO SCAN';
-    document.getElementById('iosCameraBtn').style.display='block';
-    showToast('Use the button below to scan on iPhone','red');
+  const overlay=document.getElementById('cameraOverlay');
+  overlay.classList.add('active');
+  document.getElementById('cameraStatus').textContent='STARTING CAMERA...';
+  const readerDiv=document.getElementById('html5qr-reader');
+  if(window._html5QrScanner){ 
+    try{ window._html5QrScanner.stop().catch(()=>{}); } catch(e){}
+    window._html5QrScanner=null;
+  }
+  const scanner = new Html5Qrcode('html5qr-reader');
+  window._html5QrScanner = scanner;
+  scanner.start(
+    {facingMode:'environment'},
+    {fps:10, qrbox:{width:250,height:250}, aspectRatio:1.0},
+    (decodedText)=>{
+      const now=Date.now();
+      if(decodedText!==lastScanned||now-lastScannedTime>3000){
+        lastScanned=decodedText; lastScannedTime=now;
+        closeCamera();
+        setTimeout(()=>handleScan(decodedText),200);
+      }
+    },
+    ()=>{}
+  ).then(()=>{
+    document.getElementById('cameraStatus').textContent='SCANNING...';
+    // Hide the html5-qrcode UI chrome we don't want
+    const btns=readerDiv.querySelectorAll('button,select,img[alt="Info icon"],span');
+    btns.forEach(b=>{ if(b.tagName!=='VIDEO') b.style.display='none'; });
+  }).catch(err=>{
+    document.getElementById('cameraStatus').textContent='CAMERA ERROR';
+    showToast('Camera error: '+err,'red');
   });
 }
-function scanFrame(){
-  const video=document.getElementById('cameraVideo'); const canvas=document.getElementById('cameraCanvas');
-  if(!video.videoWidth){ cameraAnimFrame=requestAnimationFrame(scanFrame); return; }
-  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-  const ctx=canvas.getContext('2d'); ctx.drawImage(video,0,0);
-  const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-  const code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
-  if(code){ const now=Date.now();
-    if(code.data!==lastScanned||now-lastScannedTime>3000){ lastScanned=code.data; lastScannedTime=now;
-      closeCamera(); setTimeout(()=>handleScan(code.data),200); return; } }
-  cameraAnimFrame=requestAnimationFrame(scanFrame);
-}
 function closeCamera(){
-  document.getElementById('cameraVideo').style.display='';
-  document.getElementById('iosCameraBtn').style.display='none';
-  document.getElementById('iosCameraInput').value='';
+  if(window._html5QrScanner){
+    try{ window._html5QrScanner.stop().then(()=>{ window._html5QrScanner.clear(); window._html5QrScanner=null; }).catch(()=>{ window._html5QrScanner=null; }); }
+    catch(e){ window._html5QrScanner=null; }
+  }
   if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
   if(cameraAnimFrame){ cancelAnimationFrame(cameraAnimFrame); cameraAnimFrame=null; }
   document.getElementById('cameraOverlay').classList.remove('active');
-  document.getElementById('cameraVideo').srcObject=null;
 }
 
-// Print labels
+
 function printLabels(){
   const keys=Object.keys(stock); if(keys.length===0){ showToast('No items to print','red'); return; }
   doOpenPrintWindow();
