@@ -353,6 +353,8 @@ tbody tr:hover td { background:#eff6ff; }
     </div>
     <div class="camera-status" id="cameraStatus">SCANNING...</div>
     <div class="camera-hint">Point at a QR label on your stock item</div>
+    <button class="btn-ios-photo" onclick="document.getElementById('iosCameraInput').click()" style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);padding:18px 40px;background:#e74c3c;color:white;border:none;border-radius:40px;font-size:1.2rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;display:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.4);" id="iosCameraBtn">📷 Take Photo (iPhone)</button>
+    <input type="file" id="iosCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleIOSPhoto(event)" />
     <button class="btn-close-camera" onclick="closeCamera()">✕ Close Camera</button>
   </div>
 
@@ -1272,13 +1274,46 @@ function triggerPhotoUpload(barcode){ photoUploadKey=barcode; photoInput.click()
 
 // Camera scanner
 let cameraStream=null, cameraAnimFrame=null, lastScanned='', lastScannedTime=0;
+function handleIOSPhoto(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new window.Image();
+    img.onload = function() {
+      const canvas = document.getElementById('cameraCanvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts:'dontInvert'});
+      if(code && code.data) {
+        closeCamera();
+        handleScan(code.data);
+        showToast('✅ Scanned: '+code.data, 'green');
+      } else {
+        showToast('QR code not detected — try again closer', 'red');
+        document.getElementById('iosCameraInput').value = '';
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 function openCamera(){
   const overlay=document.getElementById('cameraOverlay'); const video=document.getElementById('cameraVideo');
   overlay.classList.add('active'); document.getElementById('cameraStatus').textContent='STARTING CAMERA...';
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if(isIOS) { document.getElementById('iosCameraBtn').style.display='block'; document.getElementById('cameraStatus').textContent='TAP BUTTON BELOW TO SCAN'; }
   navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})
     .then(stream=>{ cameraStream=stream; video.srcObject=stream; video.setAttribute("playsinline",""); video.play();
       video.addEventListener('loadedmetadata',()=>{ document.getElementById('cameraStatus').textContent='SCANNING...'; scanFrame(); }); })
-    .catch(err=>{ document.getElementById('cameraStatus').textContent='CAMERA ERROR'; showToast('Camera not accessible — check browser permissions','red'); });
+    .catch(err=>{
+    // Fallback for iOS Safari - show photo capture button
+    document.getElementById('cameraStatus').textContent='TAP BUTTON BELOW TO SCAN';
+    document.getElementById('iosCameraBtn').style.display='block';
+    showToast('Use the button below to scan on iPhone','red');
+  });
 }
 function scanFrame(){
   const video=document.getElementById('cameraVideo'); const canvas=document.getElementById('cameraCanvas');
@@ -1293,6 +1328,9 @@ function scanFrame(){
   cameraAnimFrame=requestAnimationFrame(scanFrame);
 }
 function closeCamera(){
+  document.getElementById('cameraVideo').style.display='';
+  document.getElementById('iosCameraBtn').style.display='none';
+  document.getElementById('iosCameraInput').value='';
   if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
   if(cameraAnimFrame){ cancelAnimationFrame(cameraAnimFrame); cameraAnimFrame=null; }
   document.getElementById('cameraOverlay').classList.remove('active');
