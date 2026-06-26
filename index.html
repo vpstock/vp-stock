@@ -560,6 +560,7 @@ tbody tr:hover td { background:#eff6ff; }
     <p>Scan items or type their ID. Set new quantities, then confirm all at once.</p>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
       <input id="bulkQtyInput" type="text" placeholder="Scan or type item ID / barcode..." style="flex:1;padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter') bulkQtyScan()" />
+      <button onclick="openBulkQtyCamera()" style="padding:12px 14px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:10px;font-size:1.1rem;cursor:pointer;" title="Scan with camera">📷</button>
       <button onclick="bulkQtyScan()" style="padding:12px 18px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;font-size:0.9rem;">Add</button>
     </div>
     <div id="bulkQtyList" style="max-height:320px;overflow-y:auto;border:1.5px solid #e5e7eb;border-radius:12px;margin-bottom:14px;min-height:80px;">
@@ -783,6 +784,13 @@ function openBulkQty() {
   document.getElementById('bulkQtyModal').classList.add('active');
   setTimeout(()=>document.getElementById('bulkQtyInput').focus(), 100);
 }
+function openBulkQtyCamera() {
+  closeModal('bulkQtyModal');
+  setTimeout(()=>{
+    openCamera();
+    window._bulkQtyMode = true;
+  }, 300);
+}
 function bulkQtyScan() {
   const val = document.getElementById('bulkQtyInput').value.trim();
   if (!val) return;
@@ -998,6 +1006,13 @@ document.addEventListener('click', function(){
 
 function handleScan(barcode) {
   currentBarcode = barcode;
+  if(window._bulkQtyMode) {
+    window._bulkQtyMode = false;
+    document.getElementById('bulkQtyInput').value = barcode;
+    document.getElementById('bulkQtyModal').classList.add('active');
+    setTimeout(()=>bulkQtyScan(), 100);
+    return;
+  }
   if(currentUser && currentUser.role==='user') {
     if(stock[barcode]) openTakeModal(barcode);
     else showToast('Item not found: '+barcode, 'red');
