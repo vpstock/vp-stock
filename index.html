@@ -1400,20 +1400,7 @@ function doOpenPrintWindow(){
 
 
 <!-- TAKE MODAL (user mode) -->
-<div class="modal-overlay" id="takeModal">
-  <div class="modal" style="max-width:400px;text-align:center;">
-    <div class="modal-header"><h2>📤 Take Item</h2><button class="modal-close" onclick="closeModal('takeModal')">✕</button></div>
-    <div style="padding:24px;">
-      <img id="takeItemPhoto" src="" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:none;" />
-      <div id="takeItemName" style="font-size:1.2rem;font-weight:800;color:#0f2137;margin-bottom:6px;"></div>
-      <div id="takeItemQty" style="color:#9ca3af;font-size:0.9rem;margin-bottom:20px;"></div>
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:8px;">How many are you taking?</label>
-      <input type="number" id="takeQtyInput" min="1" value="1" style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:1.2rem;text-align:center;font-family:Inter,sans-serif;font-weight:700;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter')confirmTake()" />
-      <button onclick="confirmTake()" style="width:100%;margin-top:16px;padding:16px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;">✅ Confirm Take</button>
-      <button onclick="closeModal('takeModal')" style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
+/div>
 
 <!-- MANAGE USERS MODAL (admin only) -->
 <div class="modal-overlay admin-only" id="manageUsersModal">
@@ -1609,20 +1596,7 @@ function installApp(){
 </script>
 
 <!-- TAKE ITEM MODAL (user mode) -->
-<div class="modal-overlay" id="takeModal">
-  <div class="modal" style="max-width:400px;text-align:center;">
-    <div class="modal-header"><h2>📤 Take Item</h2><button class="modal-close" onclick="closeModal('takeModal')">✕</button></div>
-    <div style="padding:24px;">
-      <img id="takeItemPhoto" src="" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:none;" />
-      <div id="takeItemName" style="font-size:1.2rem;font-weight:800;color:#0f2137;margin-bottom:6px;"></div>
-      <div id="takeItemQty" style="color:#9ca3af;font-size:0.9rem;margin-bottom:20px;"></div>
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:8px;">How many are you taking?</label>
-      <input type="number" id="takeQtyInput" min="1" value="1" style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:1.2rem;text-align:center;font-family:Inter,sans-serif;font-weight:700;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter')confirmTake()" />
-      <button onclick="confirmTake()" style="width:100%;margin-top:16px;padding:16px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;">✅ Confirm Take</button>
-      <button onclick="closeModal('takeModal')" style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
+/div>
 
 <!-- MANAGE USERS MODAL (admin only) -->
 <div class="modal-overlay admin-only" id="manageUsersModal">
@@ -1639,18 +1613,4 @@ function installApp(){
         <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
         <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
       </div>
-      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Current Users</div>
-      <div id="userListEl"></div>
-    </div>
-  </div>
-</div>
-
-
-<!-- CELEBRATION OVERLAY -->
-<div id="celebrationOverlay">
-  <div class="celeb-emoji" id="celebEmoji"></div>
-  <div class="celeb-message" id="celebMessage"></div>
-</div>
-</body>
-</html>
-                                                                                                                                                                                                                                          
+      <div style="font-size:0.75rem;f
