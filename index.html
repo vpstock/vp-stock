@@ -622,7 +622,7 @@ let currentAction = 'add';
 let activeCategory = 'All';
 let syncTimer = null;
 
-function getFbUrl() { return localStorage.getItem(FB_KEY)||''; }
+function getFbUrl() { return localStorage.getItem(FB_KEY)||'https://vp-stock-default-rtdb.firebaseio.com'; }
 function setSyncStatus(state, label) {
   const dot = document.getElementById('syncDot');
   const lbl = document.getElementById('syncLabel');
