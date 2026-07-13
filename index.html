@@ -792,7 +792,7 @@ function openBulkQtyCamera() {
   }, 300);
 }
 function bulkQtyScan() {
-  const val = document.getElementById('bulkQtyInput').value.trim();
+  const val = resolveBarcode(document.getElementById('bulkQtyInput').value.trim());
   if (!val) return;
   if (!stock[val]) { showToast('Item not found: ' + val, 'red'); document.getElementById('bulkQtyInput').value=''; document.getElementById('bulkQtyInput').focus(); return; }
   if (bulkQtyItems[val] !== undefined) { showToast('Already in list — update qty below', 'red'); document.getElementById('bulkQtyInput').value=''; document.getElementById('bulkQtyInput').focus(); return; }
@@ -1004,7 +1004,16 @@ document.addEventListener('click', function(){
     setTimeout(()=>document.getElementById('bulkQtyInput').focus(),10);
 });
 
+function resolveBarcode(barcode) {
+  if (stock[barcode]) return barcode;
+  const match = Object.keys(stock).find(k => {
+    const displayCode = k.startsWith('MANUAL_') ? 'VP-' + k.slice(-6) : k;
+    return displayCode === barcode;
+  });
+  return match || barcode;
+}
 function handleScan(barcode) {
+  barcode = resolveBarcode(barcode);
   currentBarcode = barcode;
   if(window._bulkQtyMode) {
     window._bulkQtyMode = false;
