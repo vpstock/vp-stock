@@ -1362,77 +1362,6 @@ function doOpenPrintWindow(){
 </div>
 <div class="grid">${labelsHTML}</div>
 <script>var codes=${codesJSON};window.onload=function(){codes.forEach(function(item){var el=document.getElementById('qr_'+item.id);if(el)new QRCode(el,{text:item.code,width:150,height:150,correctLevel:QRCode.CorrectLevel.M});});};<\/script>
-
-<!-- TAKE ITEM MODAL (user mode) -->
-<div class="modal-overlay" id="takeModal">
-  <div class="modal" style="max-width:400px;text-align:center;">
-    <div class="modal-header"><h2>📤 Take Item</h2><button class="modal-close" onclick="closeModal('takeModal')">✕</button></div>
-    <div style="padding:24px;">
-      <img id="takeItemPhoto" src="" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:none;" />
-      <div id="takeItemName" style="font-size:1.2rem;font-weight:800;color:#0f2137;margin-bottom:6px;"></div>
-      <div id="takeItemQty" style="color:#9ca3af;font-size:0.9rem;margin-bottom:20px;"></div>
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:10px;">How many are you taking?</label>
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button onclick="setTakeQty(1)" class="take-preset-btn" id="takePreset1">1</button>
-        <button onclick="setTakeQty(5)" class="take-preset-btn" id="takePreset5">5</button>
-        <button onclick="setTakeQty(10)" class="take-preset-btn" id="takePreset10">10</button>
-        <button onclick="setTakeQty(30)" class="take-preset-btn" id="takePreset30" style="flex:1.5;">✋ Handful (30)</button>
-      </div>
-      <input type="number" id="takeQtyInput" min="1" value="1" style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:1.2rem;text-align:center;font-family:Inter,sans-serif;font-weight:700;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter')confirmTake()" oninput="clearTakePresets()" />
-      <div style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">or type a custom amount above</div>
-      <button onclick="confirmTake()" style="width:100%;margin-top:16px;padding:16px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;">✅ Confirm Take</button>
-      <button onclick="closeModal('takeModal')" style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- MANAGE USERS MODAL (admin only) -->
-<div class="modal-overlay admin-only" id="manageUsersModal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
-    <div style="padding:24px;">
-      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
-      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
-        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
-          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
-        </div>
-        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
-        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
-      </div>
-      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Current Users</div>
-      <div id="userListEl"></div>
-    </div>
-  </div>
-</div>
-
-
-<!-- TAKE MODAL (user mode) -->
-/div>
-
-<!-- MANAGE USERS MODAL (admin only) -->
-<div class="modal-overlay admin-only" id="manageUsersModal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
-    <div style="padding:24px;">
-      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can only scan items to take stock — no editing or deleting.</p>
-      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
-        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
-          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
-        </div>
-        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
-        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
-      </div>
-      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Current Users</div>
-      <div id="userListEl"></div>
-    </div>
-  </div>
-</div>
-
-
 </body></html>`); win.document.close();
 }
 
@@ -1605,7 +1534,27 @@ function installApp(){
 </script>
 
 <!-- TAKE ITEM MODAL (user mode) -->
-/div>
+<div class="modal-overlay" id="takeModal">
+  <div class="modal" style="max-width:400px;text-align:center;">
+    <div class="modal-header"><h2>📤 Take Item</h2><button class="modal-close" onclick="closeModal('takeModal')">✕</button></div>
+    <div style="padding:24px;">
+      <img id="takeItemPhoto" src="" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:none;" />
+      <div id="takeItemName" style="font-size:1.2rem;font-weight:800;color:#0f2137;margin-bottom:6px;"></div>
+      <div id="takeItemQty" style="color:#9ca3af;font-size:0.9rem;margin-bottom:20px;"></div>
+      <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:10px;">How many are you taking?</label>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button onclick="setTakeQty(1)" class="take-preset-btn" id="takePreset1">1</button>
+        <button onclick="setTakeQty(5)" class="take-preset-btn" id="takePreset5">5</button>
+        <button onclick="setTakeQty(10)" class="take-preset-btn" id="takePreset10">10</button>
+        <button onclick="setTakeQty(30)" class="take-preset-btn" id="takePreset30" style="flex:1.5;">✋ Handful (30)</button>
+      </div>
+      <input type="number" id="takeQtyInput" min="1" value="1" style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:1.2rem;text-align:center;font-family:Inter,sans-serif;font-weight:700;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter')confirmTake()" oninput="clearTakePresets()" />
+      <div style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">or type a custom amount above</div>
+      <button onclick="confirmTake()" style="width:100%;margin-top:16px;padding:16px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;">✅ Confirm Take</button>
+      <button onclick="closeModal('takeModal')" style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- MANAGE USERS MODAL (admin only) -->
 <div class="modal-overlay admin-only" id="manageUsersModal">
