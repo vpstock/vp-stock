@@ -682,6 +682,13 @@ function pullFromCloud(manual) {
       if(remoteUsers) { localStorage.setItem(USERS_KEY, JSON.stringify(remoteUsers)); }
       setSyncStatus('green','Synced ✓');
       if(manual) showToast('✅ Stock + users updated from cloud','green');
+      // Also load photos from separate /vp_photos path (never overwritten by push)
+      fetch(url+'/vp_photos.json').then(r=>r.json()).then(photos=>{
+        if(photos && typeof photos==='object'){
+          Object.keys(photos).forEach(k=>{ if(stock[k]) stock[k].photoUrl = photos[k]; });
+          renderTable();
+        }
+      }).catch(()=>{});
     })
     .catch(()=>{ setSyncStatus('red','Sync failed'); if(manual) showToast('Could not reach cloud — check your Firebase URL','red'); });
 }
