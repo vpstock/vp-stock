@@ -1,0 +1,96 @@
+name: Daily Low Stock Email Alert
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # 8:00 AM AEST (UTC+10)
+  workflow_dispatch:       # Allow manual trigger for testing
+
+jobs:
+  stock-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Firebase stock and send low-stock email
+        run: |
+          node << 'SCRIPT'
+          const https = require('https');
+
+          const FB = 'https://vp-stock-default-rtdb.firebaseio.com';
+
+          function get(url) {
+            return new Promise((resolve, reject) => {
+              https.get(url, res => {
+                let data = '';
+                res.on('data', d => data += d);
+                res.on('end', () => { try { resolve(JSON.parse(data)); } catch(e) { resolve(null); } });
+              }).on('error', reject);
+            });
+          }
+
+          function post(url, body) {
+            return new Promise((resolve, reject) => {
+              const s = JSON.stringify(body);
+              const u = new URL(url);
+              const req = https.request({
+                hostname: u.hostname,
+                path: u.pathname,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(s) }
+              }, res => {
+                let d = '';
+                res.on('data', c => d += c);
+                res.on('end', () => resolve({ status: res.statusCode, body: d }));
+              });
+              req.on('error', reject);
+              req.write(s);
+              req.end();
+            });
+          }
+
+          async function main() {
+            const config = await get(FB + '/vp_config/email_alert.json');
+            if (!config || !config.service || !config.template || !config.pubkey || !config.email) {
+              console.log('Email config not found in Firebase. Save your email alert settings in the app first.');
+              return;
+            }
+
+            const stock = await get(FB + '/vp_data/vp_stock.json');
+            if (!stock) { console.log('No stock data found'); return; }
+
+            const threshold = parseInt(config.threshold) || 5;
+            const lowItems = Object.values(stock)
+              .filter(item => item && typeof item.qty === 'number' && item.qty <= threshold)
+              .sort((a, b) => a.qty - b.qty);
+
+            if (lowItems.length === 0) {
+              console.log('No low stock items today — no email sent.');
+              return;
+            }
+
+            const date = new Date().toLocaleDateString('en-AU', { timeZone: 'Australia/Melbourne' });
+            const itemList = lowItems.map(i =>
+              '  • ' + i.name + ': ' + i.qty + ' unit' + (i.qty === 1 ? '' : 's')
+            ).join('\n');
+
+            const message = '⚠️ Daily Low Stock Report — ' + date + '\n\n'
+              + lowItems.length + ' item' + (lowItems.length === 1 ? '' : 's')
+              + ' at or below the threshold (' + threshold + ' units):\n\n'
+              + itemList + '\n\nPlease reorder as needed.';
+
+            const result = await post('https://api.emailjs.com/api/v1.0/email/send', {
+              service_id: config.service,
+              template_id: config.template,
+              user_id: config.pubkey,
+              template_params: {
+                to_email: config.email,
+                message: message,
+                item_name: 'Daily Low Stock Report',
+                item_qty: String(lowItems.length),
+                threshold: String(threshold)
+              }
+            });
+
+            console.log('Email sent! Status:', result.status, '— Items reported:', lowItems.length);
+          }
+
+          main().catch(e => { console.error('Error:', e.message); process.exit(1); });
+          SCRIPT
