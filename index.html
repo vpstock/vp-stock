@@ -1047,7 +1047,1629 @@ function clearTakePresets() {
 }
 function openTakeModal(barcode) {
   const item = stock[barcode];
-  document.getElementById('takeItemName').textContent = item.name;
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VP Stock Manager</title>
+<meta name="description" content="Victorian Projects QR Stock Manager">
+<meta name="theme-color" content="#1b3a5c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VP Stock">
+<link rel="manifest" id="manifest-placeholder">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #f5f7ff; color: #0f2137; min-height: 100vh; }
+
+/* LOGIN */
+#loginScreen { display:none; position:fixed; inset:0; background:linear-gradient(135deg,#0f2137 0%,#1b3a5c 50%,#2563a8 100%); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+#loginScreen.active { display:flex; }
+.login-box { background:white; border-radius:24px; padding:40px 36px; width:100%; max-width:380px; box-shadow:0 32px 80px rgba(15,33,55,0.3); text-align:center; }
+.login-logo { width:72px; height:72px; background:linear-gradient(135deg,#1b3a5c,#2563a8); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 20px; }
+.login-box h1 { font-size:1.4rem; font-weight:900; color:#0f2137; margin-bottom:4px; }
+.login-box p { color:#9ca3af; font-size:0.88rem; margin-bottom:28px; }
+.login-input { width:100%; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:1rem; font-family:'Inter',sans-serif; outline:none; color:#0f2137; text-align:center; letter-spacing:2px; transition:border-color 0.2s; margin-bottom:12px; }
+.login-input:focus { border-color:#1b3a5c; }
+.login-btn { width:100%; padding:15px; background:linear-gradient(135deg,#1b3a5c,#2563a8); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:800; font-family:'Inter',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(27,58,92,0.3); transition:transform 0.15s; }
+.login-btn:hover { transform:translateY(-2px); }
+.login-error { color:#ef4444; font-size:0.85rem; font-weight:600; margin-top:10px; display:none; }
+
+/* HEADER */
+header { background: linear-gradient(135deg,#0f2137 0%,#1b3a5c 50%,#2563a8 100%); padding:0; position:relative; overflow:hidden; padding-top:env(safe-area-inset-top); }
+header::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:rgba(255,255,255,0.06); border-radius:50%; }
+header::after  { content:''; position:absolute; bottom:-80px; left:30%; width:200px; height:200px; background:rgba(255,255,255,0.04); border-radius:50%; }
+.header-inner { max-width:1000px; margin:0 auto; padding:28px 24px 24px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; flex-wrap:wrap; gap:12px; }
+.header-logo { width:140px; height:140px; background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAsF0lEQVR42u29ebCf13nf93nOOe/72+5+AVysBEAAJECKIihqX2wtiR3bsmKN5Ta1nbjTtJ44ldukaabjLuOm03Sm7TTNTKaJ25lMnbRxY3cqO7bkWpUcbZRokRT3DSRAAgSI/a6/9X3fc87TP973XlxSoGTFpClK5zNzsd2Le3+/9z3f86zneUVVSSQSN8ekS5BIJIEkEkkgiUQSSCKRBJJIJIEkEkkgiUQSSCKRBJJIJIEkEokkkEQiCSSRSAJJJJJAEokkkEQiCSSRSAJJJJJAEokkkEQiCSSRSCSBJBJJIIlEEkgikQSSSCSBJBJJIIlEEkgikQSSSCSBJBKJJJBEIgkkkUgCSSSSQBKJJJBEIgkkkUgCSSSSQBKJJJBEIgkkkUgkgSQSSSCJRBJIIpEEkkgkgSQSSSCJRBJIIpEEkkgkgSQSiSSQRCIJJJFIAkkkkkASiSSQRCIJJJFIAkkkkkASiSSQRCIJJJFIJIEkEkkgiUQSSCKRBJJIJIEkEkkgiUQSSCKRBJJIJIEkEokkkEQiCSSRSAJJJJJAEokkkEQiCSSRSAJJJJJAEokkkEQiCSSRSCSBJBJJID9oqCqq6TokgfxwLPfm45X/crMv00YVIoIIxBhf46v1tb5L4s+AS5fgDVr729erABYiIFQIod6b1IAYIoJHqIi0CsGpQAbRQoUw8Z5LF6/r7p2LMtcB1BN9G2ItGjGAC8TQR6WFMa1m7xOEV72OxPeEaLLbr7s+RF9lFgSQCEQqDGCwgFGFGIAAJoIEPC0mZPQ1cnlU6rW1wPp14Xd/8/PYSYu//gvv4H3v3i2tHKowBCY400VDB3xEMhBrXvk62P6XpJJkQd5kgUTZvhYDBkUatVitLUn9tQLWohg8MKlKnh+Xenq0xuVRwbWJoxrP0O53OLt6C1efXOPFUw/zznun9Kc/eYT3vW9JuhIodYQhw4jbshjC9j8oN36qTSJJFuTNNiH1clT8pgwwCBoNIhWIADlD4FIR9ezAc2EAVwcl/ZEyxtLPlcJltMjJrpR88Z98le51g9MORTWg1+1z770L/MwnTvCB9y1JWzxeVxGdwkoO0lim5qfXH0kcSSBvNpsxdOMygeLVEsUiwBBYLiq9sDbizOqI8yO4HjsMTJcyy5ktwAYYtJTSeaZwjJ9Z5pHf+hJzK0KZLVBIC1sJYTKk0+7zvvfP8LOfup1737EobXK8RlRLrImgikgL1RyJBkyjz0QSyJsmkEgjjkgUQyGWKwFeuD7Sx/uGF4eecVFQCaiziLGoCBGlU4FIpHSBEJU5meb6Qy/z6L98kKXxHINWQZkpNrSx5EgIlOU6vW7gve89xqd+9gAnTy5KDhSxwGgkMxZDXhuU5FSnGORN1YcBMYqEOmcVxbAOfP7Msj66PGHNzhNMF8m7iAREK5wGXKhoaaDE4CVCDBhfZ6nWl0cUIaPKpjF4XBwjKFErxOZk3UWGFXzuC2s88OBZPviB3fpTH7+Nd96zIBkQQoVSYcU2mbN0n5IFeZMoUJRImwBRqEzGH1/s62deXOHK9CLdSumWAW8t3hg8CiqIWgQh4Jo17MmDZybkPPzZB7j00EUWdAe5rxAUxaEYglGCVKipEOexo0X8eMjc/Dof/OAsP/szd/GOt+0TqNDgUckw5tWxSB04aYpQkkBetxiDG5kq3fa7KkQTEdZwtDg16ek/eHqDl1yLmdEIzIjCdOiEOWLlIVsn2CFRO4S4g5kyULmK5Q44FfZuZDz9L77K5Ll12swQjKLyqpKgKKoRRLEqIBkhCuNixNxs5GMf3sO//ckj3HFsQQxDqhAw2gEFa0ElEKUWZ6b220WylQlTfthqy8nF+h4JJhAIzSK6kc/dSqtGIfMKtFmxHb5wbpm1gcFlwoSMSnqYaPCTPr1ui6ExDDXHak6nVCoCAxsoFEQdo0HJqD/GSkYUR8RzI2V7wwAItlHNGDSAdOl05xgXI/7Vv3qKP7nvUf7iR+7Qn/xLd3PHiRmJjFE/QnQa0RZiFCtjkNZ3WBY/fPYlWZDvESWiqjeWisZmg22uoxRoZSHr8tnrhf4fp66CzqKhzbWeZZApO8Yb3BaG/Ojd+/nyi+s8ORLU9eiVFWoCI6d4lPnQpn2mz5P/99dpD1ugHSSWGImv+foMBSAEaRFwCIZcFC0HxLJgfm6aH/noDj71qVs5fnhGBIOvFCOCuDFgEdyW23XjIwXpiT+VQmoXQxWMwlYPSbOTq5lAbnhqjP7+6QlXZY4MIXNKKQbvSxZcxV95+x4OdZFHN0aKLrCROcatPr1gyGOH6SAslBmDy2NkGLHBEEUQkW2L92avL7vhEklAVSijQ1gg67RYnazy2585zZe/epqf+LFb9ROfuJ3bDk7XdfbYQUzYZqEiW30yP6QiSRbkT6OJbdcooHjRLbcqokgjGkTICbwQrf4vz6zzrasWzXuUtkDMhLyE21D+6l0zvGdWZKX0/MMHL+r9cS9FnrOgK/RGOeOVyOjydUanr1CeXcVtgIstlIxoKlT8ay5YE12dMjYVUQKKIDg0WkQzxI7rRpfSUE2uc2BfyU9//BA//1feLb22Q1Uxpn6nEBtB2jr2+CGM4pMF+VOIoxaIgIAJJW2aarg41OREqTNAJcqjfdV/ceYS922UkO/BeaE0SlascVgDnz56kJM9K1WsWBbV1SxHBobpKyPc6bNcuLDOlesFbAzplJZOdDjNEVUET9za1V8rh9B8TgVDHYCDR4yp45PQQ6VC8gmdbIHl5Zzf+McvceHCRP/uf/YjMt2yqAexFkVvxFbJxUq8ppkVIapiAVxOpE0JrAdltVS93C84vzrk0rUB3xpkvKCWvNNlVA6pnMWOPEdU+aV7dnPXvBEtPaad0b865uJXznHlpZfxLw+ZWbtGDIZ516Mts4BQSaQ0CiZiNXzXLVxtWaeNEYgZBm0aJQOIIhrrrBUlJQ4js7RnjvEHn38abX9T/8tf/YBkTbxvrPv2hEASyA9DoP3ay0ybX2VzpxaDxog1hv5gxAP9Qh8vhNV+4PIo8PK4ZDm2WImO0i3ge20WSpgZrFG0K9YYczDAL951gA8uGpnEPiFvMYVj4/EVVn73WebNPrxtEe0iPaNklSHGSHCG6KC0sX49IWD0O8cDKlX9smOOaIZRcyMekYCRIaoWDTNEMWi+TuErWt29/P5nRuxqfUU//ekPCQjeR5wLTW+KfcW1k5tct5sngV99TsUkgXw/s9kJstm+V9+7uJkrJahBtcSYAmKGlQ7BGL54Zaz/9PkxDxMZU9ApDZ2QYbVLtBaTG7xVOuUQF4Sr7ZyJlOwvNviPT+zkJ3c70VBgaaMaUANPn1lnovvJOjmwjgldKjFUrmzEGTGqtPxmKvm73y4Ts235hIrw6hyczgAewwRLQCoHtImVodWB3/rMafLODv0bv3ynGKvAgKDKRHsUktENBgdYUWKT7jZGiBhCFLJN8byii9g3MQ0g3bdUIPNDJ5Abref1PqjbdjUFXJxAsJTMkGewjPK/n1vX33whMAiW6WiY0jaltRTGQrRkFfTGsBDqqvjVKWW1tcpt41X+9rF9/OT+TGIA7zJcAGeFoYfnzlylkm2t8I3VUnmlPfvelpN8mz3cTjAexNciUamjDIFAgWSe4eQQ/+Q3z/HyJdWPfGCRk3cvysLOnJ6UtOljQ4aqEm0kWgPiEDKsN1gPtIZ14bLO3aHq6mXWeGpik4v1fU6FUAHt2m3YVpUWhaHNcAqtAi6twN8/t6z/bHIN7cyytD5PZ9Qh1O49kxwK51E3IWsV5HGC8YtUwXFwMORv3bXEX97TESYDQp4BeR0PiGN1dcLlSytk2UyTH7ZNC0l8Q3fY2gULxGbhiuREjUjumYRVdt6xF7Gz/PZ9z/A7X/AcWHD67rsO8J6TOzl51z5mjrVlykJGxKqCj0TxVLaickJHWxitW+xVpDkbE8DGZhNwbykL8kOY5i2BCmiBum2brKIEvBgmYvjS9TX9jcfWeHI4w1wWsNWAa9kiw47F6ZDM5+TBYBWCeILzeOsZaODeaPj7t+/k/ftzmcQR1nrymIF2UErE5nzjwRX9T3/tDyl1D0EsQoGLioqgb+QCasooooLEHI0ZZIGJXufe99zC+/7qMQqbcfHcmPNn+px/ps/V5y8gG0N29drcdbTH3Sf3ceLkLm69bVp2zZlml50QwgTiVN3rJdQt//htH4ow85aKQ37oLIiSoVgMAhqbCrjiBYyB9Sryvz57Tf/RVc/VbIoDHaEYzjC0O+jnAzrxEt3KQ+xiQheNXYx0UK+UET6w5wr/xZ2zfKCVCxNFOh1GRMQIWVCiRizw/HPXmUwybBcIWt8KKbcFsm/MxpWFDKIiYhDJiM7iTaDynv1H9qD5NKsTT+vgPLccnGPX+5XR6jFWXlrm4guXeOSxPl9/8inMbz/EwX0tPXliJ+99+xJ3n9gvS3vnoB2bDUjRKKgaRNtbzTi4FKR/XxOQWiBRQT3aWIyBGF7YGOo/fvg6X7jeI+SLTOeOq36CaXusmaDFmHG1g4ntUeZC6SIShiz4ZW6JBT93fC9/48hejlovqzEwnVvaJZBZxgLWBNCKqG1OPbtO5V2dnRKLRIdI3Qu8mTF6I6yHqmAsRCYUOqQISmU9fqpkMm1YLoQNbxiFNYZ2yMR6wkKOzE2zdHyB/sdaxEvrVGevcOr0JZ78xlX+ry9dZGH+WT16217+wtsd99x5kEOH5mSqe2NohHpFY6yPApjkYn1fZ7HqbE9EY0Cd4xLC714Y6289cZWnRjNod45WdQnvDce7U/xbhx0HZiu+cr3gvo02F8cQyhHTeeTWdsmH5gyfPLDI22ecyDiimWHkhBzIKsAJhQhGIZMxy+s5n/6bX9dTL42QjiHEFjZkOLNGRFDyP4MFkVemV0Vqa4kQYsRXkSATaI9pL+RM715g97H9zB+aZnZplkEeKTRQRs9EA+NoGFWOMraogmXVjQhqyUKbfGTR8wOWv3kKd36N3jBAGLIwn3P44Az33L2Du982z/HbdsruXW6r6Kgqb5lTjT+AAombOc76b6LExsDbetAUGg2ECsktVyvhNx6+oP/nS3Cmsw/N+phimUMzM/z8XsMvHZjmSMcKGCpVrpUTVieqsVRaLmOh62ShZTBAjCVjEVoxw1UBXIF3AaMGQ4aPDmMqnjo11E//h19l6GeILU+MOTbkOFknSn3Wg5vmr/QmcpDG6mx+dWj+7MAYQgiUVQmidDotentm2Xdkjt23tpnfv0C20GWUGfoyZhCGjKoWocrwpcEHh8eyUXlGUjBRT2kcZqRwaUB16gqcvU5nrWCq9HSNZTmboggVVAMcQ6bywC17ehw7vMS733UrP/GX9opzEKJizSvfiTaNMUkgb3CWiqjgBawwsoYJQk6kg0IZsKUhTFm+tF7pf//gMl9Z7xHaPWJZ8jY5wy8eFH7k9uPc3XXSVeqDRkaa4W26TYi+XpJqiGSIGKIGrCpGXf06RIlRUas4W8v0n//+i/oP/odvkuUHCSiYIaKC9dMEt060BSZ0mmJfnd0SAognGk8URZoEg4mCMfXnVSNtiajCOBjGMZDNOvbfMc/+22Y4cGQRt2sa2hmewDAE+mXJKEYmMeBR+iYnlIa8cPi+Mioiodumn0U2tGD+iSH+zFVGZy/TW6+YigYRi7dQSF213xxyR9OiU1URDYJG+NlPzPC3fvWDMtUD7zfIbatOFBhDpMRK9n0lkh88gcR6Dy3NgAyDK7sQI+QjAoLVFhti+afnR/o/Pz7kfJFhpeKOuMLHb1ngE3cucmTKShtoR8VFRSSCEbzUnbtGqX+RqolqLGiOaP2jpKlAhjhGTMCaDhWOF8+t6R9/5Xk+97lnuHZ1CmSBaAtU1jEKJkzjDUQJiDokmjrbJE3FRiPBgIqA1p9TjVgLdQNVxaTsMQkl83uVE+/cwR3vPsyug7NoZik8rEfHxEMRlFHlmQBFVCYhUMXIGg5bWfLVwDNfeoTJ5QEL0/PYVs64nFC+vIobB3pYWgFMABUorRAM2HijrgObEyENIoJGIQzW+fGf3Mnf/k/eKYtTEEOGVdtUbicIre+rNPAPnEBUCyqEQnM6ClYnqBhKMtq24AUf+e8eW9PfOQ19Ftk17fnk0oj/4EiPe+dywQs+GizNLige3GbziUU229xf3a8itUWJOiaox9gMS5dxMDz+5IZ+/gtnuf/+l7hyaQMrszi3E6+A6yN2ANFgYo8gUgsE36y+0FT8LYIh4po0sKCiKIpKyaQY0mplzB2b5uT7j3LXPfuYX2oxKAKDEfSHgf66sDYasdpfxSu0pqbxxlIpRKnb6cNEMMPApUdOc+XRsyzSxU4CVptxKNZjnaUKAbFCFCWgjXDB+S6icqPIudV6rwgGqjmqcJof/fAUf+c/+otyYFeLqow4a7Y2oiSQN5AJFQp0CgFjKbJIizGeDr+/ZvW/fXSVRy5dYb/N+fjBnfzC8SneOSvSRqnUQ2XIoq1z+DYSJSLG1DdXDUhRm6nY2TbiB9QUqK5jTASmGBQt/uT+Zf2jz7/EAw9dZX0M2JxW1gZ1+CColGCHiCmbmkS3bknHgynqD0JtRdQ1UZRBVaAREkZpdQ23HNrJ3ffcwq4TGZVVrl0e8fLLK6yteVaWx6yu9hlNSnorlrBRos6StzuIc0Sx0ExWUbdGKCbIKJDHDBsNUSE6RxDoTLr1GROnBCd4VUQagxq1nvu1LSKqBRJBIqqBaMHGKar+iJMnc379198rh/fm+KrESWfr6ImqNq32SSCvr4fl63VbuiG5H+KYYsN1+Z/OjPR/fHQdyPj4YcO/e6jHj80bcSFAzAlOqIxgY10ljhIJcsNQZBgIBqiIpqr9ZFVCBEwLZywQWVlVvvaVZf3cHz3L40+uMKla2HYL0wp4M0bVUue3AiIVYjwxgqFLjF1csJhYWw+lbNrbDahtaiUeNKJiUAmIg6Xd8+zaM816f5Url/uMR0pVVRSTEmcEYyJGFOsUo1N1/YM6VlHi1qAsFWgFi4mCNY0wxFAZwRtDNIaeHyFGKYh4VZzJMF5xXslVKEwgikHU1illI1sCgYoyW0X8bvJqN+X4Ze5824C/9+sf5egts1KFCicORF41tFuSQF6/QkeBhgmVClnL8bDv6H/zUOC+F1f5iYMjfunYDt69syezlBCGlKZLKS0yoOUDKh5vHZHt2S/IkHqmaKz7fIMMUbOBkRxlgXMXCv3al17mj/+/ZU6fXqdiQt7LUGsJoZaYxIxKA0FLRANWPaGKQI5Gh1eLsRsYU5K5NlnWxsdtPWMiTZtMbba0CYp9KKj8BGMDrbAfpxniBlhb1C4hLUyYhthlrOuordAYiDEAFSKRGEqiKmPXIYpgYsAQMSFCrC2oqMG3xgQJOMkwOKxk5NGSqcOJoWwNCE03MWSN26tbkx6DaGMVHRk9qtGIgwcD/9V//QHuun2qNp71ia0tYbxlBaL6/Telb4LHxiGZb/GZC1F//dSIPXNd/s6tho/ucpLFCjxEK3jnKNWBKG3ABV9XD6zbSqrKZm9G7e03iSvBunqe7pPPrunnPn+K+++/zIULYI0l7xgihnHl65y/D2gZcBg6Pej1DL2Wsjg7RcvmLC4uMj3fBhu50r/M8saIc2cm9NcFY2aIqqipUFPWmSssqvWhDSNgRDFSd8zWjY6m9gKDEgOESohe6qFdU0redXRbjl5XmJnO6bYd+/YuMj1tUcaIqQN/Z0BCRIIiTY/j2E6z3o9cvbiMn0T6/YLRWBlOPINJQT8u10lm08VJF+daWAPSvD4pZ4l2leD6aJzGxCV8OWTX7mv82n/+I3z4HTvFVxXG1u0qRsxb0MVSmh2hPvoZQ52a28zeIPJvcDzzxrkBbXp1/k20p8BLPvC/PbehL1wa8fO3zfCRAy2ZwkBliYxRq5SmB0AeApYJGBhJF6NCS7cNQzd1lcFrHYs4JhReePjhK/rZz57lwW+NWF7LibZFNIKyhvcjjEzT7U6zc0eH3bvg6BHL4UOOXQtT7FtaZG4mk25baLmMvFO/U8+Ih59Bv/y1i3z5K89x5coEpYNiESIiAcWiUXAIlrr4KGIIMVL5wMSO8FHJZZpO3mHHYovFXYEDhw0HDlkOzLXZu3MnO5Zmpd0ClwnWKZ1McEQMne9yfUs8kWICsTJUURkVlkvLfX35+jWuX/ZcOG84d3bE1atDri2PGReBioCxlp7fgc0KsAMiivcZmW1RliPm5iJ/7+/u40c/9HbxPmCNQUzcVicxf+7Vku9ZIDFWSAx4b+n311lYnAWT1btXJfgA1hpk8wiz6LY3uVnIqtuhwWymypsu1s0AzzZ7t9m6FHKzzFGjoqh1k5/RyHPrI/3j89fY0cr4wG37ZQ9gNNTukpomM/Wqb6Xa/JsQVImioBVCQSTSkrrBrr9ecd+3VvT3/t9LPPLQOYZ9MKaDsUK7BzNzHQ7tsxw52OHE8R6HD8xx8OCiTE8bXqu74tqw4JlTa/rgg+d57NFlzj+bMxpllO0J2oEgoXaTvKGtOSoFwSpltIwrj8RIK1bMZrB3dpqFQz32Huxx9/EuB3bnHD64Q6bmctym24I296DJzza9aJGIonW3rdgmV91YzxibjwBSocYgJgfJt2xrc4aRzZEP6mGwGjj94lU9fb7k0dNDTp9bZuXcmPW1MWW0uFYPYw3OChoLfDVhdkr51b/5Lj71U3skVAOMLRBy1LTx1K050gzkNq9IB7wxc7u+Z4EoY8q4jp8s8fUvD/SJx5/j4JEW977/Fjm4b6Y+4klBjKEukKmSubxe9GrqlS6+DjjVbK1W3Xqntb8q32ZZ9IZ41H2bQBBhOOxzYW2onbkdsq/niEHrxKjd9OPluw6xUY0Igbj16ICciyuef/2l0/rFLz7Co48PGE+mmJ+ZZtfCDEduneHYsYw772pz8FBHdi8t0jGtZiEWqJaI1IeSwDCJytVrQ5586qo++vAqTzy+xrnzIyZFRogOM7eMtQXtYo6sqGdWlUaZtANDGWPHApNAPiMs7nQcPTbP8SOzvP22HrfunZel3W3arW2bUaxqIYT6uqkF3xypLQqYVBVBYFQEfEBXu8owBsoyElQwIrSM0HJCZpSez+llRjIjdIzQy4WWRKAErQiTKdSAzepxp/UUxwwKQ1wteeHChj5+eoVvPrnMI8/3OX+9oiiUXjuj7RzlqEur/SKf/pXj/LVPnhSNJRpatasloCYicpPnn/AazQd/3gIJESYasHZMUHj84RX9g987wzPPXOOWo4t87GOH+OC7Z2Vhdpat0fsq9eaj28atbY1c2pyCzrYWEXtDHKLbzEdsBGK/7WJElBhjXXTym7uaIjaClaYWIjS5oO9YiK+HFsDVZc/v/O7j+rkvPMHZlydMzezj2HHhHffMcOL4Pu44tkt2LRp6tlv/3wLUjol2jBHTZKu6VB7OXejrI4+c58FHlnn6mVVWliOjYY7YKbJWi2jGqCmZtIaICO2yQ17maOmZhCFVNqKzI+POfXt5/137uOv2KY4fnZf5HQLt2vEYE+lq8/QqMRRE+jGyUUZWi6grqxMeGA25qMJG5Xi5L1wdWyZumnHlqFTwxlP5Cl9FotYbirMG5wxWBGPXaWdKN8IeI9zadhxwJXtzw8HFWQ50PfPtTBY7jhZVM2TPEtTgsRRimaIuKF57acQzj1/UL3zjZb725JhLG47cTGhJFxM9//5ffxv/3l/bJxkT1AOhjWRbldib+9eGN9uCRHwMoI4ogdxECgIPP7aiv/cvr/Ot+ydMdZR3vHueD31sF8fv6MquHRluuxUIpj6kI3X7hBiprUJs0pk3i2G2/9nc/NqA1rMJgjYd43WdAGNBLBU3npLx2j7kCI0lYrusrEQeefysXl+b4Foz3HrbPm491JJZt/kzAzHUs3KNaHP+oQNqWVsLnH5hXR994jwPfesap8/0WVtXijCDzTs457FZxOuEqAExBmMtYRKpgmWCwXUsu3Za7rm9x4dOdrn7xE4O35KLyzbfhWlO7tXvtSiFF73q2YnywobnweURZ6sOL657rk8ikyCEWNA8/LDu77cOMFhTu4HqQxNP1tZddZsNjxEVe+O8yuZhKA31k4Eyod2asLvd4u5MeU9beNfiFIdnLXNdJy2jdBnWjptmGKlNnQY4f27Mfd94Tj//jTOceb7Fxuo8xpX85U/t5Rf+nVu4bV9bINQb7WbLzyt32jdkLNH3HqRrEyo4BeMJAYIKuXNA4Kkzy/qHf7TB/V87xaULBXMzc5y4Y4mT7+pw+51THD7Uk11TvW3xSFOlrqRpvPMYV25ZnhuuWd2qsG1+wLdfC4VIJErAsH24gLlhdW7yHzevQe2pTRApgBaQv0pOQ2KVgXeYlnmFUFeHJS9dWNcXnhvyxKMrnDpzibPn1xiMMwJdjJvF2WmwG7hsQvBxy+mLvu6yjRH29mY4eniWoyc73PnOHseOTsuBhTaOvM6JGA+mLoaulp4XCtHHNgKPDYWnlx1nxiWXNwZMyKnzrQ5MnZHKtaI0iwSxaKSut4QSjRFDQIh4MTdc3eZkIEbAOoxYrPab0MVh1CFqsCHWLSaqSNVmZALeDSCb0DYl+zPHXb1Z7prr8eE5OLxkZaENPajjvFjULTm0GPa7PPzkFf3ifY/z0LfWePF5y9LSHJ/4uSV+5hO3yOHFaYjgQ4Xica5uZbnxoCD7ZgvEg45B2tvcoYqgAZESMQUVOdcHHR57aKBf+fw6D37zJZaXV+hMGQ4e7nD78R5Hjixx9OgODh1uyfxCh04zrEyZABHfFLI25zttNm0jWbN4m9FUr2p09UQKCc3+2mR6qPuWbjaSY/v7V90sjtfBq6hCVIw1GLs57iEDDxvDCS9eWNNTpy/zzOmC554LXLhg6K9fI+o6atu41hSxfsLmVuNeZipi6QmlIxRKpyXs2BU5cWKat508wDvvmubwvo70ZtpNgFUPpS7FsBHgwijqqWV45NqYb60Jz008l6uK0gBSYUO9aKPNiDar3ZHgazc2BijHOCKZczhbxxedToaJEYmKs7b291XxoR4z5MUyKgOTsmJcGoIKuAyT1alYZ8HGsnF06wKjUYOLBq+GyaaZsI5ZnXC467l3p/LBnRnv3tnmaNdJDmilVM6Ri6Eg8OL5vt5//5A/+twLPP7UWW45NM8v//wePvHT75Isg3FR0sqltt5bNzd/s9O8HhixdWRV6pJa7SLZOu+uStYSBI9ScvZixQN/cl3v/8p1HnvqGpf6GxBgbqbLzh0Zhw/PcvBWy5Fb57nlwC52LvZkfqFFx27fD5pAEIOSN/mVrRWNbncBJW6F42brNASveKjmZv1G5DtHdh7YGASuXh/ryxdHPHvqHOfODXjxzDpXr0B/4PA4ognYFjgMmcmp6pmLtfsYPBpKYjnB4Jnqttm7Z4o7ju/kPe9d4o4Ti7K0lJObzZ8YiEAfx8Vg9Nl+wUMXCp685HkkZFwqI943rqO3GDVk0WDKwDirt4aOiUybCTvyCTu6wkzHsjDf5Xg+YdEqM+2c+cyy2M5YbCE5FRZPNLYpzEW81g8AGnura4OCjeGYJ8opnltXTi8PeX5QcjkYKpdDuw3Okm206pOE4rHiUSkJLqDWI6a2klQCISOLwkEb+PAOw4/t7fKOfR2W2lFcc2akJRZDZH0cefCBFf3sH5zl6acf4MiRBX7lVz7K2+/YLZsTajazccibnsWqu7hpOkx1K/BufC8tMdGAMfUz+kQQqQckVAqnXljTrz+xzuOPXOP5p1ZZvuQZ9+s08PR0m1Y+Zvd+WNo5z9xs5PZjO1na2WNmOmPH4iyLuzri2nWOvJ392fPhIULloaoCg2GflSuVriwHVvt9Tr94jXMXhyyvwQsvDRmOcsqyVpdxhsw5rDHYCC4qmVh88ETnKCrLuIxorJjtRZYWlKO3zHP7PbOcuHuW226dk13TUO+v0mS5HIMAF0aijy977rs25oFV5el+Rd/WLRiuWkGAyk6BOjqZMOUcCy6yf7bFLe0+R2dyDuWO/S3DrVMiC05oqcUac/MgNja/xM3HU282X26aacuNPPWEgLCiOc/0vT6yXvCvz054+NKQVQ9lt03MM8JWOsQhlWIrxUal7NRtMmItGkJt3aqCTAMHZjr8cnvAB25d4rYlJ7vyCHFI3XrWxSM8fWqsX/3qaV44fY6PfOQu/sJHDkkr40bH85stkO8uH3i1L6NKM/P1xnKOAS683OepZ6/qE0+s8tTT67x8PnB9taDC1q6PMbTbed1BmnlmZlpMTbXptRx5Zti7Z5odCxmtLDDdNeR5XVUWqxjTtFhrJMb6ZkdVKg+joTIeB3xwnDu3QX/gqSrDYDBidQ0GQ4eqx3uPqsc5i3X1ArNWUerzIXVezRBDRoyOYuJwXCSz68zN7eLgwT3ccXyJt53IuOP2XPbtsRiX142PlFvX6WKV81Q/6tNXJ3xh3fHwsmV5VFFu5jItECtmWo4lV7CjIxyYb3FrJ3BiynG822JPLrK745rmDrnprXmFO7m9BUK+c5ZUtw228FpXsGTrOYyOq8DDVzf080+f55+tT7MqOS7vEkOOlAYXYn282Qawoc7BiBLV12NbpU4G4COUs8ybinctTvjxA/CxA7Pc1s4l05IYI9Fa2mRsDArOnRvrwtKs7FoUbAgYLSFrv66R+p97L1aMHpg0HbIWaOGBtYHy4ovL+tRTKzzxxIDTz19gbU0ZjhTVVhN7CNp0ntbZozqLZMQj6utHmuFuHFndzIbdKLIQKMGF5llpGd6DSAtjMozJcdZjTFX/rLqPo7mZ9UieihZRM5hUWB8RHaPZkPZCZPHgAu84usg9x9oce/s+9izlMuOgjYHooJB65I4IVyr45qrXL13xfG0VnhnVWSaqEbgSrGdXF/a3PG+banOy57h9ZpoTnbbM5YZuBzJTZ9IMkbpWXeB0CuHG8DiR17dEUNS1fKx6CPVgBp/ljKR+QOn/86LXf/7ABZ7QSNnpQd6tY9UmHdYet+qerhhRYxF74/YYiZj8EpVkhDKjU0Vuzyp+aq/j526b4W1zmdgNoFVQtfo4fH1y0nchTuFFcNlbvlkxoFREjUStd1GRunrrmmJaIHJ9reL081f1uVMDTj1bcO6lgutXCobViPVwHYPF2QwxFiM5gq17lKwSN0/xaD0mTrYKkpZgxpisRENdFLTG3Xi4udSZkKB1N2mIgaiBoIGoSlBPS6eY60wxO11w9GDG4T2We+7cycH90xzevyTSc7VnEevGSVyBSs4FzTk7Ur1vI3D/lSFPXBhxdiCgOWSGJVexb8pxqFdxYj7nxFSLEzMdDneQGWPqQ1EUECcQmm5eDNKcdLzhgrff0OlsJZNaIJj6mvn6mkUjqNabyuNrXn/v1CXOGGE5WAaVYWMUGXrP9byNVyGqUPpI9M29ahIj1k8Ibg6yWTYNrYzXOdZa5aNHZvnFPRkn90xJDyjLApP16zlldInk9F7nOSR//gJp6n3aRM3ajK/UJrCpPSv3invsUZbXJ1y+elnPnfc8/2yPq9cGnD17lY31yGAQGI48ZSVEJuAmgK2/j2Ro2DZbViwqFtHmQZlGEQ1IjMQYkOhpWcgzw0wvp9s2zE7lHDywg507Fzh8oOTQsZy5xVlZ3NvDbk8kRN/UQjKqILy8EXhq1ejX+yV/uFHw2LiEwQbOwtxMmyOzHe6cznlnT7knFw53WrKzWz/Mpo4FYlMBB9XaNelnFR7IsFhM/btKHTLExu2XN/L2jZs2oLy+iVuPpKvrITFWmMyBySEaYlBGAa5XsOKjbmikiJFClWtFydVhxVBr8Yxj5LJbZKMfGQ1GjHxkHIX1KKwMK4JX2D3HjywGfm1/mx9fzOp0QkXTJhMge6sLhCbKF3llyMK2C20mTR1ct3wDs5Vtqvu0KgxrG8JgGLl2fUMvvLzBYDShvyGsrQjLy8sMBhNCqNet9xFfBXy0iGS0ckOeG5xVcifMTE+xe9cOWvMDOvORmV6bg3vnWJzpylTbMj/dFB8ZNoWgDj46CnWUYulLxfXhqj45Vh68Fnl0ueLpjRZr45wFAifaI+7Z2eVk13LbYpelxZyFPMqM1JkvMOBhaMZ4qWhjcVjQDBFLECgUWr4uQW3GotqUi0JztZzIGzuWLYZ6oDdSG48miyRERD0DKamoH0raElsnB5rNsELIbsyVuWnF10cl+EBVFUyoWMPqC5Xl2XHg8kRZvgJPrqyxHiPvWcz5xUPzvGu+LV0jVDaSW/O67g9vgkB0qwv4RgVUtnnJFcioEYKr89qxbmrUSH0KzwwxJmuGObubNo8E6uzU5vuLsY42a23WEzWMBWMUIzQu2mtd2kigRGMgSNb0KHm8KhteeG4j6BND5VTfcWWjgBiY68ChBcfhtuHEbIcjXSszUW7MhIsRYv08QTU5aloEEYrmS9qqmNB8rYXKwAihGyDbDN43g13R5vyKkuEwb6wJuXGN5ZUPRxDAbm/9ksaghbqeVNcemzfVxHcRwWO2mhxzRhhqK2oxdd1p+/31EI3yzMDrty4usxEybt/Z5d6dbZmXEcLrOxz7LX1gauulq24vcTR1Dvme77xuBfQ3eha2vo+89loR3dbm/10b+rd97zemv+4tjd7kHm9vXNU32kL+IAnkTy2g73QBXsfVGV9Rmd82uAB5ZdU/8WcWUZ0Uq1t13shBjekZhYnEd8CkS5BIJIEkEkkgiUQSSCKRBJJIJIEkEkkgiUQSSCKRBJJIJIEkEokkkEQiCSSRSAJJJJJAEokkkEQiCSSRSAJJJJJAEokkkEQiCSSRSCSBJBJJIIlEEkgikQSSSCSBJBJJIIlEEkgikQSSSCSBJBKJJJBEIgkkkUgCSSSSQBKJJJBEIgkkkUgCSSSSQBKJJJBEIgkkkUgkgSQSSSCJRBJIIpEEkkgkgSQSSSCJRBJIIpEEkkgkgSQSiSSQRCIJJJFIAkkkkkASiSSQRCIJJJFIAkkkkkASiSSQRCIJJJFIJIEkEkkgiUQSSCKRBJJIJIEkEkkgiUQSSCKRBJJIJIEkEokkkEQiCSSRSAJJJN4A/n/yVNb2neU6QwAAAABJRU5ErkJggg==') no-repeat center center; background-size:contain; flex-shrink:0; }
+.header-text-group { display:flex; flex-direction:column; }
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-left h1 { color:white; font-size:1.7rem; font-weight:900; letter-spacing:-0.5px; text-shadow:0 2px 8px rgba(0,0,0,0.2); }
+.header-left p  { color:rgba(255,255,255,0.9); font-size:0.88rem; margin-top:3px; font-weight:500; text-shadow:0 1px 4px rgba(0,0,0,0.15); }
+.header-right { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
+.stat-pill { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:7px 16px; color:white; font-size:0.82rem; font-weight:600; }
+.stat-pill span { opacity:0.75; font-weight:400; }
+
+/* STATS */
+.stats-row { max-width:1000px; margin:0 auto; padding:16px 24px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.stat-card { background:white; border-radius:16px; padding:20px 24px; box-shadow:0 4px 24px rgba(27,58,92,0.12); display:flex; align-items:center; gap:16px; }
+.stat-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+.stat-icon.blue { background:linear-gradient(135deg,#dbeafe,#bfdbfe); }
+.stat-icon.green  { background:linear-gradient(135deg,#d1fae5,#a7f3d0); }
+.stat-icon.orange { background:linear-gradient(135deg,#ffedd5,#fed7aa); }
+.stat-info p  { font-size:0.78rem; color:#9ca3af; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; }
+.stat-info h3 { font-size:1.9rem; font-weight:900; color:#0f2137; line-height:1; margin-top:2px; }
+
+/* CONTAINER */
+.container { max-width:1000px; margin:0 auto; padding:0 24px 40px; }
+
+/* SCAN CARD */
+.scan-card { background:linear-gradient(135deg,#1b3a5c,#2563a8); border-radius:20px; padding:36px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden; box-shadow:0 8px 32px rgba(27,58,92,0.3); }
+.scan-card::before { content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; background:rgba(255,255,255,0.07); border-radius:50%; }
+.scan-card::after  { content:''; position:absolute; bottom:-50px; left:-20px; width:140px; height:140px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.scan-card-inner { position:relative; z-index:1; }
+.scan-card h2 { color:rgba(255,255,255,0.8); font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; margin-bottom:12px; }
+.scan-pulse { display:inline-flex; align-items:center; justify-content:center; width:72px; height:72px; background:rgba(255,255,255,0.15); border-radius:50%; font-size:2rem; margin-bottom:20px; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.3);} 50%{box-shadow:0 0 0 16px rgba(255,255,255,0);} }
+#barcodeInput { width:100%; max-width:440px; padding:16px 22px; font-size:1.1rem; font-family:'Inter',sans-serif; font-weight:600; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.3); border-radius:12px; text-align:center; outline:none; color:white; letter-spacing:3px; transition:all 0.2s; }
+#barcodeInput::placeholder { color:rgba(255,255,255,0.5); letter-spacing:1px; font-size:0.9rem; font-weight:400; }
+#barcodeInput:focus { border-color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.2); }
+.scan-hint { color:rgba(255,255,255,0.55); font-size:0.8rem; margin-top:10px; font-weight:500; }
+.btn-camera { margin-top:18px; padding:14px 32px; background:white; color:#1b3a5c; border:none; border-radius:12px; font-size:1rem; font-weight:800; font-family:'Inter',sans-serif; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+.btn-camera:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.2); }
+
+/* CAMERA OVERLAY */
+#cameraOverlay { display:none; position:fixed; inset:0; background:#000; z-index:500; flex-direction:column; align-items:center; justify-content:center; }
+#cameraOverlay.active { display:flex; }
+#cameraVideo { width:100%; max-width:480px; display:block; }
+.camera-frame { position:absolute; width:220px; height:220px; border:3px solid #60a5fa; border-radius:16px; box-shadow:0 0 0 9999px rgba(0,0,0,0.55); pointer-events:none; }
+.camera-corner { position:absolute; width:28px; height:28px; border-color:white; border-style:solid; }
+.camera-corner.tl { top:-3px; left:-3px; border-width:4px 0 0 4px; border-radius:4px 0 0 0; }
+.camera-corner.br { bottom:-3px; right:-3px; border-width:0 4px 4px 0; border-radius:0 0 4px 0; }
+.camera-hint { position:absolute; bottom:130px; color:rgba(255,255,255,0.8); font-size:0.9rem; font-weight:600; text-align:center; padding:0 24px; }
+.camera-status { position:absolute; top:60px; background:rgba(0,0,0,0.6); color:#60a5fa; font-size:0.8rem; font-weight:700; padding:6px 16px; border-radius:20px; letter-spacing:1px; }
+.take-preset-btn { flex:1; padding:10px 6px; background:#f3f4f6; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.88rem; font-weight:700; font-family:Inter,sans-serif; cursor:pointer; color:#374151; transition:all 0.15s; }
+.take-preset-btn.active { background:linear-gradient(135deg,#1b3a5c,#2563a8); color:white; border-color:#1b3a5c; }
+.take-preset-btn:hover { border-color:#1b3a5c; color:#1b3a5c; }
+.btn-close-camera { position:absolute; bottom:48px; padding:14px 40px; background:rgba(255,255,255,0.12); color:white; border:1.5px solid rgba(255,255,255,0.25); border-radius:40px; font-size:1rem; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; }
+
+/* TOOLBAR */
+.toolbar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.btn-tool { display:flex; align-items:center; gap:7px; padding:10px 18px; background:white; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.85rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; color:#374151; transition:all 0.15s; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.btn-tool:hover       { border-color:#1b3a5c; color:#1b3a5c; background:#eff6ff; transform:translateY(-1px); }
+.btn-tool.blue:hover  { border-color:#3b82f6; color:#3b82f6; background:#eff6ff; }
+.btn-tool.red:hover   { border-color:#ef4444; color:#ef4444; background:#fff5f5; }
+.btn-tool.green:hover { border-color:#10b981; color:#10b981; background:#f0fdf4; }
+.btn-tool-menu { display:flex; align-items:center; gap:7px; padding:10px 18px; background:white; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.85rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; color:#374151; transition:all 0.15s; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.btn-tool-menu:hover { border-color:#1b3a5c; color:#1b3a5c; background:#eff6ff; }
+
+/* CATEGORY FILTERS */
+.cat-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.cat-btn { padding:7px 16px; border-radius:20px; border:1.5px solid #e5e7eb; background:white; font-size:0.8rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; color:#6b7280; transition:all 0.15s; }
+.cat-btn:hover  { border-color:#1b3a5c; color:#1b3a5c; }
+.cat-btn.active { background:#1b3a5c; border-color:#1b3a5c; color:white; }
+
+/* STOCK CARD */
+.stock-card { background:white; border-radius:20px; box-shadow:0 4px 24px rgba(27,58,92,0.08); overflow:hidden; }
+.stock-header { padding:22px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #f3f4f6; background:linear-gradient(to right,#fafbff,white); flex-wrap:wrap; gap:12px; }
+.stock-header-left h2 { font-size:1rem; font-weight:800; color:#0f2137; }
+.stock-header-left p  { font-size:0.78rem; color:#9ca3af; margin-top:2px; }
+.search-wrap { position:relative; }
+.search-wrap::before { content:'🔍'; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:0.85rem; pointer-events:none; }
+.search-box { padding:9px 14px 9px 34px; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.88rem; font-family:'Inter',sans-serif; outline:none; width:220px; transition:border-color 0.2s; color:#374151; }
+.search-box:focus { border-color:#1b3a5c; }
+
+table { width:100%; border-collapse:collapse; }
+thead { background:#f9fafb; }
+th { padding:11px 20px; text-align:left; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9ca3af; border-bottom:1px solid #f3f4f6; }
+td { padding:15px 20px; border-bottom:1px solid #f9fafb; font-size:0.9rem; color:#374151; }
+tr:last-child td { border-bottom:none; }
+tbody tr { transition:background 0.1s; }
+tbody tr:hover td { background:#eff6ff; }
+
+.item-name-cell { font-weight:700; color:#0f2137; font-size:0.93rem; }
+.barcode-cell { font-family:monospace; font-size:0.8rem; color:#9ca3af; background:#f9fafb; padding:3px 8px; border-radius:5px; display:inline-block; }
+.qty-value { font-size:1.2rem; font-weight:900; color:#0f2137; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+.badge-ok   { background:#d1fae5; color:#065f46; }
+.badge-low  { background:#ffedd5; color:#9a3412; }
+.badge-zero { background:#fee2e2; color:#991b1b; }
+.cat-badge  { display:inline-block; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:700; background:#dbeafe; color:#1b3a5c; margin-top:3px; }
+.cat-group-header td { padding:10px 20px 6px; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:#1b3a5c; background:#eff6ff; border-bottom:1px solid #dbeafe; }
+
+.photo-cell { width:64px; height:64px; border-radius:12px; overflow:hidden; cursor:pointer; position:relative; flex-shrink:0; background:#f3f4f6; border:2px dashed #e5e7eb; display:flex; align-items:center; justify-content:center; transition:border-color 0.2s,background 0.2s; }
+.photo-cell:hover { border-color:#1b3a5c; background:#eff6ff; }
+.photo-cell img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-cell .photo-placeholder { font-size:1.4rem; opacity:0.4; }
+.photo-cell .photo-overlay { position:absolute; inset:0; background:rgba(27,58,92,0.7); color:white; font-size:0.65rem; font-weight:700; display:none; align-items:center; justify-content:center; text-align:center; border-radius:10px; }
+.photo-cell:hover .photo-overlay { display:flex; }
+.qr-cell canvas, .qr-cell img { width:56px !important; height:56px !important; display:block; border-radius:4px; }
+
+.btn-row-action { background:none; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:all 0.15s; color:#d1d5db; }
+.btn-row-action:hover.edit { background:#dbeafe; color:#1b3a5c; }
+.btn-row-action:hover.del  { background:#fee2e2; color:#dc2626; }
+
+.empty-state { text-align:center; padding:70px 20px; color:#d1d5db; }
+.empty-state .empty-icon { font-size:3rem; margin-bottom:12px; }
+.empty-state h3 { font-size:1rem; font-weight:700; color:#9ca3af; margin-bottom:6px; }
+.empty-state p { font-size:0.85rem; }
+
+/* FULLSCREEN OVERLAYS */
+.fullscreen-overlay { display:none; position:fixed; inset:0; z-index:200; flex-direction:column; align-items:center; justify-content:center; animation:fadeIn 0.2s ease; }
+.fullscreen-overlay.active { display:flex; }
+@keyframes fadeIn { from{opacity:0;transform:scale(0.97);} to{opacity:1;transform:scale(1);} }
+
+#stepAction { background:linear-gradient(160deg,#0f2137 0%,#312e81 60%,#1b3a5c 100%); }
+.fs-cancel-btn { position:absolute; top:24px; right:28px; background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:9px 18px; font-size:0.85rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; }
+.fs-cancel-btn:hover { background:rgba(255,255,255,0.18); color:white; }
+.fs-item-label { color:rgba(255,255,255,0.45); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:3px; margin-bottom:12px; }
+.fs-item-name { color:white; font-size:2.4rem; font-weight:900; text-align:center; padding:0 32px; margin-bottom:10px; line-height:1.15; }
+.fs-current-qty { color:rgba(255,255,255,0.4); font-size:0.95rem; margin-bottom:60px; }
+.fs-current-qty span { color:rgba(255,255,255,0.85); font-weight:800; }
+.fs-question { color:rgba(255,255,255,0.6); font-size:1rem; margin-bottom:24px; font-weight:500; }
+.fs-action-buttons { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; padding:0 24px; }
+.fs-btn-add,.fs-btn-sub { width:210px; height:130px; border:none; border-radius:20px; font-family:'Inter',sans-serif; font-weight:900; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; }
+.fs-btn-add { background:linear-gradient(135deg,#059669,#10b981); color:white; box-shadow:0 8px 32px rgba(16,185,129,0.35); }
+.fs-btn-add:hover { transform:translateY(-4px) scale(1.02); }
+.fs-btn-sub { background:linear-gradient(135deg,#dc2626,#ef4444); color:white; box-shadow:0 8px 32px rgba(239,68,68,0.35); }
+.fs-btn-sub:hover { transform:translateY(-4px) scale(1.02); }
+.fs-btn-emoji { font-size:2rem; }
+.fs-btn-label { font-size:0.95rem; font-weight:700; opacity:0.9; }
+
+#stepQty { background:#f5f7ff; }
+.fs-action-header { font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:3px; margin-bottom:10px; padding:6px 16px; border-radius:20px; }
+.fs-action-header.add { background:#d1fae5; color:#065f46; }
+.fs-action-header.sub { background:#fee2e2; color:#991b1b; }
+.fs-qty-item-name { font-size:1.8rem; font-weight:900; color:#0f2137; margin-bottom:6px; text-align:center; padding:0 32px; }
+.fs-qty-current { color:#9ca3af; font-size:0.9rem; margin-bottom:52px; }
+.fs-qty-label { font-size:0.85rem; color:#9ca3af; margin-bottom:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+.fs-qty-input { font-size:5.5rem; font-weight:900; font-family:'Inter',sans-serif; color:#0f2137; border:none; border-bottom:4px solid #1b3a5c; background:transparent; text-align:center; width:260px; outline:none; margin-bottom:52px; padding-bottom:8px; }
+.fs-confirm-btn { width:300px; padding:20px; font-size:1.1rem; font-weight:800; font-family:'Inter',sans-serif; color:white; border:none; border-radius:16px; cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; margin-bottom:16px; }
+.fs-confirm-btn.add { background:linear-gradient(135deg,#059669,#10b981); box-shadow:0 8px 24px rgba(16,185,129,0.35); }
+.fs-confirm-btn.add:hover { transform:translateY(-2px); }
+.fs-confirm-btn.sub { background:linear-gradient(135deg,#dc2626,#ef4444); box-shadow:0 8px 24px rgba(239,68,68,0.35); }
+.fs-confirm-btn.sub:hover { transform:translateY(-2px); }
+.fs-back-btn { background:none; border:none; color:#9ca3af; font-size:0.88rem; font-family:'Inter',sans-serif; font-weight:600; cursor:pointer; padding:8px 16px; border-radius:8px; }
+.fs-back-btn:hover { color:#374151; background:#f3f4f6; }
+
+/* MODALS */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,33,55,0.5); z-index:300; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-overlay.active { display:flex; }
+.modal { background:white; border-radius:24px; padding:36px; width:90%; max-width:460px; box-shadow:0 32px 80px rgba(15,33,55,0.25); animation:popIn 0.2s ease; max-height:90vh; overflow-y:auto; }
+@keyframes popIn { from{transform:scale(0.92) translateY(10px);opacity:0;} to{transform:scale(1) translateY(0);opacity:1;} }
+.modal-icon { font-size:2rem; margin-bottom:12px; }
+.modal h2 { font-size:1.3rem; font-weight:800; color:#0f2137; margin-bottom:4px; }
+.modal > p { color:#9ca3af; font-size:0.88rem; margin-bottom:24px; }
+.form-field { margin-bottom:16px; }
+.form-field label { display:block; font-size:0.8rem; font-weight:700; color:#6b7280; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+.form-field input { width:100%; padding:12px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.95rem; font-family:'Inter',sans-serif; outline:none; color:#0f2137; transition:border-color 0.2s; }
+.form-field input:focus { border-color:#1b3a5c; }
+.form-field select { width:100%; padding:12px 14px; border:1.5px solid #e5e7eb; border-radius:10px; font-size:0.95rem; font-family:'Inter',sans-serif; outline:none; color:#0f2137; background:white; transition:border-color 0.2s; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; cursor:pointer; }
+.form-field select:focus { border-color:#1b3a5c; }
+.barcode-display { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:11px 14px; font-family:monospace; font-size:0.95rem; letter-spacing:2px; color:#1b3a5c; font-weight:700; }
+.modal-actions { display:flex; gap:10px; margin-top:24px; }
+.btn-confirm { flex:2; padding:14px; background:linear-gradient(135deg,#1b3a5c,#2563a8); color:white; border:none; border-radius:12px; font-size:0.95rem; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(27,58,92,0.3); }
+.btn-confirm:hover { transform:translateY(-1px); }
+.btn-cancel { flex:1; padding:14px; background:#f3f4f6; color:#6b7280; border:none; border-radius:12px; font-size:0.95rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; }
+.btn-cancel:hover { background:#e5e7eb; }
+
+/* SYNC PILL */
+.sync-pill { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:7px 14px; color:white; font-size:0.8rem; font-weight:600; cursor:pointer; transition:background 0.2s; }
+.sync-pill:hover { background:rgba(255,255,255,0.25); }
+.sync-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.sync-dot.grey   { background:#9ca3af; }
+.sync-dot.green  { background:#34d399; box-shadow:0 0 6px #34d399; }
+.sync-dot.yellow { background:#fbbf24; animation:blink 1s infinite; }
+.sync-dot.red    { background:#f87171; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* TOAST */
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(100px); background:#0f2137; color:white; padding:13px 26px; border-radius:40px; font-size:0.88rem; font-weight:600; z-index:999; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); white-space:nowrap; box-shadow:0 8px 32px rgba(15,33,55,0.25); }
+.toast.show  { transform:translateX(-50%) translateY(0); }
+.toast.green { background:linear-gradient(135deg,#059669,#10b981); }
+.toast.red   { background:linear-gradient(135deg,#dc2626,#ef4444); }
+
+/* MOBILE */
+@media(max-width:640px){
+  .header-inner { flex-direction:column; align-items:flex-start; padding:20px 16px 18px; }
+  .header-left h1 { font-size:1.4rem; }
+  .header-logo { width:52px; height:52px; }
+  .header-right { display:flex; flex-wrap:wrap; gap:8px; }
+  .stat-pill { display:none; }
+  .stats-row { grid-template-columns:1fr 1fr; gap:10px; padding:12px 12px 0; }
+  .stats-row .stat-card:last-child { grid-column:1/-1; }
+  .stat-card { padding:14px 16px; }
+  .stat-icon { width:42px; height:42px; font-size:1.2rem; }
+  .stat-info h3 { font-size:1.5rem; }
+  .container { padding:0 12px 32px; }
+  .scan-card { padding:24px 16px; }
+  #barcodeInput { font-size:1rem; padding:14px 16px; }
+  .toolbar { gap:8px; }
+  .btn-tool { padding:12px 14px; font-size:0.82rem; flex:1 1 calc(50% - 8px); justify-content:center; }
+  .stock-header { flex-direction:column; align-items:flex-start; gap:12px; padding:16px; }
+  .search-box { width:100%; }
+  .search-wrap { width:100%; }
+  table thead { display:none; }
+  table, tbody { display:block; width:100%; }
+  tbody tr { display:grid; grid-template-columns:52px 1fr 48px; gap:3px 10px; padding:12px 14px; border-bottom:1px solid #f3f4f6; align-items:start; }
+  tbody tr td { display:block; padding:0; border:none; }
+  tbody tr td.td-photo  { grid-column:1; grid-row:1/4; align-self:center; }
+  tbody tr td.td-qr     { display:none; }
+  tbody tr td.td-name   { grid-column:2; grid-row:1; font-size:0.93rem; }
+  tbody tr td.td-status { grid-column:2; grid-row:2; }
+  tbody tr td.td-id     { grid-column:2; grid-row:3; }
+  tbody tr td.td-qty    { display:none; }
+  tbody tr td.td-low, tbody tr td.td-updated { display:none; }
+  tbody tr td.td-actions { grid-column:3; grid-row:1/4; display:flex; flex-direction:column; gap:8px; align-items:center; justify-content:center; }
+  .btn-row-action { width:36px; height:36px; font-size:1rem; }
+  .photo-cell { width:52px; height:52px; }
+  .fs-item-name { font-size:1.7rem; }
+  .fs-qty-item-name { font-size:1.4rem; }
+  .fs-btn-add,.fs-btn-sub { width:148px; height:110px; }
+  .fs-qty-input { font-size:4rem; width:200px; }
+  .fs-confirm-btn { width:90%; }
+  .modal { padding:24px 20px; }
+}
+
+/* CELEBRATION OVERLAY */
+#celebrationOverlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; align-items:center; justify-content:center; flex-direction:column; }
+#celebrationOverlay.active { display:flex; }
+.celeb-emoji { font-size:6rem; animation:celebPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+.celeb-message { font-size:1.3rem; font-weight:900; color:white; text-shadow:0 2px 12px rgba(0,0,0,0.4); margin-top:16px; animation:celebFadeUp 0.4s ease 0.1s both; text-align:center; padding:0 24px; }
+@keyframes celebPop { 0%{transform:scale(0) rotate(-20deg);opacity:0;} 70%{transform:scale(1.2) rotate(5deg);} 100%{transform:scale(1) rotate(0deg);opacity:1;} }
+@keyframes celebFadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+
+/* CONFETTI PIECES */
+.confetti-piece { position:fixed; width:10px; height:10px; border-radius:2px; pointer-events:none; animation:confettiFall linear forwards; }
+@keyframes confettiFall { 0%{opacity:1;} 80%{opacity:1;} 100%{transform:translateY(100vh) rotate(720deg);opacity:0;} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">📦</div>
+    <h1>Victorian Projects</h1>
+    <p style="color:#9ca3af;font-size:0.88rem;margin-bottom:20px;">Stock Manager</p>
+    <div id="staffLoginForm">
+      <input type="text" class="login-input" id="staffNameInput" placeholder="Your name" style="letter-spacing:0;margin-bottom:10px;" onkeydown="if(event.key==='Enter')document.getElementById('staffPinInput').focus()" autocomplete="off" />
+      <input type="password" class="login-input" id="staffPinInput" placeholder="PIN" onkeydown="if(event.key==='Enter')doStaffLogin()" />
+      <button class="login-btn" onclick="doStaffLogin()" style="margin-top:12px;">🔑 Login</button>
+      <div style="margin-top:16px;"><a href="#" onclick="showAdminLogin();return false;" style="color:#9ca3af;font-size:0.8rem;text-decoration:none;">Admin login →</a></div>
+    </div>
+    <div id="adminLoginForm" style="display:none;">
+      <input type="password" class="login-input" id="loginInput" placeholder="Admin password" onkeydown="if(event.key==='Enter')doAdminLogin()" />
+      <button class="login-btn" onclick="doAdminLogin()" style="margin-top:12px;">🔐 Admin Login</button>
+      <div style="margin-top:16px;"><a href="#" onclick="showStaffLogin();return false;" style="color:#9ca3af;font-size:0.8rem;text-decoration:none;">← Staff login</a></div>
+    </div>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-logo"></div>
+      <div class="header-text-group">
+        <h1>Victorian Projects</h1>
+        <p>QR Code Stock Manager</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="stat-pill" id="pillTotal">— <span>items</span></div>
+      <div class="stat-pill" id="pillLow" style="display:none">⚠ <span id="pillLowCount">0</span> <span>low</span></div>
+      <div class="sync-pill admin-only" id="syncPill" onclick="openSyncModal()" title="Cloud sync status">
+        <span id="syncDot" class="sync-dot grey"></span>
+        <span id="syncLabel">Set up sync</span>
+      </div>
+      <div class="stat-pill" id="currentUserPill" style="display:none;cursor:default;background:rgba(255,255,255,0.25);">👤 <span id="currentUserName"></span></div>
+      <div class="stat-pill" id="logoutPill" onclick="doLogout()" style="display:none;cursor:pointer;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);">↩ Logout</div>
+    </div>
+  </div>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-icon blue">📦</div><div class="stat-info"><p>Total Items</p><h3 id="statTotal">0</h3></div></div>
+  <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><p>In Stock</p><h3 id="statInStock">0</h3></div></div>
+  <div class="stat-card"><div class="stat-icon orange">⚠️</div><div class="stat-info"><p>Low / Out of Stock</p><h3 id="statLow">0</h3></div></div>
+</div>
+
+<div class="container">
+
+  <div class="scan-card">
+    <div class="scan-card-inner">
+      <h2>Ready to Scan QR Code</h2>
+      <div class="scan-pulse">📱</div><br>
+      <input type="text" id="barcodeInput" placeholder="USB scanner — or use camera button below..." autocomplete="off" autofocus />
+      <div class="scan-hint">USB scanner types here automatically · Use button below for phone camera</div>
+      <br>
+      <button class="btn-camera" onclick="openCamera()">📷 Scan with Phone Camera</button>
+    </div>
+  </div>
+
+  <!-- CAMERA OVERLAY -->
+  <div id="cameraOverlay">
+    <div id="html5qr-reader" style="width:100%;height:100%;position:absolute;top:0;left:0;"></div>
+    <canvas id="cameraCanvas" style="display:none"></canvas>
+    <div class="camera-status" id="cameraStatus">SCANNING...</div>
+    <div class="camera-hint">Point at a QR label on your stock item</div>
+    <button class="btn-close-camera" onclick="closeCamera()">✕ Close Camera</button>
+  </div>
+
+  <div id="adminToolbar" class="admin-only" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="btn-tool" onclick="openAddItem()" style="background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border-color:#1b3a5c;font-weight:700;">➕ Add New Item</button>
+    <button class="btn-tool-menu" onclick="toggleToolMenu()" id="toolMenuBtn">⚙️ Tools <span id="toolMenuArrow">▾</span></button>
+    <button class="btn-tool" onclick="openManageUsers()" style="margin-left:auto;">👥 Manage Users</button>
+  </div>
+  <div id="toolMenu" class="admin-only" style="display:none;background:white;border:1.5px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 4px 24px rgba(27,58,92,0.1);">
+    <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Stock Tools</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-tool" onclick="openBulkQty()">📦 Bulk Update Qty</button>
+      <label class="btn-tool" style="cursor:pointer;">📷 Import Photos
+        <input type="file" id="photoPackInput" accept=".json" style="display:none;position:absolute;opacity:0;width:1px;height:1px;" onchange="handlePhotoPack(event)" />
+      </label>
+      <button class="btn-tool" onclick="openBulkCat()">🏷 Bulk Category</button>
+      <button class="btn-tool" onclick="printLabels()">🖨 Print Labels</button>
+      <label class="btn-tool blue" style="cursor:pointer;">
+        ⬆ Import Excel / CSV
+        <input type="file" id="csvImportInput" accept=".csv,.xlsx,.xls" style="display:none;position:absolute;opacity:0;width:1px;height:1px;" onchange="handleImport(event)" />
+      </label>
+      <button class="btn-tool green" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+    <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin:16px 0 12px;">Settings & Sync</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-tool" onclick="openSyncModal()">☁️ Cloud Sync</button>
+      <button class="btn-tool" onclick="openEmailAlertModal()">🔔 Email Alerts</button>
+      <button class="btn-tool" onclick="clearAllPhotos()">🖼 Clear All Photos</button>
+      <button class="btn-tool red" onclick="clearAll()">🗑 Clear All Data</button>
+    </div>
+  </div>
+
+  <div class="cat-filters" id="catFilters"></div>
+
+  <div class="stock-card">
+    <div class="stock-header">
+      <div class="stock-header-left"><h2>Stock Levels</h2><p id="tableSubtitle">All items</p></div>
+      <div class="search-wrap"><input type="text" class="search-box" id="searchBox" placeholder="Search..." oninput="renderTable()" /></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th><th>QR</th><th>Item Name</th><th>QR Code ID</th>
+          <th>Qty</th><th>Low Alert</th><th>Status</th><th>Last Updated</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="stockBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="empty-icon">📭</div>
+      <h3>No items yet</h3>
+      <p>Import your Excel file or add your first item to get started.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="fullscreen-overlay" id="stepAction">
+  <button class="fs-cancel-btn" onclick="closeScanFlow()">✕ Cancel</button>
+  <div class="fs-item-label">Item Scanned</div>
+  <div class="fs-item-name" id="fsItemName"></div>
+  <div class="fs-current-qty">Current stock: <span id="fsCurrentQty"></span> units</div>
+  <div class="fs-question">What are you doing with this stock?</div>
+  <div class="fs-action-buttons">
+    <button class="fs-btn-add" onclick="goToQty('add')"><span class="fs-btn-emoji">📥</span><span class="fs-btn-label">Adding Stock</span></button>
+    <button class="fs-btn-sub" onclick="goToQty('subtract')"><span class="fs-btn-emoji">📤</span><span class="fs-btn-label">Taking Out Stock</span></button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="fullscreen-overlay" id="stepQty">
+  <button class="fs-cancel-btn" style="color:#9ca3af;background:#f3f4f6;border-color:#e5e7eb;" onclick="closeScanFlow()">✕ Cancel</button>
+  <div class="fs-action-header" id="fsActionHeader"></div>
+  <div class="fs-qty-item-name" id="fsQtyItemName"></div>
+  <div class="fs-qty-current" id="fsQtyCurrent"></div>
+  <div class="fs-qty-label">How many?</div>
+  <input type="number" class="fs-qty-input" id="fsQtyInput" value="1" min="1" inputmode="numeric" />
+  <button class="fs-confirm-btn" id="fsConfirmBtn" onclick="confirmAction()"></button>
+  <button class="fs-back-btn" onclick="goBack()">← Go Back</button>
+</div>
+
+<!-- NEW ITEM MODAL -->
+<div class="modal-overlay" id="newItemModal">
+  <div class="modal">
+    <div class="modal-icon">🆕</div>
+    <h2>New Item</h2>
+    <p>This QR code isn't registered yet. Fill in the details below.</p>
+    <div class="form-field"><label>QR Code ID</label><div class="barcode-display" id="newItemBarcode"></div></div>
+    <div class="form-field"><label>Item Name</label><input type="text" id="newItemName" placeholder="e.g. 600mm Refrigerant Pipe" /></div>
+    <div class="form-field"><label>Category</label>
+      <select id="newItemCategory">
+        <option value="">— Select category —</option>
+        <option>AC Materials</option><option>Electrical</option><option>Grilles</option>
+        <option>Nexcon</option><option>PVC</option><option>Screws and Consumables</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Initial Quantity</label><input type="number" id="newItemQty" placeholder="0" min="0" value="0" /></div>
+    <div class="form-field"><label>Low Stock Alert (optional)</label><input type="number" id="newItemLow" placeholder="e.g. 5" min="0" value="" /></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveNewItem()">✅ Save Item</button>
+      <button class="btn-cancel" onclick="closeModal('newItemModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ITEM MODAL -->
+<div class="modal-overlay" id="editItemModal">
+  <div class="modal">
+    <div class="modal-icon">✏️</div>
+    <h2>Edit Item</h2>
+    <p>Update details or adjust the stock quantity.</p>
+    <input type="hidden" id="editItemKey" />
+    <div class="form-field"><label>Item Name</label><input type="text" id="editItemName" /></div>
+    <div class="form-field"><label>Category</label>
+      <select id="editItemCategory">
+        <option value="">— No category —</option>
+        <option>AC Materials</option><option>Electrical</option><option>Grilles</option>
+        <option>Nexcon</option><option>PVC</option><option>Screws and Consumables</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Quantity</label><input type="number" id="editItemQty" min="0" /></div>
+    <div class="form-field"><label>Low Stock Alert (optional)</label><input type="number" id="editItemLow" placeholder="e.g. 5" min="0" /></div>
+    <div id="editPhotoRow" style="display:none;margin-bottom:12px;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;">
+      <img id="editPhotoPreview" src="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" />
+      <div style="flex:1;font-size:0.85rem;font-weight:600;color:#991b1b;">Photo assigned</div>
+      <button onclick="removeItemPhoto()" style="background:none;border:none;color:#ef4444;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Inter,sans-serif;">🗑️ Remove</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveEditItem()">✅ Save Changes</button>
+      <button class="btn-cancel" onclick="closeModal('editItemModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL ALERT MODAL -->
+<div class="modal-overlay" id="emailAlertModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-icon">📧</div>
+    <h2>Low Stock Email Alerts</h2>
+    <p>Get an automatic email when any item drops to 5 or below.</p>
+    <div class="form-field">
+      <label>Send alerts to</label>
+      <input type="email" id="alertEmail" placeholder="joy@victorianprojects.com.au" value="joy@victorianprojects.com.au" />
+    </div>
+    <div class="form-field">
+      <label>Alert when stock reaches</label>
+      <input type="number" id="alertThreshold" value="5" min="1" max="100" />
+    </div>
+    <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:0.82rem;font-weight:700;color:#1b3a5c;margin-bottom:8px;">📋 One-time EmailJS setup (free):</div>
+      <div style="font-size:0.8rem;color:#2563a8;line-height:1.9;">
+        1. Go to <strong>emailjs.com</strong> → Sign Up (free)<br>
+        2. Click <strong>Add New Service</strong> → choose <strong>Gmail</strong> → connect your Google account<br>
+        3. Copy your <strong>Service ID</strong> (e.g. service_xxxxxx)<br>
+        4. Click <strong>Email Templates → Create New Template</strong><br>
+        5. Set Subject: <code>⚠️ Low Stock Alert — Victorian Projects</code><br>
+        6. Set Body: <code>{{message}}</code> → Save → copy <strong>Template ID</strong><br>
+        7. Go to <strong>Account → General</strong> → copy <strong>Public Key</strong><br>
+        8. Paste all three below
+      </div>
+    </div>
+    <div class="form-field"><label>EmailJS Service ID</label><input type="text" id="ejServiceId" placeholder="service_xxxxxxx" /></div>
+    <div class="form-field"><label>EmailJS Template ID</label><input type="text" id="ejTemplateId" placeholder="template_xxxxxxx" /></div>
+    <div class="form-field"><label>EmailJS Public Key</label><input type="text" id="ejPublicKey" placeholder="xxxxxxxxxxxxxxxxxxxxxx" /></div>
+    <div id="emailAlertStatus" style="display:none;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveEmailAlert()">✅ Save & Test Alert</button>
+      <button class="btn-cancel" onclick="closeModal('emailAlertModal')">Cancel</button>
+    </div>
+    <div style="margin-top:12px;text-align:center;">
+      <button onclick="removeEmailAlert()" style="background:none;border:none;color:#ef4444;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">✕ Remove email alerts</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK CATEGORY MODAL -->
+<div class="modal-overlay" id="bulkCatModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-icon">🏷</div>
+    <h2>Bulk Assign Categories</h2>
+    <p>Select items and assign them a category all at once.</p>
+    <div class="form-field">
+      <label>Category to assign</label>
+      <select id="bulkCatSelect">
+        <option value="">— Select category —</option>
+        <option>AC Materials</option><option>Electrical</option><option>Grilles</option>
+        <option>Nexcon</option><option>PVC</option><option>Screws and Consumables</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <button onclick="bulkSelectAll()" style="padding:6px 14px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Select All</button>
+      <button onclick="bulkSelectNone()" style="padding:6px 14px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Clear All</button>
+      <button onclick="bulkSelectUncategorised()" style="padding:6px 14px;background:#dbeafe;border:1.5px solid #bfdbfe;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;color:#1b3a5c;">Uncategorised only</button>
+    </div>
+    <div id="bulkItemList" style="max-height:300px;overflow-y:auto;border:1.5px solid #e5e7eb;border-radius:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="applyBulkCat()">✅ Apply Category</button>
+      <button class="btn-cancel" onclick="closeModal('bulkCatModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK QTY MODAL -->
+<div class="modal-overlay" id="bulkQtyModal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-icon">📦</div>
+    <h2>Bulk Update Quantities</h2>
+    <p>Scan items or type their ID. Set new quantities, then confirm all at once.</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input id="bulkQtyInput" type="text" placeholder="Scan or type item ID / barcode..." style="flex:1;padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter') bulkQtyScan()" />
+      <button onclick="openBulkQtyCamera()" style="padding:12px 14px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:10px;font-size:1.1rem;cursor:pointer;" title="Scan with camera">📷</button>
+      <button onclick="bulkQtyScan()" style="padding:12px 18px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;font-size:0.9rem;">Add</button>
+    </div>
+    <div id="bulkQtyList" style="max-height:320px;overflow-y:auto;border:1.5px solid #e5e7eb;border-radius:12px;margin-bottom:14px;min-height:80px;">
+      <div id="bulkQtyEmpty" style="text-align:center;padding:36px;color:#9ca3af;font-size:0.85rem;">Scan an item to get started</div>
+    </div>
+    <div id="bulkQtyCount" style="text-align:right;font-size:0.8rem;color:#1b3a5c;font-weight:700;margin-bottom:10px;display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="applyBulkQty()">✅ Confirm All Changes</button>
+      <button class="btn-cancel" onclick="closeModal('bulkQtyModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <div class="modal-icon">☁️</div>
+    <h2>Cloud Sync Setup</h2>
+    <p>Paste your Firebase Database URL below to sync stock across all devices automatically.</p>
+    <div class="form-field">
+      <label>Firebase Database URL</label>
+      <input type="url" id="fbUrlInput" placeholder="https://your-project-default-rtdb.firebaseio.com" />
+    </div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:8px;">
+      <div style="font-size:0.82rem;font-weight:700;color:#065f46;margin-bottom:8px;">📋 How to get your Firebase URL (2 minutes):</div>
+      <div style="font-size:0.8rem;color:#047857;line-height:1.8;">
+        1. Go to <strong>console.firebase.google.com</strong><br>
+        2. Click <strong>Create a project</strong> → name it "VP Stock"<br>
+        3. Click <strong>Build → Realtime Database → Create database</strong><br>
+        4. Choose <strong>Start in test mode</strong> → Enable<br>
+        5. Copy the URL shown (looks like <em>https://vp-stock-xxxx.firebaseio.com</em>)<br>
+        6. Paste it above and click Save
+      </div>
+    </div>
+    <div id="syncStatus" style="display:none;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveSyncUrl()">☁️ Save & Sync Now</button>
+      <button class="btn-cancel" onclick="closeModal('syncModal')">Cancel</button>
+    </div>
+    <div style="margin-top:12px;text-align:center;">
+      <button onclick="pushToCloud()" style="background:none;border:none;color:#1b3a5c;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">⬆️ Push to cloud</button>
+      &nbsp;·&nbsp;
+      <button onclick="pullFromCloud(true)" style="background:none;border:none;color:#1b3a5c;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">⬇️ Pull from cloud</button>
+      &nbsp;·&nbsp;
+      <button onclick="removeSyncUrl()" style="background:none;border:none;color:#ef4444;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">✕ Remove sync</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'vp_stock_v1';
+const FB_KEY = 'vp_firebase_url';
+const CATEGORIES = ['AC Materials','Electrical','Grilles','Nexcon','PVC','Screws and Consumables'];
+let stock = {};
+let currentBarcode = null;
+let currentAction = 'add';
+let activeCategory = 'All';
+let syncTimer = null;
+
+function getFbUrl() { return localStorage.getItem(FB_KEY)||'https://vp-stock-default-rtdb.firebaseio.com'; }
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  if(dot) { dot.className='sync-dot '+state; }
+  if(lbl) lbl.textContent = label;
+}
+
+function load() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if(r) stock = JSON.parse(r); } catch(e){ stock={}; }
+}
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stock));
+  updateStats();
+  requestAnimationFrame(()=>{ renderCatFilters(); renderTable(); });
+  checkAndSendLowStockEmail();
+}
+
+// CLOUD SYNC
+function pushToCloud(silent=false) {
+  const url = getFbUrl(); if(!url) return;
+  if(!silent) setSyncStatus('yellow','Syncing...');
+  const stockToSave = {};
+  Object.keys(stock).forEach(k=>{ const item={...stock[k]}; delete item.photo; stockToSave[k]=item; });
+  const count = Object.keys(stockToSave).length;
+  if(count === 0){ if(!silent){ setSyncStatus('red','Nothing to push'); showToast('No items to push','red'); } return; }
+  const users = JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+  const payload = { vp_stock: stockToSave, vp_users: users };
+  fetch(url+'/vp_data.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error(t||r.status); }); setSyncStatus('green','Synced ✓'); if(!silent) showToast('✅ '+count+' items pushed to cloud','green'); })
+    .catch(e=>{ setSyncStatus('red','Sync error'); if(!silent) showToast('Push failed: '+e.message,'red'); });
+}
+
+function pullFromCloud(manual) {
+  const url = getFbUrl(); if(!url){ if(manual) showToast('No sync URL set — tap ☁️ Cloud Sync to set it up','red'); return; }
+  setSyncStatus('yellow','Pulling...');
+  fetch(url+'/vp_data.json')
+    .then(r=>{ if(!r.ok) throw new Error(); return r.json(); })
+    .then(payload=>{
+      // Support both new combined format and old vp_stock-only format
+      const data = (payload && payload.vp_stock) ? payload.vp_stock : payload;
+      const remoteUsers = (payload && payload.vp_users) ? payload.vp_users : null;
+      if(data && typeof data==='object'){
+        Object.keys(data).forEach(k=>{
+          const remote=data[k];
+          const local=stock[k];
+          if(!local){ stock[k]=remote; }
+          else {
+            // Keep local photo, take cloud for everything else if cloud is newer or same
+            const cloudNewer = !local.updated || !remote.updated || new Date(remote.updated)>=new Date(local.updated);
+            if(cloudNewer){ stock[k]={...remote, photo: local.photo||null}; }
+            else { stock[k]={...local}; }
+          }
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stock));
+        renderCatFilters(); renderTable(); updateStats();
+      }
+      if(remoteUsers) { localStorage.setItem(USERS_KEY, JSON.stringify(remoteUsers)); }
+      setSyncStatus('green','Synced ✓');
+      if(manual) showToast('✅ Stock + users updated from cloud','green');
+      // Also load photos from separate /vp_photos path (never overwritten by push)
+      fetch(url+'/vp_photos.json').then(r=>r.json()).then(photos=>{
+        if(photos && typeof photos==='object'){
+          Object.keys(photos).forEach(k=>{ if(stock[k]) stock[k].photoUrl = photos[k]; });
+          renderTable();
+        }
+      }).catch(()=>{});
+    })
+    .catch(()=>{ setSyncStatus('red','Sync failed'); if(manual) showToast('Could not reach cloud — check your Firebase URL','red'); });
+}
+
+function openSyncModal() {
+  document.getElementById('fbUrlInput').value = getFbUrl();
+  document.getElementById('syncStatus').style.display='none';
+  document.getElementById('syncModal').classList.add('active');
+}
+function saveSyncUrl() {
+  const url = document.getElementById('fbUrlInput').value.trim().replace(/\/$/,'');
+  if(!url){ showToast('Please enter a Firebase URL','red'); return; }
+  localStorage.setItem(FB_KEY, url);
+  const status = document.getElementById('syncStatus');
+  status.style.display='block'; status.style.background='#fef9c3'; status.style.color='#854d0e'; status.style.border='1px solid #fde047';
+  status.textContent='Testing connection...';
+  fetch(url+'/vp_stock.json')
+    .then(r=>{ if(!r.ok) throw new Error();
+      status.style.background='#d1fae5'; status.style.color='#065f46'; status.style.border='1px solid #6ee7b7';
+      status.textContent='✅ Connected! Syncing your stock now...';
+      pushToCloud(); pullFromCloud(false);
+      setTimeout(()=>closeModal('syncModal'),1500);
+    })
+    .catch(()=>{ status.style.background='#fee2e2'; status.style.color='#991b1b'; status.style.border='1px solid #fca5a5';
+      status.textContent='❌ Could not connect. Check the URL and make sure test mode is enabled in Firebase.'; });
+}
+// BULK CATEGORY
+function openBulkCat() {
+  const list = document.getElementById('bulkItemList');
+  const keys = Object.keys(stock).sort((a,b)=>stock[a].name.localeCompare(stock[b].name));
+  list.innerHTML = keys.map(k=>`
+    <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f3f4f6;cursor:pointer;">
+      <input type="checkbox" class="bulk-cb" data-key="${esc(k)}" style="width:18px;height:18px;accent-color:#1b3a5c;cursor:pointer;" />
+      <span style="flex:1;font-weight:600;font-size:0.9rem;">${esc(stock[k].name)}</span>
+      <span style="font-size:0.75rem;color:#9ca3af;">${stock[k].category||'<em>No category</em>'}</span>
+    </label>`).join('');
+  document.getElementById('bulkCatSelect').value = '';
+  document.getElementById('bulkCatModal').classList.add('active');
+}
+function bulkSelectAll()  { document.querySelectorAll('.bulk-cb').forEach(c=>c.checked=true); }
+function bulkSelectNone() { document.querySelectorAll('.bulk-cb').forEach(c=>c.checked=false); }
+function bulkSelectUncategorised() { document.querySelectorAll('.bulk-cb').forEach(c=>{ const k=c.dataset.key; c.checked=!stock[k]?.category; }); }
+function applyBulkCat() {
+  const cat = document.getElementById('bulkCatSelect').value;
+  if(!cat){ showToast('Please select a category first','red'); return; }
+  const checked = document.querySelectorAll('.bulk-cb:checked');
+  if(!checked.length){ showToast('Please select at least one item','red'); return; }
+  const ts = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  checked.forEach(c=>{ const k=c.dataset.key; if(stock[k]){ stock[k].category=cat; stock[k].updated=ts; } });
+  save(); showToast(`✅ ${checked.length} item${checked.length!==1?'s':''} assigned to ${cat}`,'green');
+  closeModal('bulkCatModal');
+}
+
+// PHOTO PACK IMPORT
+function handlePhotoPack(event) {
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let pack;
+    try { pack = JSON.parse(e.target.result); } catch(err) { showToast('Invalid photo pack file','red'); return; }
+    const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+    const packEntries = Object.keys(pack).map(n => ({ key: n, norm: norm(n) }));
+    let matched = 0, skipped = 0;
+    const ts = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    Object.keys(stock).forEach(k => {
+      const itemNorm = norm(stock[k].name);
+      // 1. Exact normalised match
+      let found = packEntries.find(e => e.norm === itemNorm);
+      // 2. One contains the other
+      if(!found) found = packEntries.find(e => itemNorm.includes(e.norm) || e.norm.includes(itemNorm));
+      // 3. Word overlap score (>=75% words match)
+      if(!found) {
+        const itemWords = itemNorm.split(' ').filter(w=>w.length>2);
+        let best = null, bestScore = 0;
+        packEntries.forEach(e => {
+          const packWords = e.norm.split(' ').filter(w=>w.length>2);
+          const shared = itemWords.filter(w=>packWords.includes(w)).length;
+          const score = shared / Math.max(itemWords.length, packWords.length);
+          if(score > bestScore && score >= 0.75) { bestScore = score; best = e; }
+        });
+        found = best;
+      }
+      if(found) { stock[k].photo = pack[found.key]; stock[k].updated = ts; matched++; }
+      else skipped++;
+    });
+    save();
+    showToast(`✅ ${matched} photos imported, ${skipped} not matched`, 'green');
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// BULK QTY UPDATE
+let bulkQtyItems = {};
+function openBulkQty() {
+  bulkQtyItems = {};
+  document.getElementById('bulkQtyList').innerHTML = '<div id="bulkQtyEmpty" style="text-align:center;padding:36px;color:#9ca3af;font-size:0.85rem;">Scan an item to get started</div>';
+  document.getElementById('bulkQtyCount').style.display = 'none';
+  document.getElementById('bulkQtyInput').value = '';
+  document.getElementById('bulkQtyModal').classList.add('active');
+  setTimeout(()=>document.getElementById('bulkQtyInput').focus(), 100);
+}
+function openBulkQtyCamera() {
+  closeModal('bulkQtyModal');
+  setTimeout(()=>{
+    openCamera();
+    window._bulkQtyMode = true;
+  }, 300);
+}
+function bulkQtyScan() {
+  const val = resolveBarcode(document.getElementById('bulkQtyInput').value.trim());
+  if (!val) return;
+  if (!stock[val]) { showToast('Item not found: ' + val, 'red'); document.getElementById('bulkQtyInput').value=''; document.getElementById('bulkQtyInput').focus(); return; }
+  if (bulkQtyItems[val] !== undefined) { showToast('Already in list — update qty below', 'red'); document.getElementById('bulkQtyInput').value=''; document.getElementById('bulkQtyInput').focus(); return; }
+  bulkQtyItems[val] = stock[val].qty;
+  renderBulkQtyList();
+  document.getElementById('bulkQtyInput').value = '';
+  document.getElementById('bulkQtyInput').focus();
+}
+function renderBulkQtyList() {
+  const keys = Object.keys(bulkQtyItems);
+  const list = document.getElementById('bulkQtyList');
+  const count = document.getElementById('bulkQtyCount');
+  if (keys.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:36px;color:#9ca3af;font-size:0.85rem;">Scan an item to get started</div>';
+    count.style.display = 'none'; return;
+  }
+  count.style.display = 'block';
+  count.textContent = keys.length + ' item' + (keys.length!==1?'s':'') + ' queued';
+  list.innerHTML = keys.map(k => {
+    const item = stock[k];
+    const changed = bulkQtyItems[k] !== item.qty;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f3f4f6;background:${changed?'#eff6ff':'white'};">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:0.88rem;color:#0f2137;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.name)}</div>
+        <div style="font-size:0.75rem;color:#9ca3af;">Current qty: <strong>${item.qty}</strong>${item.category?' · '+item.category:''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <button onclick="adjustBulkQty('${esc(k)}',-1)" style="width:28px;height:28px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:700;line-height:1;">−</button>
+        <input type="number" min="0" value="${bulkQtyItems[k]}"
+          oninput="bulkQtyItems['${esc(k)}']=Math.max(0,parseInt(this.value)||0);renderBulkQtyList()"
+          style="width:64px;padding:6px;border:1.5px solid ${changed?'#1b3a5c':'#e5e7eb'};border-radius:8px;font-size:0.95rem;font-weight:700;text-align:center;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
+        <button onclick="adjustBulkQty('${esc(k)}',1)" style="width:28px;height:28px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:700;line-height:1;">+</button>
+      </div>
+      <button onclick="removeBulkQtyItem('${esc(k)}')" style="background:none;border:none;color:#d1d5db;font-size:1.1rem;cursor:pointer;padding:4px;flex-shrink:0;" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+}
+function adjustBulkQty(k, delta) {
+  bulkQtyItems[k] = Math.max(0, (bulkQtyItems[k]||0) + delta);
+  renderBulkQtyList();
+}
+function removeBulkQtyItem(k) { delete bulkQtyItems[k]; renderBulkQtyList(); }
+function applyBulkQty() {
+  const keys = Object.keys(bulkQtyItems);
+  if (keys.length === 0) { showToast('No items to update', 'red'); return; }
+  const ts = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let changed = 0;
+  keys.forEach(k => { if(stock[k]){ const prev=stock[k].qty; stock[k].qty=bulkQtyItems[k]; stock[k].updated=ts; if(prev!==bulkQtyItems[k]) changed++; } });
+  save();
+  showToast(`✅ ${changed} item${changed!==1?'s':''} updated`, 'green');
+  closeModal('bulkQtyModal');
+}
+
+// EMAIL ALERTS
+const EJ_KEYS = { service:'vp_ej_service', template:'vp_ej_template', pubkey:'vp_ej_pubkey', email:'vp_alert_email', threshold:'vp_alert_threshold' };
+let lastAlertedItems = JSON.parse(localStorage.getItem('vp_last_alerted')||'{}');
+
+function openEmailAlertModal() {
+  document.getElementById('ejServiceId').value  = localStorage.getItem(EJ_KEYS.service)||'';
+  document.getElementById('ejTemplateId').value = localStorage.getItem(EJ_KEYS.template)||'';
+  document.getElementById('ejPublicKey').value  = localStorage.getItem(EJ_KEYS.pubkey)||'';
+  document.getElementById('alertEmail').value   = localStorage.getItem(EJ_KEYS.email)||'joy@victorianprojects.com.au';
+  document.getElementById('alertThreshold').value = localStorage.getItem(EJ_KEYS.threshold)||'5';
+  document.getElementById('emailAlertStatus').style.display='none';
+  document.getElementById('emailAlertModal').classList.add('active');
+}
+
+function saveEmailAlert() {
+  const svc  = document.getElementById('ejServiceId').value.trim();
+  const tmpl = document.getElementById('ejTemplateId').value.trim();
+  const pub  = document.getElementById('ejPublicKey').value.trim();
+  const email= document.getElementById('alertEmail').value.trim();
+  const thr  = parseInt(document.getElementById('alertThreshold').value)||5;
+  if(!svc||!tmpl||!pub||!email){ showToast('Please fill in all fields','red'); return; }
+  localStorage.setItem(EJ_KEYS.service, svc);
+  localStorage.setItem(EJ_KEYS.template, tmpl);
+  localStorage.setItem(EJ_KEYS.pubkey, pub);
+  localStorage.setItem(EJ_KEYS.email, email);
+  localStorage.setItem(EJ_KEYS.threshold, thr);
+  const st = document.getElementById('emailAlertStatus');
+  st.style.display='block'; st.style.background='#fef9c3'; st.style.color='#854d0e'; st.style.border='1px solid #fde047';
+  st.textContent='Sending test email...';
+  const lowItems = Object.values(stock).filter(i=>i.qty<=thr);
+  const date = new Date().toLocaleString('en-AU',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let testMsg;
+  if(lowItems.length){
+    testMsg = `LOW STOCK SUMMARY - Victorian Projects\nGenerated: ${date}\n\n`;
+    const out = lowItems.filter(i=>i.qty===0); const lo = lowItems.filter(i=>i.qty>0);
+    if(out.length){ testMsg+=`OUT OF STOCK (${out.length} item${out.length!==1?'s':''})\n`; out.forEach(i=>testMsg+=`  - ${i.name}${i.category?' ['+i.category+']':''}: 0 remaining\n`); testMsg+='\n'; }
+    if(lo.length){ testMsg+=`LOW STOCK (${lo.length} item${lo.length!==1?'s':''})\n`; lo.forEach(i=>testMsg+=`  - ${i.name}${i.category?' ['+i.category+']':''}: ${i.qty} remaining\n`); testMsg+='\n'; }
+    testMsg+=`Total items needing attention: ${lowItems.length}\n\nPlease arrange restocking.\n\n- VP Stock Manager`;
+  } else {
+    testMsg = `TEST EMAIL - VP Stock Manager\nGenerated: ${date}\n\nAll stock levels are currently OK. You will receive a summary email when any item drops to ${thr} or below.\n\n- VP Stock Manager`;
+  }
+  sendEmailViaAPI(svc, tmpl, pub, email, '⚠️ Low Stock Alert — Victorian Projects', testMsg)
+    .then(()=>{
+      st.style.background='#d1fae5'; st.style.color='#065f46'; st.style.border='1px solid #6ee7b7';
+      st.textContent=`✅ Test email sent to ${email}! Check your inbox.`;
+      setTimeout(()=>closeModal('emailAlertModal'),2000);
+    })
+    .catch(err=>{
+      st.style.background='#fee2e2'; st.style.color='#991b1b'; st.style.border='1px solid #fca5a5';
+      st.textContent='❌ Failed: '+(err.message||'Check your keys and make sure Gmail service is connected in EmailJS.');
+    });
+}
+
+function removeEmailAlert() {
+  Object.values(EJ_KEYS).forEach(k=>localStorage.removeItem(k));
+  showToast('Email alerts removed','red'); closeModal('emailAlertModal');
+}
+
+let alertDebounceTimer = null;
+function checkAndSendLowStockEmail() {
+  // Debounce — wait 8 seconds after last change before sending, so one summary goes out not many
+  clearTimeout(alertDebounceTimer);
+  alertDebounceTimer = setTimeout(_doSendLowStockEmail, 8000);
+}
+function _doSendLowStockEmail() {
+  const svc  = localStorage.getItem(EJ_KEYS.service);
+  const tmpl = localStorage.getItem(EJ_KEYS.template);
+  const pub  = localStorage.getItem(EJ_KEYS.pubkey);
+  const email= localStorage.getItem(EJ_KEYS.email);
+  const thr  = parseInt(localStorage.getItem(EJ_KEYS.threshold))||5;
+  if(!svc||!tmpl||!pub||!email) return;
+  const allLow = Object.values(stock).filter(i=>i.qty<=thr&&i.qty>=0);
+  if(!allLow.length) return;
+  // Only alert if something is newly low since last alert
+  // 24-hour cooldown — don't send more than once per day
+  const lastSent = parseInt(localStorage.getItem('vp_last_alert_time')||'0');
+  if(Date.now() - lastSent < 24*60*60*1000) return;
+  const newlyLow = allLow.filter(i=>!lastAlertedItems[i.name]||lastAlertedItems[i.name]>thr);
+  if(!newlyLow.length) return;
+  // Mark all current low items as alerted and save
+  allLow.forEach(i=>lastAlertedItems[i.name]=i.qty);
+  localStorage.setItem('vp_last_alerted', JSON.stringify(lastAlertedItems));
+  localStorage.setItem('vp_last_alert_time', Date.now().toString());
+  const outOfStock = allLow.filter(i=>i.qty===0);
+  const low        = allLow.filter(i=>i.qty>0);
+  const date = new Date().toLocaleString('en-AU',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let msg = `LOW STOCK SUMMARY — Victorian Projects\n`;
+  msg += `Generated: ${date}\n`;
+  msg += `${'─'.repeat(40)}\n\n`;
+  if(outOfStock.length){
+    msg += `🔴 OUT OF STOCK (${outOfStock.length} item${outOfStock.length!==1?'s':''})\n`;
+    outOfStock.forEach(i=>{ msg += `  • ${i.name}${i.category?' ['+i.category+']':''} — 0 remaining\n`; });
+    msg += '\n';
+  }
+  if(low.length){
+    msg += `🟠 LOW STOCK (${low.length} item${low.length!==1?'s':''})\n`;
+    low.forEach(i=>{ msg += `  • ${i.name}${i.category?' ['+i.category+']':''} — ${i.qty} remaining\n`; });
+    msg += '\n';
+  }
+  msg += `${'─'.repeat(40)}\n`;
+  msg += `Total items needing attention: ${allLow.length}\n\n`;
+  msg += `Please arrange restocking as soon as possible.\n\n— VP Stock Manager`;
+  sendEmailViaAPI(svc, tmpl, pub, email, `⚠️ Low Stock Alert — ${allLow.length} item${allLow.length!==1?'s':''} need restocking`, msg)
+    .then(()=>showToast(`📧 Low stock summary sent to ${email}`,'green'))
+    .catch(()=>{});
+}
+
+function sendEmailViaAPI(serviceId, templateId, publicKey, toEmail, subject, message) {
+  return fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      template_params: { to_email: toEmail, subject: subject, message: message }
+    })
+  }).then(r => {
+    if(!r.ok) return r.text().then(t => { throw new Error(t||r.status); });
+    return r;
+  });
+}
+
+function removeSyncUrl() {
+  if(!confirm('Remove cloud sync? Your local data stays safe.')) return;
+  localStorage.removeItem(FB_KEY); setSyncStatus('grey','Set up sync'); closeModal('syncModal'); showToast('Sync removed','red');
+}
+
+function startAutoSync() {
+  if(getFbUrl()){ setSyncStatus('green','Synced ✓'); pullFromCloud(false); }
+  setInterval(()=>{ if(getFbUrl()) pullFromCloud(false); }, 30000);
+}
+function updateStats() {
+  const keys = Object.keys(stock);
+  const total = keys.length;
+  const low = keys.filter(k => stock[k].qty===0 || (stock[k].lowAt!==null && stock[k].qty<=stock[k].lowAt)).length;
+  const inStock = total - low;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statInStock').textContent = inStock;
+  document.getElementById('statLow').textContent = low;
+  document.getElementById('pillTotal').innerHTML = `${total} <span>item${total!==1?'s':''}</span>`;
+  const pl = document.getElementById('pillLow');
+  if(low>0){ pl.style.display=''; document.getElementById('pillLowCount').textContent=low; } else pl.style.display='none';
+  document.getElementById('tableSubtitle').textContent = total===0 ? 'No items yet' : `${total} item${total!==1?'s':''} tracked`;
+}
+
+// Barcode input
+const barcodeInput = document.getElementById('barcodeInput');
+barcodeInput.addEventListener('keydown', function(e){
+  if(e.key==='Enter'){ const v=this.value.trim(); if(!v) return; handleScan(v); this.value=''; }
+});
+document.addEventListener('click', function(){
+  if(!document.querySelector('.modal-overlay.active') && !document.querySelector('.fullscreen-overlay.active') && !document.getElementById('cameraOverlay').classList.contains('active') && !document.getElementById('loginScreen').classList.contains('active'))
+    barcodeInput.focus();
+  if(document.getElementById('bulkQtyModal').classList.contains('active'))
+    setTimeout(()=>document.getElementById('bulkQtyInput').focus(),10);
+});
+
+function resolveBarcode(barcode) {
+  if (stock[barcode]) return barcode;
+  const match = Object.keys(stock).find(k => {
+    const displayCode = k.startsWith('MANUAL_') ? 'VP-' + k.slice(-6) : k;
+    return displayCode === barcode;
+  });
+  return match || barcode;
+}
+function handleScan(barcode) {
+  barcode = resolveBarcode(barcode);
+  currentBarcode = barcode;
+  if(window._bulkQtyMode) {
+    window._bulkQtyMode = false;
+    document.getElementById('bulkQtyInput').value = barcode;
+    document.getElementById('bulkQtyModal').classList.add('active');
+    setTimeout(()=>bulkQtyScan(), 100);
+    return;
+  }
+  if(currentUser && currentUser.role==='user') {
+    if(stock[barcode]) openTakeModal(barcode);
+    else showToast('Item not found: '+barcode, 'red');
+    return;
+  }
+  if(stock[barcode]) openScanModal(barcode); else openNewItemModal(barcode);
+}
+function setTakeQty(n) {
+  document.getElementById('takeQtyInput').value = n;
+  document.querySelectorAll('.take-preset-btn').forEach(b=>b.classList.remove('active'));
+  const map={1:'takePreset1',5:'takePreset5',10:'takePreset10',30:'takePreset30'};
+  if(map[n]) document.getElementById(map[n]).classList.add('active');
+}
+function clearTakePresets() {
+  document.querySelectorAll('.take-preset-btn').forEach(b=>b.classList.remove('active'));
+}
+function openTakeModal(barcode) {
+  openScanModal(barcode);
+  goToQty('subtract');
+}
+function confirmTake() {
+  const qty = parseInt(document.getElementById('takeQtyInput').value)||1;
+  const item = stock[currentBarcode];
+  if(!item) return;
+  const prev = item.qty;
+  item.qty = Math.max(0, item.qty - qty);
+  item.updated = new Date().toISOString().slice(0,10);
+  if(!item.takeLog) item.takeLog=[];
+  item.takeLog.push({by:currentUser.name,qty:qty,from:prev,to:item.qty,ts:new Date().toISOString()});
+  save(); updateStats(); renderTable();
+  closeModal('takeModal');
+  showToast('✅ '+currentUser.name+' took '+qty+' × '+item.name, 'green');showCelebration('✅','Got it! '+qty+' × '+item.name);
+  barcodeInput.focus();
+}
+
+// Scan flow
+function openScanModal(barcode) {
+  const item = stock[barcode];
+  document.getElementById('fsItemName').textContent = item.name;
+  document.getElementById('fsCurrentQty').textContent = item.qty;
+  document.getElementById('stepAction').classList.add('active');
+}
+function goToQty(action) {
+  currentAction = action;
+  const item = stock[currentBarcode];
+  const isAdd = action==='add';
+  document.getElementById('stepAction').classList.remove('active');
+  const h = document.getElementById('fsActionHeader');
+  h.textContent = isAdd ? '📥 ADDING STOCK' : '📤 TAKING OUT STOCK';
+  h.className = 'fs-action-header '+(isAdd?'add':'sub');
+  document.getElementById('fsQtyItemName').textContent = item.name;
+  document.getElementById('fsQtyCurrent').textContent = 'Current stock: '+item.qty+' units';
+  const btn = document.getElementById('fsConfirmBtn');
+  btn.textContent = isAdd ? '✅ Confirm — Add Stock' : '✅ Confirm — Take Out Stock';
+  btn.className = 'fs-confirm-btn '+(isAdd?'add':'sub');
+  document.getElementById('fsQtyInput').value = 1;
+  document.getElementById('stepQty').classList.add('active');
+  setTimeout(()=>document.getElementById('fsQtyInput').select(),100);
+}
+function goBack() { document.getElementById('stepQty').classList.remove('active'); document.getElementById('stepAction').classList.add('active'); }
+function closeScanFlow() { document.getElementById('stepAction').classList.remove('active'); document.getElementById('stepQty').classList.remove('active'); barcodeInput.focus(); }
+function confirmAction() {
+  const qty = parseInt(document.getElementById('fsQtyInput').value)||0;
+  if(qty<=0){ showToast('Enter a valid quantity','red'); return; }
+  const item = stock[currentBarcode];
+  const before = item.qty;
+  if(currentAction==='add'){ item.qty+=qty; showToast(`✅ ${item.name}: ${before} → ${item.qty}`,'green'); }
+  else { if(qty>item.qty){ showToast(`⚠ Can't remove more than current stock (${item.qty})`,'red'); return; } item.qty-=qty; showToast(`📤 ${item.name}: ${before} → ${item.qty}`,'red'); }
+  item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  save(); closeScanFlow();
+}
+
+// New item
+function openNewItemModal(barcode) {
+  document.getElementById('newItemBarcode').textContent = barcode;
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemCategory').value = '';
+  document.getElementById('newItemQty').value = '0';
+  document.getElementById('newItemLow').value = '';
+  document.getElementById('newItemModal').classList.add('active');
+  setTimeout(()=>document.getElementById('newItemName').focus(),50);
+}
+function saveNewItem() {
+  const name = document.getElementById('newItemName').value.trim();
+  if(!name){ showToast('Please enter an item name','red'); return; }
+  const qty = parseInt(document.getElementById('newItemQty').value)||0;
+  const low = parseInt(document.getElementById('newItemLow').value)||null;
+  const category = document.getElementById('newItemCategory').value||'';
+  stock[currentBarcode] = { name, qty, lowAt:low, category, updated: new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) };
+  save(); showToast(`✅ ${name} added to stock`,'green'); closeModal('newItemModal');
+}
+function openAddItem() {
+  currentBarcode = 'MANUAL_'+Date.now();
+  document.getElementById('newItemBarcode').textContent = '(auto-generated)';
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemCategory').value = '';
+  document.getElementById('newItemQty').value = '0';
+  document.getElementById('newItemLow').value = '';
+  document.getElementById('newItemModal').classList.add('active');
+  setTimeout(()=>document.getElementById('newItemName').focus(),50);
+}
+
+// Edit item
+function editItem(barcode) {
+  const item = stock[barcode];
+  document.getElementById('editItemKey').value = barcode;
+  document.getElementById('editItemName').value = item.name;
+  document.getElementById('editItemCategory').value = item.category||'';
+  document.getElementById('editItemQty').value = item.qty;
+  document.getElementById('editItemLow').value = item.lowAt??'';
+  const photoRow = document.getElementById('editPhotoRow');
+  const _eSrc = item.photo || item.photoUrl || ''; if(_eSrc){ photoRow.style.display='flex'; document.getElementById('editPhotoPreview').src=_eSrc; }
+  else { photoRow.style.display='none'; }
+  document.getElementById('editItemModal').classList.add('active');
+  setTimeout(()=>document.getElementById('editItemName').focus(),50);
+}
+function saveEditItem() {
+  const barcode = document.getElementById('editItemKey').value;
+  const name = document.getElementById('editItemName').value.trim();
+  if(!name){ showToast('Name cannot be empty','red'); return; }
+  const qty = parseInt(document.getElementById('editItemQty').value)||0;
+  const lowRaw = document.getElementById('editItemLow').value.trim();
+  const low = lowRaw!=='' ? parseInt(lowRaw) : null;
+  const category = document.getElementById('editItemCategory').value||'';
+  const item = stock[barcode];
+  item.name=name; item.qty=qty; item.lowAt=low; item.category=category;
+  item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  save(); showToast(`✅ ${name} updated`,'green'); closeModal('editItemModal');
+}
+
+function removeItemPhoto() {
+  const barcode = document.getElementById('editItemKey').value;
+  if(stock[barcode]){ delete stock[barcode].photo; save(); showToast('Photo removed','red'); }
+  document.getElementById('editPhotoRow').style.display='none';
+}
+function closeModal(id) { document.getElementById(id).classList.remove('active'); barcodeInput.focus(); }
+function deleteItem(barcode) {
+  if(!confirm(`Delete "${stock[barcode]?.name}"? This cannot be undone.`)) return;
+  delete stock[barcode]; save(); showToast('Item deleted','red');
+}
+
+// Category filters
+function renderCatFilters() {
+  const cf = document.getElementById('catFilters');
+  const usedCats = new Set(Object.values(stock).map(i=>i.category||'').filter(Boolean));
+  if(usedCats.size===0){ cf.innerHTML=''; return; }
+  const all = ['All',...CATEGORIES.filter(c=>usedCats.has(c))];
+  cf.innerHTML = all.map(c=>`<button class="cat-btn ${activeCategory===c?'active':''}" onclick="setCategory('${c}')">${c}</button>`).join('');
+}
+function setCategory(cat) { activeCategory=cat; renderCatFilters(); renderTable(); }
+
+// Render table
+function renderTable() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const tbody = document.getElementById('stockBody');
+  const empty = document.getElementById('emptyState');
+  let keys = Object.keys(stock).filter(k=>{
+    const item=stock[k];
+    const ms=item.name.toLowerCase().includes(search)||k.toLowerCase().includes(search);
+    const mc=activeCategory==='All'||(item.category||'')===activeCategory;
+    return ms&&mc;
+  });
+  if(Object.keys(stock).length===0){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  keys.sort((a,b)=>{ const ca=stock[a].category||'Uncategorised',cb=stock[b].category||'Uncategorised'; return ca!==cb?ca.localeCompare(cb):stock[a].name.localeCompare(stock[b].name); });
+  const groups={};
+  keys.forEach(k=>{ const cat=stock[k].category||'Uncategorised'; if(!groups[cat]) groups[cat]=[]; groups[cat].push(k); });
+  let html='';
+  Object.keys(groups).sort().forEach(cat=>{
+    if(activeCategory==='All') html+=`<tr class="cat-group-header"><td colspan="9">📂 ${cat}</td></tr>`;
+    groups[cat].forEach(k=>{
+      const item=stock[k]; const low=item.lowAt;
+      let badge=item.qty===0?'<span class="badge badge-zero">🔴 Out of Stock</span>':low!==null&&item.qty<=low?'<span class="badge badge-low">🟠 Low</span>':'<span class="badge badge-ok">🟢 OK</span>';
+      const bd=k.startsWith('MANUAL_')?'(manual)':k;
+      const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
+      const _rSrc=item.photo||item.photoUrl||''; const photoHTML=_rSrc?`<img src="${_rSrc}" alt="${esc(item.name)}" /><div class="photo-overlay">📷 Change</div>`:`<span class="photo-placeholder">📷</span><div class="photo-overlay">📷 Add Photo</div>`;
+      html+=`<tr>
+        <td class="td-photo"><div class="photo-cell" onclick="triggerPhotoUpload('${esc(k)}')">${photoHTML}</div></td>
+        <td class="td-qr"><div class="qr-cell" id="${qrId}"></div></td>
+        <td class="td-name"><span class="item-name-cell">${esc(item.name)}</span>${item.category?`<br><span class="cat-badge">${esc(item.category)}</span>`:''}</td>
+        <td class="td-id"><span class="barcode-cell">${esc(bd)}</span> <span style="font-size:0.8rem;color:#1b3a5c;font-weight:700;">Qty: ${item.qty}</span></td>
+        <td class="td-qty"><span class="qty-value">${item.qty}</span></td>
+        <td class="td-low" style="color:#9ca3af;font-size:0.85rem;">${low!==null?low:'—'}</td>
+        <td class="td-status">${badge}</td>
+        <td class="td-updated" style="font-size:0.8rem;color:#9ca3af;">${item.updated||'—'}</td>
+        <td class="td-actions"><button class="btn-row-action edit" onclick="editItem('${esc(k)}')">✏️</button><button class="btn-row-action del" onclick="deleteItem('${esc(k)}')">🗑️</button></td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML=html;
+  setTimeout(()=>{
+    keys.forEach(k=>{
+      const code=k.startsWith('MANUAL_')?'VP-'+k.slice(-6):k;
+      const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
+      const el=document.getElementById(qrId);
+      if(el&&el.children.length===0){ try{ new QRCode(el,{text:code,width:56,height:56,correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+    });
+  },50);
+}
+
+function esc(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// Export/Import
+function exportCSV() {
+  const rows=[['Item Name','Barcode','Quantity','Category','Low Stock At','Last Updated']];
+  Object.keys(stock).forEach(k=>{ const i=stock[k]; rows.push([i.name,k.startsWith('MANUAL_')?'':k,i.qty,i.category||'',i.lowAt??'',i.updated||'']); });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='vp-stock-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  showToast('CSV exported','green');
+}
+function importCSV(){ document.getElementById('csvImportInput').click(); }
+function handleImport(event){
+  const file=event.target.files[0]; if(!file) return;
+  if(file.name.endsWith('.xlsx')||file.name.endsWith('.xls')){
+    const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=function(){
+      const r=new FileReader(); r.onload=function(e){
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        const hasHeader=rows[0]&&rows[0].some(c=>typeof c==='string'&&/name|item|barcode|qty|quantity/i.test(c));
+        const data=hasHeader?rows.slice(1):rows; let count=0;
+        data.forEach((row,idx)=>{ const name=String(row[0]||'').trim(); if(!name) return;
+          const barcode=String(row[1]||'').trim()||null; const qty=parseInt(row[2])||0;
+          const lowAt=row[3]!==''&&row[3]!==undefined?parseInt(row[3]):null;
+          const key=barcode||'VP-'+String(Date.now()+idx).slice(-6);
+          stock[key]={name,qty,lowAt:isNaN(lowAt)?null:lowAt,category:'',updated:new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}; count++; });
+        save(); showToast(`✅ Imported ${count} items`,'green');
+      }; r.readAsArrayBuffer(file);
+    }; document.head.appendChild(s);
+  } else {
+    const r=new FileReader(); r.onload=function(e){
+      const lines=e.target.result.split('\n'); const hasHeader=/name|item|barcode|qty|quantity/i.test(lines[0]||'');
+      const data=hasHeader?lines.slice(1):lines; let count=0;
+      data.forEach((line,idx)=>{ if(!line.trim()) return; const cols=line.split(',').map(c=>c.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+        const name=cols[0]; if(!name) return; const barcode=cols[1]||null; const qty=parseInt(cols[2])||0;
+        const lowAt=cols[3]&&cols[3]!==''?parseInt(cols[3]):null; const key=barcode||'VP-'+String(Date.now()+idx).slice(-6);
+        stock[key]={name,qty,lowAt:isNaN(lowAt)?null:lowAt,category:cols[4]||'',updated:new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}; count++; });
+      save(); showToast(`✅ Imported ${count} items`,'green');
+    }; r.readAsText(file);
+  }
+  event.target.value='';
+}
+
+// Photo upload
+let photoUploadKey=null;
+const photoInput=document.createElement('input'); photoInput.type='file'; photoInput.accept='image/*'; photoInput.style.display='none'; document.body.appendChild(photoInput);
+photoInput.addEventListener('change',function(){
+  const file=this.files[0]; if(!file||!photoUploadKey) return;
+  const reader=new FileReader(); reader.onload=function(e){
+    const img=new Image(); img.onload=function(){
+      const canvas=document.createElement('canvas'); const MAX=300;
+      const ratio=Math.min(MAX/img.width,MAX/img.height,1); canvas.width=img.width*ratio; canvas.height=img.height*ratio;
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      stock[photoUploadKey].photo=canvas.toDataURL('image/jpeg',0.82); save(); showToast('📷 Photo saved!','green');
+    }; img.src=e.target.result;
+  }; reader.readAsDataURL(file); this.value='';
+});
+function triggerPhotoUpload(barcode){ photoUploadKey=barcode; photoInput.click(); }
+
+// Camera scanner
+let cameraStream=null, cameraAnimFrame=null, lastScanned='', lastScannedTime=0;
+function openCamera(){
+  const overlay=document.getElementById('cameraOverlay');
+  overlay.classList.add('active');
+  document.getElementById('cameraStatus').textContent='STARTING CAMERA...';
+  const readerDiv=document.getElementById('html5qr-reader');
+  if(window._html5QrScanner){ 
+    try{ window._html5QrScanner.stop().catch(()=>{}); } catch(e){}
+    window._html5QrScanner=null;
+  }
+  const scanner = new Html5Qrcode('html5qr-reader');
+  window._html5QrScanner = scanner;
+  scanner.start(
+    {facingMode:'environment'},
+    {fps:10, qrbox:{width:250,height:250}, aspectRatio:1.0},
+    (decodedText)=>{
+      const now=Date.now();
+      if(decodedText!==lastScanned||now-lastScannedTime>3000){
+        lastScanned=decodedText; lastScannedTime=now;
+        closeCamera();
+        setTimeout(()=>handleScan(decodedText),200);
+      }
+    },
+    ()=>{}
+  ).then(()=>{
+    document.getElementById('cameraStatus').textContent='SCANNING...';
+    // Hide the html5-qrcode UI chrome we don't want
+    const btns=readerDiv.querySelectorAll('button,select,img[alt="Info icon"],span');
+    btns.forEach(b=>{ if(b.tagName!=='VIDEO') b.style.display='none'; });
+  }).catch(err=>{
+    document.getElementById('cameraStatus').textContent='CAMERA ERROR';
+    showToast('Camera error: '+err,'red');
+  });
+}
+function closeCamera(){
+  if(window._html5QrScanner){
+    try{ window._html5QrScanner.stop().then(()=>{ window._html5QrScanner.clear(); window._html5QrScanner=null; }).catch(()=>{ window._html5QrScanner=null; }); }
+    catch(e){ window._html5QrScanner=null; }
+  }
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+  if(cameraAnimFrame){ cancelAnimationFrame(cameraAnimFrame); cameraAnimFrame=null; }
+  document.getElementById('cameraOverlay').classList.remove('active');
+}
+
+
+function printLabels(){
+  const keys=Object.keys(stock); if(keys.length===0){ showToast('No items to print','red'); return; }
+  doOpenPrintWindow();
+}
+function doOpenPrintWindow(){
+  const keys=Object.keys(stock).sort((a,b)=>stock[a].name.localeCompare(stock[b].name));
+  const labelsHTML=keys.map(k=>{ const item=stock[k]; const code=k.startsWith('MANUAL_')?'VP-'+k.slice(-6):k;
+    return `<div class="label"><div class="label-name">${item.name}</div><div class="qr-wrap" id="qr_${k.replace(/[^a-zA-Z0-9]/g,'_')}"></div><div class="label-code">${code}</div></div>`; }).join('');
+  const codesJSON=JSON.stringify(keys.map(k=>{ const code=k.startsWith('MANUAL_')?'VP-'+k.slice(-6):k; return {id:k.replace(/[^a-zA-Z0-9]/g,'_'),code}; }));
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Victorian Projects — QR Labels</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:white;padding:10mm;}
+.no-print{margin-bottom:8mm;}.grid{display:flex;flex-wrap:wrap;gap:5mm;}
+.label{border:1.5px solid #e5e7eb;border-radius:8px;padding:4mm 5mm;width:60mm;text-align:center;page-break-inside:avoid;}
+.label-name{font-size:8.5px;font-weight:bold;color:#0f2137;margin-bottom:3mm;line-height:1.3;min-height:22px;display:flex;align-items:center;justify-content:center;}
+.qr-wrap{display:flex;justify-content:center;margin-bottom:2mm;}.qr-wrap canvas,.qr-wrap img{width:40mm!important;height:40mm!important;}
+.label-code{font-size:7.5px;color:#9ca3af;letter-spacing:1px;font-family:monospace;}
+@media print{.no-print{display:none;}body{padding:5mm;}}</style></head><body>
+<div class="no-print">
+  <button onclick="window.print()" style="padding:10px 24px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-right:10px;font-weight:700;">🖨 Print QR Labels</button>
+  <button onclick="window.close()" style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;font-size:14px;cursor:pointer;">Close</button>
+</div>
+<div class="grid">${labelsHTML}</div>
+<script>var codes=${codesJSON};window.onload=function(){codes.forEach(function(item){var el=document.getElementById('qr_'+item.id);if(el)new QRCode(el,{text:item.code,width:150,height:150,correctLevel:QRCode.CorrectLevel.M});});};<\/script>
+
+<!-- TAKE ITEM MODAL (user mode) -->
+<div class="modal-overlay" id="takeModal">
+  <div class="modal" style="max-width:400px;text-align:center;">
+    <div class="modal-header"><h2>📤 Take Item</h2><button class="modal-close" onclick="closeModal('takeModal')">✕</button></div>
+    <div style="padding:24px;">
+      <img id="takeItemPhoto" src="" style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:none;" />
+      <div id="takeItemName" style="font-size:1.2rem;font-weight:800;color:#0f2137;margin-bottom:6px;"></div>
+      <div id="takeItemQty" style="color:#9ca3af;font-size:0.9rem;margin-bottom:20px;"></div>
+      <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:10px;">How many are you taking?</label>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button onclick="setTakeQty(1)" class="take-preset-btn" id="takePreset1">1</button>
+        <button onclick="setTakeQty(5)" class="take-preset-btn" id="takePreset5">5</button>
+        <button onclick="setTakeQty(10)" class="take-preset-btn" id="takePreset10">10</button>
+        <button onclick="setTakeQty(30)" class="take-preset-btn" id="takePreset30" style="flex:1.5;">✋ Handful (30)</button>
+      </div>
+      <input type="number" id="takeQtyInput" min="1" value="1" style="width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:1.2rem;text-align:center;font-family:Inter,sans-serif;font-weight:700;outline:none;color:#0f2137;" onkeydown="if(event.key==='Enter')confirmTake()" oninput="clearTakePresets()" />
+      <div style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">or type a custom amount above</div>
+      <button onclick="confirmTake()" style="width:100%;margin-top:16px;padding:16px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;font-family:Inter,sans-serif;cursor:pointer;">✅ Confirm Take</button>
+      <button onclick="closeModal('takeModal')" style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE USERS MODAL (admin only) -->
+<div class="modal-overlay admin-only" id="manageUsersModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
+    <div style="padding:24px;">
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
+      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
+          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
+        </div>
+        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
+        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
+      </div>
+      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Current Users</div>
+      <div id="userListEl"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- TAKE MODAL (user mode) -->
+/div>
+
+<!-- MANAGE USERS MODAL (admin only) -->
+<div class="modal-overlay admin-only" id="manageUsersModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
+    <div style="padding:24px;">
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can only scan items to take stock — no editing or deleting.</p>
+      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
+          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
+        </div>
+        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
+        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
+      </div>
+      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Current Users</div>
+      <div id="userListEl"></div>
+    </div>
+  </div>
+</div>
+
+
+</body></html>`); win.document.close();
+}
+
+// Clear
+function clearAllPhotos() {
+  if(!confirm('Remove all photos from every item? This cannot be undone.')) return;
+  Object.keys(stock).forEach(k => delete stock[k].photo);
+  save(); renderTable();
+  showToast('All photos cleared','red');
+}
+function clearAll(){ if(!confirm('⚠️ Delete ALL stock data permanently?')) return; localStorage.removeItem(STORAGE_KEY); stock={}; save(); showToast('All data cleared','red'); }
+
+// Toast
+function showToast(msg,type=''){
+  const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type;
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.className='toast',3000);
+}
+
+// Keyboard
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ closeScanFlow(); closeModal('newItemModal'); closeModal('editItemModal'); closeCamera(); }
+  if(e.key==='Enter'){
+    if(document.getElementById('stepQty').classList.contains('active')&&document.activeElement===document.getElementById('fsQtyInput')) confirmAction();
+    if(document.getElementById('newItemModal').classList.contains('active')&&document.activeElement===document.getElementById('newItemName')) document.getElementById('newItemQty').focus();
+  }
+});
+
+function toggleToolMenu() {
+  const menu = document.getElementById('toolMenu');
+  const arrow = document.getElementById('toolMenuArrow');
+  const open = menu.style.display === 'none';
+  menu.style.display = open ? 'block' : 'none';
+  arrow.textContent = open ? '▴' : '▾';
+}
+
+
+// CELEBRATION
+const CONFETTI_COLORS = ['#1b3a5c','#2563a8','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#ffffff'];
+function showCelebration(emoji, message, duration=1800) {
+  const overlay = document.getElementById('celebrationOverlay');
+  overlay.style.background = 'rgba(15,33,55,0.55)';
+  overlay.style.backdropFilter = 'blur(4px)';
+  document.getElementById('celebEmoji').textContent = emoji;
+  document.getElementById('celebMessage').textContent = message;
+  overlay.classList.add('active');
+  spawnConfetti();
+  setTimeout(()=>{ overlay.classList.remove('active'); }, duration);
+}
+function spawnConfetti() {
+  for(let i=0;i<25;i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}vw;top:${-10 - Math.random()*20}px;background:${CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)]};transform:rotate(${Math.random()*360}deg) scale(${0.5+Math.random()});width:${6+Math.random()*8}px;height:${6+Math.random()*14}px;border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${0.8+Math.random()*1.2}s;animation-delay:${Math.random()*0.4}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2000);
+  }
+}
+
+// AUTH
+const APP_PASS = 'VP@2o2siX';
+const AUTH_KEY = 'vp_auth';
+const USERS_KEY = 'vp_users';
+const SESSION_KEY = 'vp_session_user';
+let currentUser = null;
+
+function checkAuth() {
+  if(localStorage.getItem(AUTH_KEY)===APP_PASS){currentUser={name:'Admin',role:'admin'};startApp();return;}
+  try{const saved=localStorage.getItem(SESSION_KEY);if(saved){const u=JSON.parse(saved);const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(x=>x.name===u.name&&x.pin===u.pin);if(found){currentUser={name:found.name,role:'user'};startApp();return;}}}catch(e){}
+  document.getElementById('loginScreen').classList.add('active');showStaffLogin();
+}
+function showAdminLogin(){document.getElementById('staffLoginForm').style.display='none';document.getElementById('adminLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('loginInput').focus(),50);}
+function showStaffLogin(){document.getElementById('adminLoginForm').style.display='none';document.getElementById('staffLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('staffNameInput').focus(),50);}
+function doAdminLogin(){
+  const val=document.getElementById('loginInput').value;const err=document.getElementById('loginError');
+  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');startApp();}
+  else{err.style.display='block';err.textContent='Incorrect password.';document.getElementById('loginInput').value='';document.getElementById('loginInput').focus();}
+}
+function doStaffLogin(){
+  const name=document.getElementById('staffNameInput').value.trim();const pin=document.getElementById('staffPinInput').value.trim();const err=document.getElementById('loginError');
+  if(!name||!pin){err.style.display='block';err.textContent='Enter your name and PIN.';return;}
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(u=>u.name.toLowerCase()===name.toLowerCase()&&u.pin===pin);
+  if(found){localStorage.setItem(SESSION_KEY,JSON.stringify({name:found.name,pin:found.pin}));localStorage.removeItem(AUTH_KEY);currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');startApp();}
+  else{err.style.display='block';err.textContent='Name or PIN not recognised.';document.getElementById('staffPinInput').value='';document.getElementById('staffPinInput').focus();}
+}
+function doLogout(){localStorage.removeItem(AUTH_KEY);localStorage.removeItem(SESSION_KEY);currentUser=null;location.reload();}
+function applyRoleUI(){
+  document.getElementById('currentUserName').textContent=currentUser.name;
+  document.getElementById('currentUserPill').style.display='flex';
+  document.getElementById('logoutPill').style.display='flex';
+  if(currentUser.role==='user'){document.querySelectorAll('.admin-only').forEach(el=>el.style.setProperty('display','none','important'));}
+}
+function startApp(){
+  load(); applyRoleUI(); updateStats(); barcodeInput.focus();
+  requestAnimationFrame(()=>{
+    renderCatFilters(); renderTable();
+    if(currentUser&&currentUser.role==='admin') startAutoSync();
+    const emoji=currentUser.role==='admin'?'🎉':'👋';
+    const msg=currentUser.role==='admin'?'Welcome back, Admin!':'Welcome, '+currentUser.name+'!';
+    showCelebration(emoji,msg);
+  });
+}
+
+// USER MANAGEMENT
+function openManageUsers(){renderUserList();document.getElementById('manageUsersModal').classList.add('active');}
+function renderUserList(){
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const ul=document.getElementById('userListEl');
+  if(!users.length){ul.innerHTML='<p style="color:#9ca3af;text-align:center;padding:12px;">No users yet.</p>';return;}
+  ul.innerHTML=users.map((u,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f9fafb;border-radius:10px;margin-bottom:8px;"><div><strong style="color:#0f2137;">${u.name}</strong> <span style="color:#9ca3af;font-size:0.8rem;">PIN: ${'•'.repeat(u.pin.length)}</span></div><button onclick="deleteUser(${i})" style="background:#fee2e2;border:none;color:#ef4444;border-radius:8px;padding:6px 12px;font-size:0.8rem;font-weight:700;cursor:pointer;">Remove</button></div>`).join('');
+}
+function addUser(){
+  const name=document.getElementById('newUserName').value.trim();const pin=document.getElementById('newUserPin').value.trim();const err=document.getElementById('userAddError');
+  if(!name||!pin){err.style.display='block';err.textContent='Enter name and PIN.';return;}
+  if(pin.length<4){err.style.display='block';err.textContent='PIN must be at least 4 digits.';return;}
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+  if(users.find(u=>u.name.toLowerCase()===name.toLowerCase())){err.style.display='block';err.textContent='Name already exists.';return;}
+  users.push({name,pin});localStorage.setItem(USERS_KEY,JSON.stringify(users));
+  document.getElementById('newUserName').value='';document.getElementById('newUserPin').value='';err.style.display='none';
+  renderUserList();showToast('✅ User "'+name+'" added','green');
+}
+function deleteUser(i){
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+  if(!confirm('Remove user "'+users[i].name+'"?'))return;
+  users.splice(i,1);localStorage.setItem(USERS_KEY,JSON.stringify(users));renderUserList();
+}
+checkAuth();
+
+// PWA Manifest (injected inline so no server needed)
+(function(){
+  const manifest = {
+    name: "Victorian Projects Stock Manager",
+    short_name: "VP Stock",
+    description: "QR Code Stock Manager for Victorian Projects",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#1b3a5c",
+    theme_color: "#1b3a5c",
+    orientation: "portrait-primary",
+    icons: [
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%234338ca'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E📦%3C/text%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml" },
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%234338ca'/%3E%3Ctext y='360' x='256' text-anchor='middle' font-size='300'%3E📦%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('manifest-placeholder').href = url;
+})();
+
+// Install banner
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt = e;
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:1.4rem">📱</span>
+    <div style="flex:1;min-width:180px;">
+      <div style="font-weight:800;font-size:0.95rem;color:#0f2137;">Install as App</div>
+      <div style="font-size:0.78rem;color:#6b7280;margin-top:2px;">Add VP Stock to your home screen for quick access</div>
+    </div>
+    <button onclick="installApp()" style="padding:10px 20px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;font-size:0.88rem;white-space:nowrap;">Install App</button>
+    <button onclick="document.getElementById('installBanner').remove()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:1.2rem;padding:4px;">✕</button>
+  </div>`;
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:white;padding:16px 20px;box-shadow:0 -4px 24px rgba(15,33,55,0.12);z-index:400;border-top:1px solid #e5e7eb;';
+  document.body.appendChild(banner);
+});
+function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; const b=document.getElementById('installBanner'); if(b) b.remove(); showToast('✅ App installed!','green'); });
+}
+</script>
+
+<!-- TAKE ITEM MODAL (user mode) -->
+/div>
+
+<!-- MANAGE USERS MODAL (admin only) -->
+<div class="modal-overlay admin-only" id="manageUsersModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
+    <div style="padding:24px;">
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
+      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
+          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
+        </div>
+        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
+        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
+      </div>
+      <div style="font-size:0.75rem;f = item.name;
   document.getElementById('takeItemQty').textContent = 'Current stock: '+item.qty+' units';
   const ph = document.getElementById('takeItemPhoto');
   const _pSrc = item.photo || item.photoUrl || '';
