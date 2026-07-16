@@ -1509,7 +1509,7 @@ function showAdminLogin(){document.getElementById('staffLoginForm').style.displa
 function showStaffLogin(){document.getElementById('adminLoginForm').style.display='none';document.getElementById('staffLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('staffNameInput').focus(),50);}
 function doAdminLogin(){
   const val=document.getElementById('loginInput').value;const err=document.getElementById('loginError');
-  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');confetti({particleCount:150,spread:90,origin:{y:0.5}});startApp();}
+  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');setTimeout(function(){confetti({particleCount:150,spread:90,origin:{y:0.5},zIndex:99999});},400);startApp();}
   else{err.style.display='block';err.textContent='Incorrect password.';document.getElementById('loginInput').value='';document.getElementById('loginInput').focus();}
 }
 function doStaffLogin(){
