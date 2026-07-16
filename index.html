@@ -15,6 +15,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -913,6 +914,7 @@ function saveEmailAlert() {
     });
 }
 
+function checkLowStockAndAlert(barcode,qty){var svc=localStorage.getItem('vp_ej_service');var tmpl=localStorage.getItem('vp_ej_template');var pub=localStorage.getItem('vp_ej_pubkey');var email=localStorage.getItem('vp_alert_email');var threshold=parseInt(localStorage.getItem('vp_alert_threshold'))||5;if(!svc||!tmpl||!pub||!email)return;if(qty>threshold)return;var item=stock[barcode];if(!item)return;var alerted=JSON.parse(localStorage.getItem('vp_last_alerted')||'{}');if(alerted[barcode]!==undefined&&alerted[barcode]<=threshold)return;alerted[barcode]=qty;localStorage.setItem('vp_last_alerted',JSON.stringify(alerted));emailjs.send(svc,tmpl,{to_email:email,item_name:item.name,item_qty:String(qty),threshold:String(threshold),message:'⚠️ Low Stock Alert — '+item.name+' is now at '+qty+' unit'+(qty===1?'':' s')+'. Threshold: '+threshold+' units.'},{publicKey:pub}).catch(function(e){console.warn('EmailJS:',e);});}
 function removeEmailAlert() {
   Object.values(EJ_KEYS).forEach(k=>localStorage.removeItem(k));
   showToast('Email alerts removed','red'); closeModal('emailAlertModal');
@@ -1102,7 +1104,7 @@ function confirmAction() {
   if(currentAction==='add'){ item.qty+=qty; showToast(`✅ ${item.name}: ${before} → ${item.qty}`,'green'); }
   else { if(qty>item.qty){ showToast(`⚠ Can't remove more than current stock (${item.qty})`,'red'); return; } item.qty-=qty; showToast(`📤 ${item.name}: ${before} → ${item.qty}`,'red'); }
   item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  save(); closeScanFlow();
+  save() checkLowStockAndAlert(currentBarcode,stock[currentBarcode].qty);; closeScanFlow();
 }
 
 // New item
