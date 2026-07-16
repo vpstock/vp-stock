@@ -1520,7 +1520,7 @@ function doStaffLogin(){
   const name=document.getElementById('staffNameInput').value.trim();const pin=document.getElementById('staffPinInput').value.trim();const err=document.getElementById('loginError');
   if(!name||!pin){err.style.display='block';err.textContent='Enter your name and PIN.';return;}
   const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(u=>u.name.toLowerCase()===name.toLowerCase()&&u.pin===pin);
-  if(found){localStorage.setItem(SESSION_KEY,JSON.stringify({name:found.name,pin:found.pin}));localStorage.removeItem(AUTH_KEY);currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');startApp();}
+  if(found){localStorage.setItem(SESSION_KEY,JSON.stringify({name:found.name,pin:found.pin}));localStorage.removeItem(AUTH_KEY);currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');setTimeout(function(){confetti({particleCount:150,spread:90,origin:{y:0.5},zIndex:99999});},400);startApp();}
   else{err.style.display='block';err.textContent='Name or PIN not recognised.';document.getElementById('staffPinInput').value='';document.getElementById('staffPinInput').focus();}
 }
 function doLogout(){localStorage.removeItem(AUTH_KEY);localStorage.removeItem(SESSION_KEY);currentUser=null;location.reload();}
