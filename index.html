@@ -1506,7 +1506,7 @@ let currentUser = null;
 
 function checkAuth() {
   if(localStorage.getItem(AUTH_KEY)===APP_PASS){currentUser={name:'Admin',role:'admin'};startApp();return;}
-  try{const saved=localStorage.getItem(SESSION_KEY);if(saved){const u=JSON.parse(saved);const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(x=>x.name===u.name&&x.pin===u.pin);if(found){currentUser={name:found.name,role:'user'};startApp();return;}}}catch(e){}
+  try{const saved=localStorage.getItem(SESSION_KEY);if(saved){const u=JSON.parse(saved);const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(x=>x.name===u.name&&x.pin===u.pin);if(found){currentUser={name:found.name,role:'user'};startApp();setTimeout(function(){confetti({particleCount:150,spread:90,origin:{y:0.5},zIndex:99999});},400);return;}}}catch(e){}
   document.getElementById('loginScreen').classList.add('active');showStaffLogin();
 }
 function showAdminLogin(){document.getElementById('staffLoginForm').style.display='none';document.getElementById('adminLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('loginInput').focus(),50);}
