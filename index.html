@@ -1047,7 +1047,8 @@ function clearTakePresets() {
 }
 function openTakeModal(barcode) {
     openScanModal(barcode);
-  goToQty('subtract');
+  goToQty('subtract');}
+
 function confirmTake() {
   const qty = parseInt(document.getElementById('takeQtyInput').value)||1;
   const item = stock[currentBarcode];
