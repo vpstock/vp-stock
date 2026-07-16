@@ -1046,19 +1046,8 @@ function clearTakePresets() {
   document.querySelectorAll('.take-preset-btn').forEach(b=>b.classList.remove('active'));
 }
 function openTakeModal(barcode) {
-  const item = stock[barcode];
-  document.getElementById('takeItemName').textContent = item.name;
-  document.getElementById('takeItemQty').textContent = 'Current stock: '+item.qty+' units';
-  const ph = document.getElementById('takeItemPhoto');
-  const _pSrc = item.photo || item.photoUrl || '';
-  ph.style.display = _pSrc ? 'block':'none';
-  if(_pSrc) ph.src = _pSrc;
-  document.getElementById('takeQtyInput').value = 1;
-  document.querySelectorAll('.take-preset-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('takePreset1').classList.add('active');
-  document.getElementById('takeModal').classList.add('active');
-  setTimeout(()=>document.getElementById('takeQtyInput').select(),100);
-}
+    openScanModal(barcode);
+  goToQty('subtract');
 function confirmTake() {
   const qty = parseInt(document.getElementById('takeQtyInput').value)||1;
   const item = stock[currentBarcode];
