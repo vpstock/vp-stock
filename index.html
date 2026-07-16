@@ -427,6 +427,12 @@ tbody tr:hover td { background:#eff6ff; }
   <div class="fs-qty-current" id="fsQtyCurrent"></div>
   <div class="fs-qty-label">How many?</div>
   <input type="number" class="fs-qty-input" id="fsQtyInput" value="1" min="1" inputmode="numeric" />
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0;">
+    <button onclick="document.getElementById('fsQtyInput').value=1" style="flex:1;min-width:60px;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-weight:600;background:#f3f4f6;cursor:pointer;font-family:Inter,sans-serif;">1</button>
+    <button onclick="document.getElementById('fsQtyInput').value=5" style="flex:1;min-width:60px;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-weight:600;background:#f3f4f6;cursor:pointer;font-family:Inter,sans-serif;">5</button>
+    <button onclick="document.getElementById('fsQtyInput').value=10" style="flex:1;min-width:60px;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-weight:600;background:#f3f4f6;cursor:pointer;font-family:Inter,sans-serif;">10</button>
+    <button onclick="document.getElementById('fsQtyInput').value=30" style="flex:1;min-width:80px;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-weight:600;background:#f3f4f6;cursor:pointer;font-family:Inter,sans-serif;">✋ Handful</button>
+  </div>
   <button class="fs-confirm-btn" id="fsConfirmBtn" onclick="confirmAction()"></button>
   <button class="fs-back-btn" onclick="goBack()">← Go Back</button>
 </div>
@@ -1045,10 +1051,7 @@ function setTakeQty(n) {
 function clearTakePresets() {
   document.querySelectorAll('.take-preset-btn').forEach(b=>b.classList.remove('active'));
 }
-function openTakeModal(barcode) {
-    openScanModal(barcode);
-  goToQty('subtract');}
-
+function openTakeModal(barcode) { goToQty('subtract'); }
 function confirmTake() {
   const qty = parseInt(document.getElementById('takeQtyInput').value)||1;
   const item = stock[currentBarcode];
@@ -1088,7 +1091,7 @@ function goToQty(action) {
   document.getElementById('stepQty').classList.add('active');
   setTimeout(()=>document.getElementById('fsQtyInput').select(),100);
 }
-function goBack() { document.getElementById('stepQty').classList.remove('active'); document.getElementById('stepAction').classList.add('active'); }
+function goBack() { if(currentUser&&currentUser.role==='user'){closeScanFlow();return;} document.getElementById('stepQty').classList.remove('active'); document.getElementById('stepAction').classList.add('active'); }
 function closeScanFlow() { document.getElementById('stepAction').classList.remove('active'); document.getElementById('stepQty').classList.remove('active'); barcodeInput.focus(); }
 function confirmAction() {
   const qty = parseInt(document.getElementById('fsQtyInput').value)||0;
