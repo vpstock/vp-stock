@@ -15,6 +15,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f5f7ff; color: #0f2137; min-height: 100vh; }
@@ -1508,7 +1509,7 @@ function showAdminLogin(){document.getElementById('staffLoginForm').style.displa
 function showStaffLogin(){document.getElementById('adminLoginForm').style.display='none';document.getElementById('staffLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('staffNameInput').focus(),50);}
 function doAdminLogin(){
   const val=document.getElementById('loginInput').value;const err=document.getElementById('loginError');
-  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');startApp();}
+  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');confetti({particleCount:150,spread:90,origin:{y:0.5}});startApp();}
   else{err.style.display='block';err.textContent='Incorrect password.';document.getElementById('loginInput').value='';document.getElementById('loginInput').focus();}
 }
 function doStaffLogin(){
