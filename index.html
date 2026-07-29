@@ -1169,7 +1169,7 @@ function saveEditItem() {
 
 function removeItemPhoto() {
   const barcode = document.getElementById('editItemKey').value;
-  if(stock[barcode]){ delete stock[barcode].photo; save(); showToast('Photo removed','red'); }
+  if(stock[barcode]){ delete stock[barcode].photo; delete stock[barcode].photoUrl; save(); showToast('Photo removed','red'); }
   document.getElementById('editPhotoRow').style.display='none';
 }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); barcodeInput.focus(); }
@@ -1445,7 +1445,7 @@ function doOpenPrintWindow(){
 // Clear
 function clearAllPhotos() {
   if(!confirm('Remove all photos from every item? This cannot be undone.')) return;
-  Object.keys(stock).forEach(k => delete stock[k].photo);
+  Object.keys(stock).forEach(k => { delete stock[k].photo; delete stock[k].photoUrl; });
   save(); renderTable();
   showToast('All photos cleared','red');
 }
