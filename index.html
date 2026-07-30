@@ -280,6 +280,10 @@ tbody tr:hover td { background:#eff6ff; }
 /* CONFETTI PIECES */
 .confetti-piece { position:fixed; width:10px; height:10px; border-radius:2px; pointer-events:none; animation:confettiFall linear forwards; }
 @keyframes confettiFall { 0%{opacity:1;} 80%{opacity:1;} 100%{transform:translateY(100vh) rotate(720deg);opacity:0;} }
+/* Hide columns: QR image, Low Alert, Last Updated */
+.td-qr, thead th:nth-child(2) { display: none !important; }
+.td-low, thead th:nth-child(6) { display: none !important; }
+.td-updated, thead th:nth-child(8) { display: none !important; }
 </style>
 </head>
 <body>
@@ -1343,7 +1347,7 @@ function renderTable() {
         <td class="td-name"><span class="item-name-cell">${esc(item.name)}</span>${item.category?`<br><span class="cat-badge">${esc(item.category)}</span>`:''}</td>
         <td class="td-id"><span class="barcode-cell">${esc(bd)}</span></td>
         <td class="td-qty"><span class="qty-value">${item.qty}</span></td>
-        <td class="td-low" style="color:#9ca3af;font-size:0.85rem;">${low!==null?low:'—'}</td>
+        <td class="td-low" style="color:#9ca3af;font-size:0.85rem;">${(low!==null&&low!==undefined)?low:'—'}</td>
         <td class="td-status">${badge}</td>
         <td class="td-updated" style="font-size:0.8rem;color:#9ca3af;">${item.updated||'—'}</td>
         <td class="td-actions"><button class="btn-row-action edit" onclick="editItem('${esc(k)}')">✏️</button><button class="btn-row-action del" onclick="deleteItem('${esc(k)}')">🗑️</button></td>
