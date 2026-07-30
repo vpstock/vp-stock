@@ -1097,7 +1097,7 @@ function startAutoSync() {
 function updateStats() {
   const keys = Object.keys(stock);
   const total = keys.length;
-  const low = keys.filter(k => stock[k].qty===0 || (stock[k].lowAt!==null && stock[k].qty<=stock[k].lowAt)).length;
+  const low = keys.filter(k => { const _el=stock[k].lowAt!==null&&stock[k].lowAt!==undefined?stock[k].lowAt:5; return stock[k].qty===0||stock[k].qty<=_el; }).length;
   const inStock = total - low;
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statInStock').textContent = inStock;
@@ -1316,7 +1316,8 @@ function renderTable() {
     const ms=item.name.toLowerCase().includes(search)||k.toLowerCase().includes(search);
     const mc=activeCategory==='All'||(item.category||'')===activeCategory;
     const _isOut=item.qty===0;
-    const _isLow=!_isOut&&item.lowAt!==null&&item.lowAt!==undefined&&item.qty<=item.lowAt;
+    const _eLow2=item.lowAt!==null&&item.lowAt!==undefined?item.lowAt:5;
+    const _isLow=!_isOut&&item.qty<=_eLow2;
     const _isOk=!_isOut&&!_isLow;
     const mf=activeStatusFilter==='All'||(activeStatusFilter==='out'&&_isOut)||(activeStatusFilter==='low'&&_isLow)||(activeStatusFilter==='ok'&&_isOk);
     return ms&&mc&&mf;
@@ -1331,7 +1332,8 @@ function renderTable() {
     if(activeCategory==='All') html+=`<tr class="cat-group-header"><td colspan="9">📂 ${cat}</td></tr>`;
     groups[cat].forEach(k=>{
       const item=stock[k]; const low=item.lowAt;
-      let badge=item.qty===0?'<span class="badge badge-zero">🔴 Out of Stock</span>':low!==null&&item.qty<=low?'<span class="badge badge-low">🟠 Low</span>':'<span class="badge badge-ok">🟢 OK</span>';
+      const _eLow=low!==null&&low!==undefined?low:5;
+      let badge=item.qty===0?'<span class="badge badge-zero">🔴 Out of Stock</span>':item.qty<=_eLow?'<span class="badge badge-low">🟠 Low</span>':'<span class="badge badge-ok">🟢 OK</span>';
       const bd=k.startsWith('MANUAL_')?'(manual)':k;
       const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
       const _rSrc=item.photo||item.photoUrl||''; const photoHTML=_rSrc?`<img src="${_rSrc}" alt="${esc(item.name)}" /><div class="photo-overlay">📷 Change</div>`:`<span class="photo-placeholder">📷</span><div class="photo-overlay">📷 Add Photo</div>`;
