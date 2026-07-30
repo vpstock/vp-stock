@@ -381,6 +381,7 @@ tbody tr:hover td { background:#eff6ff; }
       <button class="btn-tool" onclick="openEmailAlertModal()">🔔 Email Alerts</button>
       <button class="btn-tool" onclick="clearAllPhotos()">🖼 Clear All Photos</button>
       <button class="btn-tool red" onclick="clearAll()">🗑 Clear All Data</button>
+      <button class="btn-tool" onclick="openActivityLog()">📋 Activity Log</button>
     </div>
   </div>
 
@@ -404,6 +405,37 @@ tbody tr:hover td { background:#eff6ff; }
       <div class="empty-icon">📭</div>
       <h3>No items yet</h3>
       <p>Import your Excel file or add your first item to get started.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVITY LOG MODAL -->
+<div class="modal-overlay" id="activityLogModal">
+  <div class="modal-card" style="max-width:720px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#0f2137">📋 Activity Log</h3>
+      <button onclick="closeModal('activityLogModal')" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9ca3af;line-height:1">✕</button>
+    </div>
+    <input type="text" id="activityLogFilter" placeholder="Filter by user, action, item..." oninput="renderActivityLog(this.value)" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.88rem;margin-bottom:12px;outline:none;font-family:Inter,sans-serif;width:100%;box-sizing:border-box" />
+    <div style="overflow-y:auto;flex:1;border:1.5px solid #e5e7eb;border-radius:10px">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="position:sticky;top:0;background:#f9fafb;z-index:1">
+          <tr>
+            <th style="padding:9px 10px;text-align:left;font-size:0.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid #e5e7eb;white-space:nowrap">When</th>
+            <th style="padding:9px 10px;text-align:left;font-size:0.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid #e5e7eb">User</th>
+            <th style="padding:9px 10px;text-align:left;font-size:0.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid #e5e7eb">Action</th>
+            <th style="padding:9px 10px;text-align:left;font-size:0.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid #e5e7eb">Details</th>
+          </tr>
+        </thead>
+        <tbody id="activityLogBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+      <button onclick="exportActivityLog()" style="padding:8px 14px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#1b3a5c;font-weight:600;cursor:pointer;font-size:0.82rem">⬇ Export CSV</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="if(window.confirm('Clear all log history?')){localStorage.removeItem(LOG_KEY);renderActivityLog('');showToast('Log cleared','red')}" style="padding:8px 14px;border:1.5px solid #fca5a5;border-radius:8px;background:#fff;color:#dc2626;font-weight:600;cursor:pointer;font-size:0.82rem">🗑 Clear Log</button>
+        <button onclick="closeModal('activityLogModal')" style="padding:8px 18px;border:none;border-radius:8px;background:#1b3a5c;color:#fff;font-weight:700;cursor:pointer;font-size:0.85rem">Close</button>
+      </div>
     </div>
   </div>
 </div>
@@ -622,6 +654,62 @@ tbody tr:hover td { background:#eff6ff; }
 
 <script>
 const STORAGE_KEY = 'vp_stock_v1';
+const LOG_KEY = 'vp_activity_log';
+const LOG_MAX = 500;
+
+function logActivity(action, details) {
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); } catch(e){}
+  log.unshift({ ts: new Date().toISOString(), user: currentUser ? currentUser.name : 'System', action, details });
+  if(log.length > LOG_MAX) log = log.slice(0, LOG_MAX);
+  localStorage.setItem(LOG_KEY, JSON.stringify(log));
+}
+
+function openActivityLog() {
+  const f = document.getElementById('activityLogFilter');
+  if(f) f.value = '';
+  renderActivityLog('');
+  document.getElementById('activityLogModal').classList.add('active');
+}
+
+function renderActivityLog(filter) {
+  filter = filter || '';
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); } catch(e){}
+  const icons = {login:'🔑',took:'📤',added:'➕',edited:'✏️',deleted:'🗑️',pushed:'⬆️',pulled:'⬇️',imported:'📥'};
+  const colors = {login:'#6b7280',took:'#dc2626',added:'#16a34a',edited:'#d97706',deleted:'#dc2626',pushed:'#2563eb',pulled:'#7c3aed',imported:'#0891b2'};
+  if(filter) {
+    const q = filter.toLowerCase();
+    log = log.filter(e => (e.user||'').toLowerCase().includes(q) || (e.action||'').includes(q) || (e.details||'').toLowerCase().includes(q));
+  }
+  const tbody = document.getElementById('activityLogBody');
+  if(!log.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:28px;font-size:0.88rem">' + (filter ? 'No matching entries.' : 'No activity recorded yet.') + '</td></tr>';
+    return;
+  }
+  tbody.innerHTML = log.map((e,i) => {
+    const d = new Date(e.ts);
+    const dateStr = d.toLocaleDateString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const timeStr = d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+    const icon = icons[e.action]||'•';
+    const col = colors[e.action]||'#374151';
+    const bg = i%2===0 ? '#fff' : '#f9fafb';
+    return '<tr style="background:'+bg+'"><td style="padding:8px 10px;white-space:nowrap;color:#6b7280;font-size:0.78rem;border-bottom:1px solid #f3f4f6">'+dateStr+'<br><span style="color:#9ca3af">'+timeStr+'</span></td><td style="padding:8px 10px;font-weight:600;color:#0f2137;border-bottom:1px solid #f3f4f6;white-space:nowrap">'+e.user+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6"><span style="background:'+col+'18;color:'+col+';padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;white-space:nowrap">'+icon+' '+e.action+'</span></td><td style="padding:8px 10px;color:#374151;font-size:0.84rem;border-bottom:1px solid #f3f4f6">'+e.details+'</td></tr>';
+  }).join('');
+}
+
+function exportActivityLog() {
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); } catch(e){}
+  if(!log.length) { showToast('No log entries to export','red'); return; }
+  const rows = [['Timestamp','User','Action','Details']].concat(log.map(e=>[e.ts,e.user,e.action,'"'+(e.details||'').replace(/"/g,'""')+'"']));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'vp-activity-log-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
 const FB_KEY = 'vp_firebase_url';
 const CATEGORIES = ['AC Materials','Electrical','Grilles','Nexcon','PVC','Screws and Consumables'];
 let stock = {};
@@ -657,9 +745,10 @@ function pushToCloud(silent=false) {
   const count = Object.keys(stockToSave).length;
   if(count === 0){ if(!silent){ setSyncStatus('red','Nothing to push'); showToast('No items to push','red'); } return; }
   const users = JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
-  const payload = { vp_stock: stockToSave, vp_users: users };
+  let vp_log=[];try{vp_log=JSON.parse(localStorage.getItem(LOG_KEY)||'[]').slice(0,200);}catch(e){}
+  const payload = { vp_stock: stockToSave, vp_users: users, vp_activity_log: vp_log };
   fetch(url+'/vp_data.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error(t||r.status); }); setSyncStatus('green','Synced ✓'); if(!silent) showToast('✅ '+count+' items pushed to cloud','green'); })
+    .then(r=>{ if(!r.ok) return r.text().then(t=>{ throw new Error(t||r.status); }); setSyncStatus('green','Synced ✓'); if(!silent){logActivity('pushed',count+' items pushed to cloud');showToast('✅ '+count+' items pushed to cloud','green');} })
     .catch(e=>{ setSyncStatus('red','Sync error'); if(!silent) showToast('Push failed: '+e.message,'red'); });
 }
 
@@ -688,8 +777,10 @@ function pullFromCloud(manual) {
         renderCatFilters(); renderTable(); updateStats();
       }
       if(remoteUsers) { localStorage.setItem(USERS_KEY, JSON.stringify(remoteUsers)); }
+      const remoteLog = (payload && payload.vp_activity_log) ? payload.vp_activity_log : [];
+      if(remoteLog.length){let localLog=[];try{localLog=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');}catch(e){}const seen=new Set();const merged=[...localLog,...remoteLog].filter(e=>{if(seen.has(e.ts))return false;seen.add(e.ts);return true;});merged.sort((a,b)=>b.ts.localeCompare(a.ts));localStorage.setItem(LOG_KEY,JSON.stringify(merged.slice(0,LOG_MAX)));}
       setSyncStatus('green','Synced ✓');
-      if(manual) showToast('✅ Stock + users updated from cloud','green');
+      if(manual){logActivity('pulled','Stock pulled from cloud');showToast('✅ Stock + users updated from cloud','green');}
       // Also load photos from separate /vp_photos path (never overwritten by push)
       fetch(url+'/vp_photos.json').then(r=>r.json()).then(photos=>{
         if(photos && typeof photos==='object'){
@@ -1069,6 +1160,7 @@ function confirmTake() {
   item.takeLog.push({by:currentUser.name,qty:qty,from:prev,to:item.qty,ts:new Date().toISOString()});
   save(); updateStats(); renderTable();
   closeModal('takeModal');
+  logActivity('took', currentUser.name+' took '+qty+' × '+item.name+' ('+prev+' → '+item.qty+')');
   showToast('✅ '+currentUser.name+' took '+qty+' × '+item.name, 'green');showCelebration('✅','Got it! '+qty+' × '+item.name);
   barcodeInput.focus();
 }
@@ -1107,7 +1199,9 @@ function confirmAction() {
   if(currentAction==='add'){ item.qty+=qty; showToast(`✅ ${item.name}: ${before} → ${item.qty}`,'green'); }
   else { if(qty>item.qty){ showToast(`⚠ Can't remove more than current stock (${item.qty})`,'red'); return; } item.qty-=qty; showToast(`📤 ${item.name}: ${before} → ${item.qty}`,'red'); }
   item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  save(); checkLowStockAndAlert(currentBarcode,stock[currentBarcode].qty);; closeScanFlow();
+  save(); checkLowStockAndAlert(currentBarcode,stock[currentBarcode].qty);
+  logActivity(currentAction==='add' ? 'added' : 'took', currentUser.name+' '+(currentAction==='add'?'added':'removed')+' '+qty+' × '+item.name+' ('+before+' → '+item.qty+')');
+  ; closeScanFlow();
 }
 
 // New item
@@ -1127,6 +1221,7 @@ function saveNewItem() {
   const low = parseInt(document.getElementById('newItemLow').value)||null;
   const category = document.getElementById('newItemCategory').value||'';
   stock[currentBarcode] = { name, qty, lowAt:low, category, updated: new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) };
+  logActivity('added', name+' added (qty: '+qty+')');
   save(); showToast(`✅ ${name} added to stock`,'green'); closeModal('newItemModal');
 }
 function openAddItem() {
@@ -1162,9 +1257,10 @@ function saveEditItem() {
   const lowRaw = document.getElementById('editItemLow').value.trim();
   const low = lowRaw!=='' ? parseInt(lowRaw) : null;
   const category = document.getElementById('editItemCategory').value||'';
-  const item = stock[barcode];
+  const item = stock[barcode]; const oldQty = item.qty;
   item.name=name; item.qty=qty; item.lowAt=low; item.category=category;
   item.updated = new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  logActivity('edited', name+' updated (qty: '+oldQty+' → '+qty+')');
   save(); showToast(`✅ ${name} updated`,'green'); closeModal('editItemModal');
 }
 
@@ -1181,7 +1277,7 @@ function showDeleteConfirm(barcode) {
   overlay.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:320px;width:100%;text-align:center"><p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:#0f2137">Delete item?</p><p style="margin:0 0 24px;font-size:0.9rem;color:#6b7280">'+name+'</p><p style="margin:0 0 24px;font-size:0.8rem;color:#ef4444">This cannot be undone.</p><div style="display:flex;gap:12px"><button id="vpCancelDel" style="flex:1;padding:11px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:0.9rem;cursor:pointer;font-weight:600">Cancel</button><button id="vpConfirmDel" style="flex:1;padding:11px;background:#dc2626;color:#fff;border:none;border-radius:10px;font-size:0.9rem;cursor:pointer;font-weight:700">Delete</button></div></div>';
   document.body.appendChild(overlay);
   overlay.querySelector('#vpCancelDel').onclick=()=>overlay.remove();
-  overlay.querySelector('#vpConfirmDel').onclick=()=>{overlay.remove();delete stock[barcode];save();pushToCloud(true);showToast('Item deleted','red');};
+  overlay.querySelector('#vpConfirmDel').onclick=()=>{overlay.remove();logActivity('deleted',name+' deleted');delete stock[barcode];save();pushToCloud(true);showToast('Item deleted','red');};
   overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
 }
 function deleteItem(barcode){showDeleteConfirm(barcode);}
@@ -1539,6 +1635,7 @@ function applyRoleUI(){
   if(currentUser.role==='user'){document.querySelectorAll('.admin-only').forEach(el=>el.style.setProperty('display','none','important'));}
 }
 function startApp(){
+  logActivity('login', currentUser.name + ' logged in');
   load(); applyRoleUI(); updateStats(); barcodeInput.focus();
   requestAnimationFrame(()=>{
     renderCatFilters(); renderTable();
