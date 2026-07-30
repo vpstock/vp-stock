@@ -1336,7 +1336,7 @@ function renderTable() {
     if(activeCategory==='All') html+=`<tr class="cat-group-header"><td colspan="9">📂 ${cat}</td></tr>`;
     groups[cat].forEach(k=>{
       const item=stock[k]; const low=item.lowAt;
-      const _eLow=low!==null&&low!==undefined?low:5;
+      const _eLow=low!==null&&low!==undefined?low:0;
       let badge=item.qty===0?'<span class="badge badge-zero">🔴 Out of Stock</span>':item.qty<=_eLow?'<span class="badge badge-low">🟠 Low</span>':'<span class="badge badge-ok">🟢 OK</span>';
       const bd=k.startsWith('MANUAL_')?'(manual)':k;
       const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
@@ -1652,7 +1652,7 @@ function startApp(){
 }
 
 // USER MANAGEMENT
-function openManageUsers(){renderUserList();document.getElementById('manageUsersModal').classList.add('active');}
+function openManageUsers(){renderUserList();const _mu=document.getElementById('manageUsersModal');_mu.style.setProperty('display','flex','important');_mu.classList.add('active');}
 function renderUserList(){
   const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const ul=document.getElementById('userListEl');
   if(!users.length){ul.innerHTML='<p style="color:#9ca3af;text-align:center;padding:12px;">No users yet.</p>';return;}
