@@ -1102,14 +1102,14 @@ function startAutoSync() {
 function updateStats() {
   const keys = Object.keys(stock);
   const total = keys.length;
-  let inStockCount=0,lowCount=0,outCount=0;
+  let lowCount=0,outCount=0;
   keys.forEach(k=>{
     const item=stock[k];
-    const eLow=(item.lowAt!==null&&item.lowAt!==undefined)?item.lowAt:0;
+    const eLow=(item.lowAt!==null&&item.lowAt!==undefined)?item.lowAt:5;
     if(item.qty===0) outCount++;
     else if(item.qty<=eLow) lowCount++;
-    else inStockCount++;
   });
+  const inStockCount=total-outCount;
   const el=id=>document.getElementById(id);
   if(el('statTotal')) el('statTotal').textContent=total;
   if(el('statInStock')) el('statInStock').textContent=inStockCount;
@@ -1345,7 +1345,7 @@ function renderTable() {
     if(activeCategory==='All') html+=`<tr class="cat-group-header"><td colspan="9">📂 ${cat}</td></tr>`;
     groups[cat].forEach(k=>{
       const item=stock[k]; const low=item.lowAt;
-      const _eLow=low!==null&&low!==undefined?low:0;
+      const _eLow=low!==null&&low!==undefined?low:5;
       let badge=item.qty===0?'<span class="badge badge-zero">🔴 Out of Stock</span>':item.qty<=_eLow?'<span class="badge badge-low">🟠 Low</span>':'<span class="badge badge-ok">🟢 OK</span>';
       const bd=k.startsWith('MANUAL_')?'(manual)':k;
       const qrId='qr_'+k.replace(/[^a-zA-Z0-9]/g,'_');
@@ -1625,7 +1625,7 @@ let currentUser = null;
 
 function checkAuth() {
   if(localStorage.getItem(AUTH_KEY)===APP_PASS){currentUser={name:'Admin',role:'admin'};startApp();return;}
-  try{const saved=localStorage.getItem(SESSION_KEY);if(saved){const u=JSON.parse(saved);const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(x=>x.name===u.name&&x.pin===u.pin);if(found){currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');setTimeout(function(){confetti({particleCount:40,spread:70,origin:{y:0.5},zIndex:99999});},400);startApp();return;}}}catch(e){}
+  try{const saved=localStorage.getItem(SESSION_KEY);if(saved){const u=JSON.parse(saved);const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(x=>x.name===u.name&&x.pin===u.pin);if(found){currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');startApp();return;}}}catch(e){}
   document.getElementById('loginScreen').classList.add('active');showStaffLogin();
 }
 function showAdminLogin(){document.getElementById('staffLoginForm').style.display='none';document.getElementById('adminLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('loginInput').focus(),50);}
@@ -1739,6 +1739,7 @@ function installApp(){
     <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
     <div style="padding:24px;">
       <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
+      <div id="userListEl" style="max-height:180px;overflow-y:auto;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;"></div>
       <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
         <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
         <div style="display:flex;gap:8px;margin-bottom:10px;">
