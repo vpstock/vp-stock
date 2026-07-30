@@ -1173,10 +1173,17 @@ function removeItemPhoto() {
   document.getElementById('editPhotoRow').style.display='none';
 }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); barcodeInput.focus(); }
-function deleteItem(barcode) {
-  if(!confirm(`Delete "${stock[barcode]?.name}"? This cannot be undone.`)) return;
-  delete stock[barcode]; save(); showToast('Item deleted','red');
+function showDeleteConfirm(barcode) {
+  const name = (stock[barcode]?.name||barcode).replace(/["<>]/g,'');
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:320px;width:100%;text-align:center"><p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:#0f2137">Delete item?</p><p style="margin:0 0 24px;font-size:0.9rem;color:#6b7280">'+name+'</p><p style="margin:0 0 24px;font-size:0.8rem;color:#ef4444">This cannot be undone.</p><div style="display:flex;gap:12px"><button id="vpCancelDel" style="flex:1;padding:11px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:0.9rem;cursor:pointer;font-weight:600">Cancel</button><button id="vpConfirmDel" style="flex:1;padding:11px;background:#dc2626;color:#fff;border:none;border-radius:10px;font-size:0.9rem;cursor:pointer;font-weight:700">Delete</button></div></div>';
+  document.body.appendChild(overlay);
+  overlay.querySelector('#vpCancelDel').onclick=()=>overlay.remove();
+  overlay.querySelector('#vpConfirmDel').onclick=()=>{overlay.remove();delete stock[barcode];save();pushToCloud(true);showToast('Item deleted','red');};
+  overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
 }
+function deleteItem(barcode){showDeleteConfirm(barcode);}
 
 // Category filters
 function renderCatFilters() {
