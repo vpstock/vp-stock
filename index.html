@@ -1321,7 +1321,7 @@ function renderTable() {
         <td class="td-photo"><div class="photo-cell" onclick="triggerPhotoUpload('${esc(k)}')">${photoHTML}</div></td>
         <td class="td-qr"><div class="qr-cell" id="${qrId}"></div></td>
         <td class="td-name"><span class="item-name-cell">${esc(item.name)}</span>${item.category?`<br><span class="cat-badge">${esc(item.category)}</span>`:''}</td>
-        <td class="td-id"><span class="barcode-cell">${esc(bd)}</span> <span style="font-size:0.8rem;color:#1b3a5c;font-weight:700;">Qty: ${item.qty}</span></td>
+        <td class="td-id"><span class="barcode-cell">${esc(bd)}</span></td>
         <td class="td-qty"><span class="qty-value">${item.qty}</span></td>
         <td class="td-low" style="color:#9ca3af;font-size:0.85rem;">${low!==null?low:'—'}</td>
         <td class="td-status">${badge}</td>
