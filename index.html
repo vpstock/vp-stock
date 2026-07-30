@@ -386,6 +386,12 @@ tbody tr:hover td { background:#eff6ff; }
   </div>
 
   <div class="cat-filters" id="catFilters"></div>
+  <div class="cat-filters" id="statusFilters" style="margin-bottom:4px;">
+    <button class="cat-btn active" data-f="All" onclick="setStatusFilter('All')">All Items</button>
+    <button class="cat-btn" data-f="ok" onclick="setStatusFilter('ok')">🟢 In Stock</button>
+    <button class="cat-btn" data-f="low" onclick="setStatusFilter('low')">🟠 Low Stock</button>
+    <button class="cat-btn" data-f="out" onclick="setStatusFilter('out')">🔴 Out of Stock</button>
+  </div>
 
   <div class="stock-card">
     <div class="stock-header">
@@ -716,6 +722,7 @@ let stock = {};
 let currentBarcode = null;
 let currentAction = 'add';
 let activeCategory = 'All';
+let activeStatusFilter = 'All';
 let syncTimer = null;
 
 function getFbUrl() { return localStorage.getItem(FB_KEY)||'https://vp-stock-default-rtdb.firebaseio.com'; }
@@ -1291,6 +1298,13 @@ function renderCatFilters() {
   cf.innerHTML = all.map(c=>`<button class="cat-btn ${activeCategory===c?'active':''}" onclick="setCategory('${c}')">${c}</button>`).join('');
 }
 function setCategory(cat) { activeCategory=cat; renderCatFilters(); renderTable(); }
+function setStatusFilter(f) {
+  activeStatusFilter = f;
+  document.querySelectorAll('#statusFilters .cat-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector('#statusFilters .cat-btn[data-f="'+f+'"]');
+  if(btn) btn.classList.add('active');
+  renderTable();
+}
 
 // Render table
 function renderTable() {
@@ -1301,7 +1315,11 @@ function renderTable() {
     const item=stock[k];
     const ms=item.name.toLowerCase().includes(search)||k.toLowerCase().includes(search);
     const mc=activeCategory==='All'||(item.category||'')===activeCategory;
-    return ms&&mc;
+    const _isOut=item.qty===0;
+    const _isLow=!_isOut&&item.lowAt!==null&&item.lowAt!==undefined&&item.qty<=item.lowAt;
+    const _isOk=!_isOut&&!_isLow;
+    const mf=activeStatusFilter==='All'||(activeStatusFilter==='out'&&_isOut)||(activeStatusFilter==='low'&&_isLow)||(activeStatusFilter==='ok'&&_isOk);
+    return ms&&mc&&mf;
   });
   if(Object.keys(stock).length===0){ tbody.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
