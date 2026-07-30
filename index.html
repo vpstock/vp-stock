@@ -1545,8 +1545,197 @@ function doOpenPrintWindow(){
 <!-- TAKE MODAL (user mode) -->
 /div>
 
-<!-- MANAGE USERS MODAL (admin only) -->
 
+
+
+</body></html>`); win.document.close();
+}
+
+// Clear
+function clearAllPhotos() {
+  if(!confirm('Remove all photos from every item? This cannot be undone.')) return;
+  Object.keys(stock).forEach(k => { delete stock[k].photo; delete stock[k].photoUrl; });
+  save(); renderTable();
+  showToast('All photos cleared','red');
+}
+function clearAll(){ if(!confirm('⚠️ Delete ALL stock data permanently?')) return; localStorage.removeItem(STORAGE_KEY); stock={}; save(); showToast('All data cleared','red'); }
+
+// Toast
+function showToast(msg,type=''){
+  const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type;
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.className='toast',3000);
+}
+
+// Keyboard
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ closeScanFlow(); closeModal('newItemModal'); closeModal('editItemModal'); closeCamera(); }
+  if(e.key==='Enter'){
+    if(document.getElementById('stepQty').classList.contains('active')&&document.activeElement===document.getElementById('fsQtyInput')) confirmAction();
+    if(document.getElementById('newItemModal').classList.contains('active')&&document.activeElement===document.getElementById('newItemName')) document.getElementById('newItemQty').focus();
+  }
+});
+
+function toggleToolMenu() {
+  const menu = document.getElementById('toolMenu');
+  const arrow = document.getElementById('toolMenuArrow');
+  const open = menu.style.display === 'none';
+  menu.style.display = open ? 'block' : 'none';
+  arrow.textContent = open ? '▴' : '▾';
+}
+
+
+// CELEBRATION
+const CONFETTI_COLORS = ['#1b3a5c','#2563a8','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#ffffff'];
+function showCelebration(emoji, message, duration=1800) {
+  const overlay = document.getElementById('celebrationOverlay');
+  overlay.style.background = 'rgba(15,33,55,0.55)';
+  overlay.style.backdropFilter = 'blur(4px)';
+  document.getElementById('celebEmoji').textContent = emoji;
+  document.getElementById('celebMessage').textContent = message;
+  overlay.classList.add('active');
+  spawnConfetti();
+  setTimeout(()=>{ overlay.classList.remove('active'); }, duration);
+}
+function spawnConfetti() {
+  for(let i=0;i<25;i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}vw;top:${-10 - Math.random()*20}px;background:${CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)]};transform:rotate(${Math.random()*360}deg) scale(${0.5+Math.random()});width:${6+Math.random()*8}px;height:${6+Math.random()*14}px;border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${0.8+Math.random()*1.2}s;animation-delay:${Math.random()*0.4}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2000);
+  }
+}
+
+// AUTH
+const APP_PASS = 'VP@2o2siX';
+const AUTH_KEY = 'vp_auth';
+const USERS_KEY = 'vp_users';
+const SESSION_KEY = 'vp_session_user';
+let currentUser = null;
+
+function checkAuth() {
+  if(localStorage.getItem(AUTH_KEY)===APP_PASS){currentUser={name:'Admin',role:'admin'};startApp();return;}
+  try{const saved=localStorage.getItem(SESSION_KEY);if(saved){const u=JSON.parse(saved);const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(x=>x.name===u.name&&x.pin===u.pin);if(found){currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');setTimeout(function(){confetti({particleCount:150,spread:90,origin:{y:0.5},zIndex:99999});},400);startApp();return;}}}catch(e){}
+  document.getElementById('loginScreen').classList.add('active');showStaffLogin();
+}
+function showAdminLogin(){document.getElementById('staffLoginForm').style.display='none';document.getElementById('adminLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('loginInput').focus(),50);}
+function showStaffLogin(){document.getElementById('adminLoginForm').style.display='none';document.getElementById('staffLoginForm').style.display='block';document.getElementById('loginError').style.display='none';setTimeout(()=>document.getElementById('staffNameInput').focus(),50);}
+function doAdminLogin(){
+  const val=document.getElementById('loginInput').value;const err=document.getElementById('loginError');
+  if(val===APP_PASS){localStorage.setItem(AUTH_KEY,APP_PASS);localStorage.removeItem(SESSION_KEY);currentUser={name:'Admin',role:'admin'};document.getElementById('loginScreen').classList.remove('active');setTimeout(function(){confetti({particleCount:150,spread:90,origin:{y:0.5},zIndex:99999});},400);startApp();}
+  else{err.style.display='block';err.textContent='Incorrect password.';document.getElementById('loginInput').value='';document.getElementById('loginInput').focus();}
+}
+function doStaffLogin(){
+  const name=document.getElementById('staffNameInput').value.trim();const pin=document.getElementById('staffPinInput').value.trim();const err=document.getElementById('loginError');
+  if(!name||!pin){err.style.display='block';err.textContent='Enter your name and PIN.';return;}
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const found=users.find(u=>u.name.toLowerCase()===name.toLowerCase()&&u.pin===pin);
+  if(found){localStorage.setItem(SESSION_KEY,JSON.stringify({name:found.name,pin:found.pin}));localStorage.removeItem(AUTH_KEY);currentUser={name:found.name,role:'user'};document.getElementById('loginScreen').classList.remove('active');setTimeout(function(){confetti({particleCount:150,spread:90,origin:{y:0.5},zIndex:99999});},400);startApp();}
+  else{err.style.display='block';err.textContent='Name or PIN not recognised.';document.getElementById('staffPinInput').value='';document.getElementById('staffPinInput').focus();}
+}
+function doLogout(){localStorage.removeItem(AUTH_KEY);localStorage.removeItem(SESSION_KEY);currentUser=null;location.reload();}
+function applyRoleUI(){
+  document.getElementById('currentUserName').textContent=currentUser.name;
+  document.getElementById('currentUserPill').style.display='flex';
+  document.getElementById('logoutPill').style.display='flex';
+  if(currentUser.role==='user'){document.querySelectorAll('.admin-only').forEach(el=>el.style.setProperty('display','none','important'));}
+}
+function startApp(){
+  logActivity('login', currentUser.name + ' logged in');
+  load(); applyRoleUI(); updateStats(); barcodeInput.focus();
+  requestAnimationFrame(()=>{
+    renderCatFilters(); renderTable();
+    if(currentUser&&currentUser.role==='admin') startAutoSync();
+    const emoji=currentUser.role==='admin'?'🎉':'👋';
+    const msg=currentUser.role==='admin'?'Welcome back, Admin!':'Welcome, '+currentUser.name+'!';
+    showCelebration(emoji,msg);
+  });
+}
+
+// USER MANAGEMENT
+function openManageUsers(){renderUserList();document.getElementById('manageUsersModal').classList.add('active');}
+function renderUserList(){
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');const ul=document.getElementById('userListEl');
+  if(!users.length){ul.innerHTML='<p style="color:#9ca3af;text-align:center;padding:12px;">No users yet.</p>';return;}
+  ul.innerHTML=users.map((u,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f9fafb;border-radius:10px;margin-bottom:8px;"><div><strong style="color:#0f2137;">${u.name}</strong> <span style="color:#9ca3af;font-size:0.8rem;">PIN: ${'•'.repeat(u.pin.length)}</span></div><button onclick="deleteUser(${i})" style="background:#fee2e2;border:none;color:#ef4444;border-radius:8px;padding:6px 12px;font-size:0.8rem;font-weight:700;cursor:pointer;">Remove</button></div>`).join('');
+}
+function addUser(){
+  const name=document.getElementById('newUserName').value.trim();const pin=document.getElementById('newUserPin').value.trim();const err=document.getElementById('userAddError');
+  if(!name||!pin){err.style.display='block';err.textContent='Enter name and PIN.';return;}
+  if(pin.length<4){err.style.display='block';err.textContent='PIN must be at least 4 digits.';return;}
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+  if(users.find(u=>u.name.toLowerCase()===name.toLowerCase())){err.style.display='block';err.textContent='Name already exists.';return;}
+  users.push({name,pin});localStorage.setItem(USERS_KEY,JSON.stringify(users));
+  document.getElementById('newUserName').value='';document.getElementById('newUserPin').value='';err.style.display='none';
+  renderUserList();showToast('✅ User "'+name+'" added','green');
+}
+function deleteUser(i){
+  const users=JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+  if(!confirm('Remove user "'+users[i].name+'"?'))return;
+  users.splice(i,1);localStorage.setItem(USERS_KEY,JSON.stringify(users));renderUserList();
+}
+checkAuth();
+
+// PWA Manifest (injected inline so no server needed)
+(function(){
+  const manifest = {
+    name: "Victorian Projects Stock Manager",
+    short_name: "VP Stock",
+    description: "QR Code Stock Manager for Victorian Projects",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#1b3a5c",
+    theme_color: "#1b3a5c",
+    orientation: "portrait-primary",
+    icons: [
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%234338ca'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E📦%3C/text%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml" },
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%234338ca'/%3E%3Ctext y='360' x='256' text-anchor='middle' font-size='300'%3E📦%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('manifest-placeholder').href = url;
+})();
+
+// Install banner
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt = e;
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:1.4rem">📱</span>
+    <div style="flex:1;min-width:180px;">
+      <div style="font-weight:800;font-size:0.95rem;color:#0f2137;">Install as App</div>
+      <div style="font-size:0.78rem;color:#6b7280;margin-top:2px;">Add VP Stock to your home screen for quick access</div>
+    </div>
+    <button onclick="installApp()" style="padding:10px 20px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;font-size:0.88rem;white-space:nowrap;">Install App</button>
+    <button onclick="document.getElementById('installBanner').remove()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:1.2rem;padding:4px;">✕</button>
+  </div>`;
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:white;padding:16px 20px;box-shadow:0 -4px 24px rgba(15,33,55,0.12);z-index:400;border-top:1px solid #e5e7eb;';
+  document.body.appendChild(banner);
+});
+function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; const b=document.getElementById('installBanner'); if(b) b.remove(); showToast('✅ App installed!','green'); });
+}
 </script>
-</body>
-</html>
+
+<!-- TAKE ITEM MODAL (user mode) -->
+/div>
+
+<!-- MANAGE USERS MODAL (admin only) -->
+<div class="modal-overlay admin-only" id="manageUsersModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
+    <div style="padding:24px;">
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
+      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
+          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
+        </div>
+        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
+        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
+      </div>
+      <div style="font-size:0.75rem;f
