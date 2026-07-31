@@ -1289,7 +1289,7 @@ function removeItemPhoto() {
   if(stock[barcode]){ delete stock[barcode].photo; delete stock[barcode].photoUrl; save(); showToast('Photo removed','red'); }
   document.getElementById('editPhotoRow').style.display='none';
 }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); barcodeInput.focus(); }
+function closeModal(id) { const _m=document.getElementById(id);_m.classList.remove('active');if(_m.classList.contains('admin-only')){_m.style.setProperty('display','none','important');}barcodeInput.focus(); }
 function showDeleteConfirm(barcode) {
   const name = (stock[barcode]?.name||barcode).replace(/["<>]/g,'');
   const overlay=document.createElement('div');
