@@ -1129,7 +1129,7 @@ barcodeInput.addEventListener('keydown', function(e){
 document.addEventListener('click', function(e){
   if(e.target !== barcodeInput && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
   if(!document.querySelector('.modal-overlay.active') && !document.querySelector('.fullscreen-overlay.active') && !document.getElementById('cameraOverlay').classList.contains('active') && !document.getElementById('loginScreen').classList.contains('active'))
-    barcodeInput.focus();
+    if(document.activeElement.tagName!=='SELECT') barcodeInput.focus();
   if(document.getElementById('bulkQtyModal').classList.contains('active'))
     setTimeout(()=>document.getElementById('bulkQtyInput').focus(),10);
 });
