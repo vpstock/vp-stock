@@ -1305,7 +1305,6 @@ function deleteItem(barcode){showDeleteConfirm(barcode);}
 // Category filters
 function renderCatFilters() {
   const _sel=document.querySelector('#catFilters select');if(_sel&&document.activeElement===_sel)return;
-  const _sel=document.querySelector('#catFilters select');if(_sel&&document.activeElement===_sel)return;
   const cf = document.getElementById('catFilters');
   const usedCats = new Set(Object.values(stock).map(i=>i.category||'').filter(Boolean));
   if(usedCats.size===0){ cf.innerHTML=''; return; }
