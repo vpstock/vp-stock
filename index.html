@@ -2716,3 +2716,21 @@ function installApp(){
         <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
       </div>
       <div style="font-size:0.75rem;f
+
+<script>
+(function(){
+  if(document.getElementById('vp-mobile-styles'))return;
+  fetch(location.href).then(function(r){return r.text();}).then(function(src){
+    var si=src.indexOf('<style id="vp-mobile-styles">');
+    var ei=src.indexOf('</style>',si);
+    if(si<0||ei<0)return;
+    var css=src.slice(si+29,ei);
+    var s=document.createElement('style');
+    s.id='vp-mobile-styles';
+    s.textContent=css;
+    document.head.appendChild(s);
+    var ma=document.getElementById('mobileApp');
+    if(ma&&ma.parentElement!==document.body)document.body.appendChild(ma);
+  });
+})();
+</script>
