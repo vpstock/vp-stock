@@ -1758,9 +1758,8 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   .m-scan-cta-ico::before{content:"\1F4F7";font-size:2rem;display:block;}
   .m-search-ico{font-size:0!important;}
   .m-search-ico::before{content:"\1F50D";font-size:1.2rem;}
-  .m-login-btn{color:transparent!important;}
-  .m-login-btn::before{content:"Sign In \2192";font-size:1rem;font-weight:600;letter-spacing:0.05em;display:block;color:white;}
-  #m-scan-screen h2{font-size:0!important;}
+  .m-login-btn{color:#fff!important;}
+    #m-scan-screen h2{font-size:0!important;}
   #m-scan-screen h2::before{content:"\1F4F7  Scan Item";font-size:1.15rem;font-weight:700;display:block;}
   #m-list h2{font-size:0!important;}
   #m-list h2::before{content:"\1F4E6  Stock List";font-size:1.15rem;font-weight:700;display:block;}
@@ -2233,12 +2232,24 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
       <div class="m-login-title">VP Stock Manager</div>
       <div class="m-login-sub">Victorian Projects</div>
       <div class="m-login-card">
-        <label class="m-login-label">EMAIL</label>
-        <input id="m-email" class="m-login-input" type="email" placeholder="you@victorianprojects.com.au" autocomplete="email" autocapitalize="none">
-        <label class="m-login-label">PASSWORD</label>
-        <input id="m-pass" class="m-login-input" type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" autocomplete="current-password">
-        <button class="m-login-btn" onclick="mLogin()">Sign In â</button>
-        <div class="m-login-err" id="m-login-err"></div>
+        <div id="m-umode">
+          <label class="m-login-label">USERNAME</label>
+          <input id="m-username" class="m-login-input" type="text" placeholder="Enter your username" autocomplete="username" autocapitalize="none">
+          <label class="m-login-label">PASSWORD</label>
+          <input id="m-pass" class="m-login-input" type="password" autocomplete="current-password">
+          <button class="m-login-btn" id="m-signbtn" onclick="mLogin(false)">Sign In &#x2192;</button>
+          <div class="m-login-err" id="m-login-err"></div>
+          <div style="text-align:center;margin-top:1.1rem;"><span style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Admin? </span><button onclick="mToggleAdmin(true)" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.8rem;text-decoration:underline;cursor:pointer;padding:0;">Login here</button></div>
+        </div>
+        <div id="m-amode" style="display:none;">
+          <label class="m-login-label">ADMIN EMAIL</label>
+          <input id="m-admin-email" class="m-login-input" type="email" placeholder="admin@victorianprojects.com.au" autocomplete="email" autocapitalize="none">
+          <label class="m-login-label">PASSWORD</label>
+          <input id="m-admin-pass" class="m-login-input" type="password" autocomplete="current-password">
+          <button class="m-login-btn" id="m-adminbtn" onclick="mLogin(true)">Admin Sign In &#x2192;</button>
+          <div class="m-login-err" id="m-login-admin-err"></div>
+          <div style="text-align:center;margin-top:1.1rem;"><button onclick="mToggleAdmin(false)" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.8rem;text-decoration:underline;cursor:pointer;padding:0;">&#x2190; Back to User Login</button></div>
+        </div>
       </div>
     </div>
   </div>
@@ -2479,35 +2490,52 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
     document.getElementById('m-greeting').textContent=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   }
 
-  window.mLogin = function(){
-    var email=document.getElementById('m-email').value.trim();
-    var pass=document.getElementById('m-pass').value;
-    var err=document.getElementById('m-login-err');
-    if(!email||!pass){err.textContent='Enter email and password.';return;}
-    err.textContent='';
-    var btn=document.querySelector('.m-login-btn');
-    btn.textContent='Signing inâ¦'; btn.disabled=true;
-    function resetBtn(){btn.textContent='Sign In â';btn.disabled=false;}
-    // Try existing login function first
-    if(typeof window.login==='function'){
-      window.login(email,pass);
-      var w=setInterval(function(){
-        if(window.currentUser){clearInterval(w);resetBtn();setUser(window.currentUser.email.split('@')[0]);mGo('home');}
-      },400);
-      setTimeout(function(){clearInterval(w);resetBtn();if(!window.currentUser)err.textContent='Login failed. Check credentials.';},10000);
-      return;
-    }
-    // Try Firebase auth directly
-    var auth=null;
-    try{auth=firebase.auth();}catch(e){}
+  window.mLogin = function(isAdmin){
+  var userEl=isAdmin?document.getElementById('m-admin-email'):document.getElementById('m-username');
+  var passEl=isAdmin?document.getElementById('m-admin-pass'):document.getElementById('m-pass');
+  var errEl=document.getElementById(isAdmin?'m-login-admin-err':'m-login-err');
+  var user=userEl?userEl.value.trim():'';
+  var pass=passEl?passEl.value:'';
+  if(!user||!pass){errEl.textContent='Enter '+(isAdmin?'email':'username')+' and password.';return;}
+  errEl.textContent='';
+  var btns=document.querySelectorAll('.m-login-btn');
+  btns.forEach(function(b){b.disabled=true;});
+  function resetBtns(){btns.forEach(function(b){b.disabled=false;});}
+  if(isAdmin){
+    var auth=null;try{auth=firebase.auth();}catch(e){}
     if(auth){
-      auth.signInWithEmailAndPassword(email,pass)
-        .then(function(r){resetBtn();setUser(r.user.email.split('@')[0]);mGo('home');})
-        .catch(function(e){err.textContent=e.message||'Login failed.';resetBtn();});
+      auth.signInWithEmailAndPassword(user,pass)
+        .then(function(r){resetBtns();setUser(r.user.email.split('@')[0]);mGo('home');})
+        .catch(function(e){errEl.textContent=e.message||'Login failed.';resetBtns();});
     } else {
-      err.textContent='Auth not available. Try the desktop version.';resetBtn();
+      errEl.textContent='Auth not available.';resetBtns();
     }
-  };
+  } else {
+    if(typeof window.login==='function'){
+      window.login(user,pass);
+      var w=setInterval(function(){
+        if(window.currentUser){
+          clearInterval(w);resetBtns();
+          var name=window.currentUser.email?window.currentUser.email.split('@')[0]:user;
+          setUser(name);mGo('home');
+        }
+      },400);
+      setTimeout(function(){clearInterval(w);resetBtns();if(!window.currentUser)errEl.textContent='Login failed. Check credentials.';},10000);
+    } else {
+      errEl.textContent='Login service not available.';resetBtns();
+    }
+  }
+};
+mToggleAdmin = function(showAdmin){
+  var um=document.getElementById('m-umode');
+  var am=document.getElementById('m-amode');
+  if(um)um.style.display=showAdmin?'none':'block';
+  if(am)am.style.display=showAdmin?'block':'none';
+  var errU=document.getElementById('m-login-err');
+  var errA=document.getElementById('m-login-admin-err');
+  if(errU)errU.textContent='';
+  if(errA)errA.textContent='';
+};;
 
   window.mLogout = function(){
     localStorage.removeItem('vp_user');
@@ -2766,7 +2794,7 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   fix('#m-nb-tools .m-nav-icon','🔧');
   fix('.m-scan-cta-ico','📷');
   fix('.m-search-ico','🔍');
-  var lb=ma.querySelector('.m-login-btn');if(lb)lb.innerHTML='Sign In →';
+        var lb=ma.querySelector('#m-signbtn');if(lb)lb.textContent='Sign In →';
   var ab=ma.querySelector('[onclick*="submitAdd"]');if(ab)ab.innerHTML='Add Item →';
   fxa('#m-pass','placeholder','••••••••');
   ma.querySelectorAll('h2').forEach(function(h){
