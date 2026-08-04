@@ -2526,7 +2526,7 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
     }
   }
 };
-mToggleAdmin = function(showAdmin){
+window.mToggleAdmin = function(showAdmin){
   var um=document.getElementById('m-umode');
   var am=document.getElementById('m-amode');
   if(um)um.style.display=showAdmin?'none':'block';
