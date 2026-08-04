@@ -2226,7 +2226,26 @@ function installApp(){
         <label class="m-login-label">EMAIL</label>
         <input id="m-email" class="m-login-input" type="email" placeholder="you@victorianprojects.com.au" autocomplete="email" autocapitalize="none">
         <label class="m-login-label">PASSWORD</label>
-        <input id="m-pass" class="m-login-input" type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢""WFö6ö×ÆWFSÒ&7W'&VçB×77v÷&B#à¢Æ'WGFöâ6Æ73Ò&ÒÖÆövâÖ'Fâ"öæ6Æ6³Ò&ÔÆövâ#å6vââ(i#Âö'WGFöãà¢ÆFb6Æ73Ò&ÒÖÆövâÖW'""CÒ&ÒÖÆövâÖW'"#ãÂöFcà¢ÂöFcà¢ÂöFcà¢ÂöFcà ¢ÂÒÒöÖRÒÓà¢ÆFb6Æ73Ò&Ò×67&VVâ"CÒ&ÒÖöÖR#à¢ÆFb6Æ73Ò&Ò×67&öÆÂ#à¢ÆFb6Æ73Ò&ÒÖVFW"#à¢ÆFb6Æ73Ò&ÒÖw&VWFær"CÒ&ÒÖw&VWFær#ävööBÖ÷&ææsÂöFcà¢ÆFb6Æ73Ò&ÒÖæÖR"CÒ&ÒÖæÖR#åe7Fö6³ÂöFcà¢ÆFb6Æ73Ò&ÒÖ7V"#å÷W"çfVçF÷'BvÆæ6SÂöFcà¢ÂöFcà¢ÆFb6Æ73Ò&Ò×7FBÖw&B#à¢ÆFb6Æ73Ò&Ò×7FBÖ6&B#ãÆFb6Æ73Ò&Ò×7FBÖÆ&Â#åDõDÂCÂöFcãÆFb6Æ73Ò&Ò×7FB×fÂ"CÒ&Ò×2×F÷FÂ#î(	CÂöFcãÆFb6Æ73Ò&Ò×7FBÖæfò#æâ7Fö6³ÂöFcãÂöFcà¢ÆFb6Æ73Ò&Ò×7FBÖ6&B"CÒ&Ò×2ÖÆ÷rÖ6&B#ãÆFb6Æ73Ò&Ò×7FBÖÆ&Â#äÄõr5Dô4³ÂöFcãÆFb6Æ73Ò&Ò×7FB×fÂ"CÒ&Ò×2ÖÆ÷r#î(	CÂöFcãÆFb6Æ73Ò&Ò×7FBÖæfò"CÒ&Ò×2ÖÆ÷rÖæfò#æFV×3ÂöFcãÂöFcà¢ÆFb6Æ73Ò&Ò×7FBÖ6&B#ãÆFb6Æ73Ò&Ò×7FBÖÆ&Â#ä4DTtõ$U3ÂöFcãÆFb6Æ73Ò&Ò×7FB×fÂ"CÒ&Ò×2Ö6G2#î(	CÂöFcãÆFb6Æ73Ò&Ò×7FBÖæfò#æ7FfSÂöFcãÂöFcà¢ÆFb6Æ73Ò&Ò×7FBÖ6&B#ãÆFb6Æ73Ò&-stat-lbl">ZERO STOCK</div><div class="m-stat-val" id="m-s-zero">â</div><div class="m-stat-info">items</div></div>
+        <input id="m-pass" class="m-login-input" type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" autocomplete="current-password">
+        <button class="m-login-btn" onclick="mLogin()">Sign In â</button>
+        <div class="m-login-err" id="m-login-err"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Home -->
+  <div class="m-screen" id="m-home">
+    <div class="m-scroll">
+      <div class="m-header">
+        <div class="m-greeting" id="m-greeting">Good morning</div>
+        <div class="m-hname" id="m-hname">VP Stock</div>
+        <div class="m-hsub">Your inventory at a glance</div>
+      </div>
+      <div class="m-stat-grid">
+        <div class="m-stat-card"><div class="m-stat-lbl">TOTAL QTY</div><div class="m-stat-val" id="m-s-total">â</div><div class="m-stat-info">in stock</div></div>
+        <div class="m-stat-card" id="m-s-low-card"><div class="m-stat-lbl">LOW STOCK</div><div class="m-stat-val" id="m-s-low">â</div><div class="m-stat-info" id="m-s-low-info">items</div></div>
+        <div class="m-stat-card"><div class="m-stat-lbl">CATEGORIES</div><div class="m-stat-val" id="m-s-cats">â</div><div class="m-stat-info">active</div></div>
+        <div class="m-stat-card"><div class="m-stat-lbl">ZERO STOCK</div><div class="m-stat-val" id="m-s-zero">â</div><div class="m-stat-info">items</div></div>
       </div>
       <button class="m-scan-cta" onclick="mGo('scan')">
         <span class="m-scan-cta-ico">ð·</span>
