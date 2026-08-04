@@ -1768,6 +1768,10 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   #m-tools h2::before{content:"\1F527  Tools";font-size:1.15rem;font-weight:700;display:block;}
   .m-tool-arr{font-size:0!important;}
   .m-tool-arr::before{content:"\203A";font-size:1.1rem;}
+  #m-pass::placeholder{color:transparent!important;}
+  #m-login.active ~ #m-nav{display:none!important;}
+  #mobileApp:has(#m-login.active) #m-nav{display:none!important;}
+
 }
 #mobileApp {
   display: none;
