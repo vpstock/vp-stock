@@ -2266,22 +2266,8 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
       <div class="m-stat-grid">
         <div class="m-stat-card"><div class="m-stat-lbl">TOTAL QTY</div><div class="m-stat-val" id="m-s-total">â</div><div class="m-stat-info">in stock</div></div>
         <div class="m-stat-card" id="m-s-low-card"><div class="m-stat-lbl">LOW STOCK</div><div class="m-stat-val" id="m-s-low">â</div><div class="m-stat-info" id="m-s-low-info">items</div></div>
-        <div class="m-stat-card"><div class="m-stat-lbl">CATEGORIES</div><div class="m-stat-val" id="m-s-cats">â</div><div class="m-stat-info">active</div></div>
-        <div class="m-stat-card"><div class="m-stat-lbl">ZERO STOCK</div><div class="m-stat-val" id="m-s-zero">â</div><div class="m-stat-info">items</div></div>
-      </div>
-      <button class="m-scan-cta" onclick="mGo('scan')">
-        <span class="m-scan-cta-ico">ð·</span>
-        <span class="m-scan-cta-txt"><b>Scan Barcode</b><span>Quick stock adjustment</span></span>
-        <span style="color:rgba(255,255,255,0.4);font-size:1.1rem;">âº</span>
-      </button>
-      <div class="m-section">
-        <div class="m-section-title">â ï¸ Needs Attention</div>
-        <div id="m-attn-list"></div>
-      </div>
-      <div style="height:1rem;"></div>
-    </div>
-  </div>
-
+        
+        <div class="m-stat-card"><div class="m-stat-lbl">ZERO STOCK</div><div class="m-stat-val" id="m-s-zero">â</div><div class="m-
   <!-- Scan -->
   <div class="m-screen" id="m-scan-screen">
     <div class="m-scan-hdr">
@@ -2392,7 +2378,7 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
     <button class="m-nav-btn active" id="m-nb-home" onclick="mGo('home')"><span class="m-nav-icon">ð </span><span class="m-nav-label">Home</span></button>
     <button class="m-nav-btn" id="m-nb-list" onclick="mGo('list')"><span class="m-nav-icon">ð¦</span><span class="m-nav-label">Stock</span></button>
     <button class="m-nav-scan-wrap" id="m-nb-scan" onclick="mGo('scan')"><div class="m-nav-scan-blob">ð·</div><span class="m-nav-scan-lbl">Scan</span></button>
-    <button class="m-nav-btn" id="m-nb-add" onclick="mGo('add')"><span class="m-nav-icon">â</span><span class="m-nav-label">Add</span></button>
+    <button class="m-nav-btn" id="m-nb-add" onclick="mGo('add')" style="display:none"><span class="m-nav-icon">â</span><span class="m-nav-label">Add</span></button>
     <button class="m-nav-btn" id="m-nb-tools" onclick="mGo('tools')" style="display:none"><span class="m-nav-icon">ð§</span><span class="m-nav-label">Tools</span></button>
   </div>
 
@@ -2503,20 +2489,21 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   btns.forEach(function(b){b.disabled=true;});
   function resetBtns(){btns.forEach(function(b){b.disabled=false;});}
   if(isAdmin){
-    var origSet=localStorage.setItem.bind(localStorage);
-    var sessionWritten=null;
-    var safe=['vp_users','vp_stock_v1','vp_activity_log','vp_firebase_url'];
-    localStorage.setItem=function(k,v){if(!safe.includes(k)){sessionWritten=k;}return origSet(k,v);};
+    var prevLen=0;try{prevLen=(JSON.parse(localStorage.getItem('vp_activity_log')||'[]')).length;}catch(e){}
+    var deskErr=document.getElementById('loginError');
+    if(deskErr)deskErr.textContent='';
     var deskInp=document.getElementById('loginInput');
     var prev=deskInp?deskInp.value:'';
     if(deskInp)deskInp.value=code;
     try{doAdminLogin();}catch(e){}
-    localStorage.setItem=origSet;
     if(deskInp)deskInp.value=prev;
-    if(sessionWritten){
+    var newLen=0;try{newLen=(JSON.parse(localStorage.getItem('vp_activity_log')||'[]')).length;}catch(e){}
+    var noErr=!deskErr||!deskErr.textContent||!deskErr.textContent.trim();
+    var logOk=newLen>prevLen;
+    if(noErr&&logOk){
       window._mIsAdmin=true;
-      var tb=document.getElementById('m-nb-tools');
-      if(tb)tb.style.display='';
+      var tb=document.getElementById('m-nb-tools');if(tb)tb.style.display='';
+      var ab=document.getElementById('m-nb-add');if(ab)ab.style.display='';
       resetBtns();setUser(name);mGo('home');
     }else{errEl.textContent='Incorrect password.';resetBtns();}
   }else{
@@ -2830,49 +2817,79 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
 
 <script>
 (function(){
-  'use strict';
-  if(window.innerWidth>640)return;
-  window.mLoadStats=function(){
-    function applyStats(data){
-      var items=Array.isArray(data)?data:Object.values(data||{}).filter(Boolean);
-      var totalQty=0,lowStock=0,zeroStock=0,cats={};
-      items.forEach(function(item){
-        var qty=parseInt(item.qty||item.quantity||0,10);
-        totalQty+=qty;
-        if(qty===0)zeroStock++;
-        else if(qty<=5)lowStock++;
-        if(item.category)cats[item.category]=true;
-      });
-      var catCount=Object.keys(cats).length;
-      var el=function(id){return document.getElementById(id);};
-      if(el('m-s-total'))el('m-s-total').textContent=totalQty;
-      if(el('m-s-low'))el('m-s-low').textContent=lowStock;
-      if(el('m-s-cats'))el('m-s-cats').textContent=catCount;
-      if(el('m-s-zero'))el('m-s-zero').textContent=zeroStock;
-      var li=el('m-s-low-info');
-      if(li)li.textContent=lowStock===0?'all good':'items';
-      var attn=el('m-attn-list');
-      if(attn){
-        var html='';
-        items.filter(function(i){return parseInt(i.qty||0,10)===0;}).slice(0,6).forEach(function(i){html+='<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;"><span style="color:#ef4444;font-weight:600;">OUT</span> &mdash; '+i.name+'</div>';});
-        items.filter(function(i){var q=parseInt(i.qty||0,10);return q>0&&q<=5;}).slice(0,4).forEach(function(i){html+='<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;"><span style="color:#f59e0b;font-weight:600;">LOW</span> &mdash; '+i.name+' ('+i.qty+')</div>';});
-        attn.innerHTML=html||'<div style="color:#6b7280;font-size:0.85rem;padding:8px 0;">&#x2714; All stock levels healthy!</div>';
-      }
+'use strict';
+if(window.innerWidth>640)return;
+window._stock=null;
+window.mLoadStats=function(){
+  function apply(d){
+    var items=Object.values(d||{}).filter(Boolean);
+    var tot=0,low=0,zero=0;
+    items.forEach(function(i){var q=parseInt(i.qty||0,10);tot+=q;if(q===0)zero++;else if(q<=5)low++;});
+    var $=function(id){return document.getElementById(id);};
+    if($('m-s-total'))$('m-s-total').textContent=tot;
+    if($('m-s-low'))$('m-s-low').textContent=low;
+    if($('m-s-zero'))$('m-s-zero').textContent=zero;
+    var li=$('m-s-low-info');if(li)li.textContent=low===0?'all good':'items';
+    var al=$('m-attn-list');
+    if(al){
+      var html=items.filter(function(i){return parseInt(i.qty||0,10)===0;}).slice(0,6).map(function(i){return '<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;"><b style="color:#ef4444">OUT</b> — '+i.name+'</div>';}).join('')+items.filter(function(i){var q=parseInt(i.qty||0,10);return q>0&&q<=5;}).slice(0,4).map(function(i){return '<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;"><b style="color:#f59e0b">LOW</b> — '+i.name+' ('+i.qty+')</div>';}).join('');
+      al.innerHTML=html||'<div style="color:#6b7280;font-size:0.85rem;padding:8px 0;">&#x2714; All stock levels healthy!</div>';
     }
-    try{var c=localStorage.getItem('vp_stock_v1');if(c){var d=JSON.parse(c);applyStats(d);}}catch(e){}
-    fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_stock.json')
-      .then(function(r){return r.json();})
-      .then(function(data){if(data){try{localStorage.setItem('vp_stock_v1',JSON.stringify(data));}catch(e){}applyStats(data);}})
-      .catch(function(){});
-  };
-  var _origMGo=window.mGo;
-  window.mGo=function(screen){_origMGo(screen);if(screen==='home')window.mLoadStats();};
-  var _origLogout=window.mLogout;
-  window.mLogout=function(){
-    window._mIsAdmin=false;
-    var tb=document.getElementById('m-nb-tools');
-    if(tb)tb.style.display='none';
-    if(_origLogout)_origLogout();
-  };
+  }
+  try{var c=localStorage.getItem('vp_stock_v1');if(c)apply(JSON.parse(c));}catch(e){}
+  fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_stock.json').then(function(r){return r.json();}).then(function(d){if(d){try{localStorage.setItem('vp_stock_v1',JSON.stringify(d));}catch(e){}apply(d);}}).catch(function(){});
+};
+window.mLoadStockList=function(){
+  var listEl=document.getElementById('m-item-list'),chipEl=document.getElementById('m-cat-chips');
+  if(!listEl)return;
+  function render(d){
+    window._stock=d;
+    var entries=Object.entries(d||{});
+    entries.sort(function(a,b){var ca=a[1].category||'',cb=b[1].category||'';return ca.localeCompare(cb)||(a[1].name||'').localeCompare(b[1].name||'');});
+    var cats={};entries.forEach(function(e){if(e[1].category)cats[e[1].category]=true;});
+    if(chipEl)chipEl.innerHTML='<button class="m-chip m-chip-active" data-cat="" onclick="mCatFilter(this)">All</button>'+Object.keys(cats).sort().map(function(c){return '<button class="m-chip" data-cat="'+c+'" onclick="mCatFilter(this)">'+c+'</button>';}).join('');
+    window.mRenderItems(entries,'');
+  }
+  listEl.innerHTML='<div style="text-align:center;padding:2rem;color:#9ca3af;">Loading…</div>';
+  try{var c=localStorage.getItem('vp_stock_v1');if(c){render(JSON.parse(c));}}catch(e){}
+  fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_stock.json').then(function(r){return r.json();}).then(function(d){if(d){try{localStorage.setItem('vp_stock_v1',JSON.stringify(d));}catch(e){}render(d);}}).catch(function(){if(!window._stock)listEl.innerHTML='<div style="text-align:center;padding:2rem;color:#ef4444;">Could not load.</div>';});
+};
+window.mRenderItems=function(entries,cat){
+  var listEl=document.getElementById('m-item-list');if(!listEl)return;
+  var rows=cat?entries.filter(function(e){return e[1].category===cat;}):entries;
+  if(!rows.length){listEl.innerHTML='<div style="text-align:center;padding:2rem;color:#9ca3af;">No items.</div>';return;}
+  listEl.innerHTML=rows.map(function(e){
+    var id=e[0],item=e[1],qty=parseInt(item.qty||0,10),c=qty===0?'#ef4444':qty<=5?'#f59e0b':'#1b3a5c';
+    return '<div onclick="mViewDetail(''+id+'')" style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;gap:10px;"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.88rem;color:#1b3a5c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+item.name+'</div><div style="font-size:0.75rem;color:#9ca3af;margin-top:2px;">'+(item.category||'')+'</div></div><div style="font-size:1.05rem;font-weight:700;color:'+c+';min-width:28px;text-align:right;">'+qty+'</div></div>';
+  }).join('');
+};
+window.mCatFilter=function(btn){
+  document.querySelectorAll('.m-chip').forEach(function(c){c.classList.remove('m-chip-active');});btn.classList.add('m-chip-active');
+  if(!window._stock)return;
+  var entries=Object.entries(window._stock);entries.sort(function(a,b){return (a[1].name||'').localeCompare(b[1].name||'');});
+  window.mRenderItems(entries,btn.getAttribute('data-cat'));
+};
+window.mViewDetail=function(id){
+  if(!window._stock||!window._stock[id])return;
+  var item=window._stock[id],qty=parseInt(item.qty||0,10);
+  var $=function(x){return document.getElementById(x);};
+  if($('m-di-name'))$('m-di-name').textContent=item.name||'';
+  if($('m-di-cat'))$('m-di-cat').textContent=item.category||'';
+  if($('m-di-qty'))$('m-di-qty').textContent=qty;
+  if($('m-di-meta'))$('m-di-meta').textContent='ID: '+id+(item.updated?' · '+item.updated:'');
+  window._currentItemId=id;
+  mGo('detail');
+};
+window.mFilterList=function(){
+  var q=((document.getElementById('m-list-search')||{}).value||'').toLowerCase().trim();
+  if(!window._stock)return;
+  var entries=Object.entries(window._stock);
+  entries.sort(function(a,b){var ca=a[1].category||'',cb=b[1].category||'';return ca.localeCompare(cb)||(a[1].name||'').localeCompare(b[1].name||'');});
+  if(q)entries=entries.filter(function(e){return (e[1].name||'').toLowerCase().includes(q)||(e[0]||'').toLowerCase().includes(q);});
+  var ac=document.querySelector('.m-chip-active');
+  window.mRenderItems(entries,ac?ac.getAttribute('data-cat'):'');
+};
+var _oGo=window.mGo;window.mGo=function(s){_oGo(s);if(s==='home')window.mLoadStats();if(s==='list')window.mLoadStockList();};
+var _oLo=window.mLogout;window.mLogout=function(){window._mIsAdmin=false;var tb=document.getElementById('m-nb-tools');if(tb)tb.style.display='none';var ab=document.getElementById('m-nb-add');if(ab)ab.style.display='none';if(_oLo)_oLo();};
 })();
 </script>
