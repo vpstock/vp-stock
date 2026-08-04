@@ -1739,7 +1739,8 @@ function installApp(){
 <style id="vp-mobile-styles">
 @media (max-width: 640px) {
   #loginScreen, #app { display: none !important; }
-  #mobileApp { display: flex !important; }
+  #mobileApp { display: flex !important; z-index: 2147483647 !important; }
+body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
 }
 #mobileApp {
   display: none;
