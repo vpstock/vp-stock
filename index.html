@@ -1741,6 +1741,33 @@ function installApp(){
   #loginScreen, #app { display: none !important; }
   #mobileApp { display: flex !important; z-index: 2147483647 !important; }
 body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
+
+  .m-login-logo{font-size:0!important;}
+  .m-login-logo::before{content:"\1F4E6";font-size:3.2rem;display:block;text-align:center;}
+  #m-nb-home .m-nav-icon{font-size:0!important;}
+  #m-nb-home .m-nav-icon::before{content:"\1F3E0";font-size:1.3rem;}
+  #m-nb-list .m-nav-icon{font-size:0!important;}
+  #m-nb-list .m-nav-icon::before{content:"\1F4E6";font-size:1.3rem;}
+  .m-nav-scan-blob{font-size:0!important;}
+  .m-nav-scan-blob::before{content:"\1F4F7";font-size:1.3rem;display:block;}
+  #m-nb-add .m-nav-icon{font-size:0!important;}
+  #m-nb-add .m-nav-icon::before{content:"\2795";font-size:1.3rem;}
+  #m-nb-tools .m-nav-icon{font-size:0!important;}
+  #m-nb-tools .m-nav-icon::before{content:"\1F527";font-size:1.3rem;}
+  .m-scan-cta-ico{font-size:0!important;}
+  .m-scan-cta-ico::before{content:"\1F4F7";font-size:2rem;display:block;}
+  .m-search-ico{font-size:0!important;}
+  .m-search-ico::before{content:"\1F50D";font-size:1.2rem;}
+  .m-login-btn{color:transparent!important;}
+  .m-login-btn::before{content:"Sign In \2192";font-size:1rem;font-weight:600;letter-spacing:0.05em;display:block;color:white;}
+  #m-scan-screen h2{font-size:0!important;}
+  #m-scan-screen h2::before{content:"\1F4F7  Scan Item";font-size:1.15rem;font-weight:700;display:block;}
+  #m-list h2{font-size:0!important;}
+  #m-list h2::before{content:"\1F4E6  Stock List";font-size:1.15rem;font-weight:700;display:block;}
+  #m-tools h2{font-size:0!important;}
+  #m-tools h2::before{content:"\1F527  Tools";font-size:1.15rem;font-weight:700;display:block;}
+  .m-tool-arr{font-size:0!important;}
+  .m-tool-arr::before{content:"\203A";font-size:1.1rem;}
 }
 #mobileApp {
   display: none;
@@ -2737,7 +2764,7 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   fix('.m-search-ico','🔍');
   var lb=ma.querySelector('.m-login-btn');if(lb)lb.innerHTML='Sign In →';
   var ab=ma.querySelector('[onclick*="submitAdd"]');if(ab)ab.innerHTML='Add Item →';
-  fxa('#m-pwd','placeholder','••••••••');
+  fxa('#m-pass','placeholder','••••••••');
   ma.querySelectorAll('h2').forEach(function(h){
     var t=h.textContent;
     if(t.indexOf('Scan')>-1)h.textContent='📷 Scan Item';
