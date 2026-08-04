@@ -2235,15 +2235,15 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
         <div id="m-umode">
           <label class="m-login-label">USERNAME</label>
           <input id="m-username" class="m-login-input" type="text" placeholder="Enter your username" autocomplete="username" autocapitalize="none">
-          <label class="m-login-label">PASSWORD</label>
-          <input id="m-pass" class="m-login-input" type="password" autocomplete="current-password">
+          <label class="m-login-label">PIN</label>
+          <input id="m-pin" class="m-login-input" type="tel" placeholder="Enter PIN" autocomplete="off">
           <button class="m-login-btn" id="m-signbtn" onclick="mLogin(false)">Sign In &#x2192;</button>
           <div class="m-login-err" id="m-login-err"></div>
           <div style="text-align:center;margin-top:1.1rem;"><span style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Admin? </span><button onclick="mToggleAdmin(true)" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.8rem;text-decoration:underline;cursor:pointer;padding:0;">Login here</button></div>
         </div>
         <div id="m-amode" style="display:none;">
-          <label class="m-login-label">ADMIN EMAIL</label>
-          <input id="m-admin-email" class="m-login-input" type="email" placeholder="admin@victorianprojects.com.au" autocomplete="email" autocapitalize="none">
+          <label class="m-login-label">USERNAME</label>
+          <input id="m-admin-user" class="m-login-input" type="text" placeholder="Enter admin username" autocomplete="username" autocapitalize="none">
           <label class="m-login-label">PASSWORD</label>
           <input id="m-admin-pass" class="m-login-input" type="password" autocomplete="current-password">
           <button class="m-login-btn" id="m-adminbtn" onclick="mLogin(true)">Admin Sign In &#x2192;</button>
@@ -2491,12 +2491,12 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   }
 
   window.mLogin = function(isAdmin){
-  var userEl=isAdmin?document.getElementById('m-admin-email'):document.getElementById('m-username');
-  var passEl=isAdmin?document.getElementById('m-admin-pass'):document.getElementById('m-pass');
+  var nameEl=isAdmin?document.getElementById('m-admin-user'):document.getElementById('m-username');
+  var codeEl=isAdmin?document.getElementById('m-admin-pass'):document.getElementById('m-pin');
   var errEl=document.getElementById(isAdmin?'m-login-admin-err':'m-login-err');
-  var user=userEl?userEl.value.trim():'';
-  var pass=passEl?passEl.value:'';
-  if(!user||!pass){errEl.textContent='Enter '+(isAdmin?'email':'username')+' and password.';return;}
+  var name=nameEl?nameEl.value.trim():'';
+  var code=codeEl?codeEl.value.trim():'';
+  if(!name||!code){errEl.textContent='Enter username and '+(isAdmin?'password':'PIN')+'.';return;}
   errEl.textContent='';
   var btns=document.querySelectorAll('.m-login-btn');
   btns.forEach(function(b){b.disabled=true;});
@@ -2504,26 +2504,20 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   if(isAdmin){
     var auth=null;try{auth=firebase.auth();}catch(e){}
     if(auth){
-      auth.signInWithEmailAndPassword(user,pass)
-        .then(function(r){resetBtns();setUser(r.user.email.split('@')[0]);mGo('home');})
-        .catch(function(e){errEl.textContent=e.message||'Login failed.';resetBtns();});
-    } else {
-      errEl.textContent='Auth not available.';resetBtns();
-    }
-  } else {
-    if(typeof window.login==='function'){
-      window.login(user,pass);
-      var w=setInterval(function(){
-        if(window.currentUser){
-          clearInterval(w);resetBtns();
-          var name=window.currentUser.email?window.currentUser.email.split('@')[0]:user;
-          setUser(name);mGo('home');
-        }
-      },400);
-      setTimeout(function(){clearInterval(w);resetBtns();if(!window.currentUser)errEl.textContent='Login failed. Check credentials.';},10000);
-    } else {
-      errEl.textContent='Login service not available.';resetBtns();
-    }
+      auth.signInWithEmailAndPassword('joy@victorianprojects.com.au',code)
+        .then(function(r){resetBtns();setUser(name);mGo('home');})
+        .catch(function(e){errEl.textContent='Incorrect password.';resetBtns();});
+    }else{errEl.textContent='Auth not available.';resetBtns();}
+  }else{
+    try{
+      firebase.database().ref('vp_data/vp_users').once('value').then(function(snap){
+        var users=snap.val()||[];
+        var arr=Array.isArray(users)?users:Object.values(users).filter(Boolean);
+        var found=arr.find(function(u){return u&&u.name&&u.name.toLowerCase()===name.toLowerCase()&&String(u.pin)===String(code);});
+        if(found){resetBtns();setUser(found.name);mGo('home');}
+        else{errEl.textContent='Invalid username or PIN.';resetBtns();}
+      }).catch(function(e){errEl.textContent='Login failed. Try again.';resetBtns();});
+    }catch(e){errEl.textContent='Database not available.';resetBtns();}
   }
 };
 window.mToggleAdmin = function(showAdmin){
