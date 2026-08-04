@@ -2719,18 +2719,46 @@ function installApp(){
 
 <script>
 (function(){
-  if(document.getElementById('vp-mobile-styles'))return;
-  fetch(location.href).then(function(r){return r.text();}).then(function(src){
-    var si=src.indexOf('<style id="vp-mobile-styles">');
-    var ei=src.indexOf('</style>',si);
-    if(si<0||ei<0)return;
-    var css=src.slice(si+29,ei);
-    var s=document.createElement('style');
-    s.id='vp-mobile-styles';
-    s.textContent=css;
-    document.head.appendChild(s);
-    var ma=document.getElementById('mobileApp');
-    if(ma&&ma.parentElement!==document.body)document.body.appendChild(ma);
+  if(!window.matchMedia('(max-width:640px)').matches)return;
+  var s=document.createElement('style');
+  s.textContent='body>*:not(#mobileApp):not(style):not(script){display:none!important;}#mobileApp{z-index:2147483647!important;}';
+  document.head.appendChild(s);
+  var ma=document.getElementById('mobileApp');if(!ma)return;
+  function fix(sel,t){var e=ma.querySelector(sel);if(e)e.textContent=t;}
+  function fxa(sel,a,v){var e=ma.querySelector(sel);if(e)e.setAttribute(a,v);}
+  fix('.m-login-logo','📦');
+  fix('#m-nb-home .m-nav-icon','🏠');
+  fix('#m-nb-list .m-nav-icon','📦');
+  fix('.m-nav-scan-blob','📷');
+  fix('#m-nb-add .m-nav-icon','➕');
+  fix('#m-nb-tools .m-nav-icon','🔧');
+  fix('.m-scan-cta-ico','📷');
+  fix('.m-search-ico','🔍');
+  var lb=ma.querySelector('.m-login-btn');if(lb)lb.innerHTML='Sign In →';
+  var ab=ma.querySelector('[onclick*="submitAdd"]');if(ab)ab.innerHTML='Add Item →';
+  fxa('#m-pwd','placeholder','••••••••');
+  ma.querySelectorAll('h2').forEach(function(h){
+    var t=h.textContent;
+    if(t.indexOf('Scan')>-1)h.textContent='📷 Scan Item';
+    else if(t.indexOf('Stock')>-1)h.textContent='📦 Stock List';
+    else if(t.indexOf('Tools')>-1)h.textContent='🔧 Tools';
+  });
+  ma.querySelectorAll('.m-stat-val').forEach(function(e){if(!e.textContent.trim()||e.textContent.charCodeAt(0)>127)e.textContent='—';});
+  ma.querySelectorAll('[onclick*="mBack"]').forEach(function(e){e.innerHTML='‹ Back';});
+  ma.querySelectorAll('.m-tool-arr').forEach(function(e){e.textContent='›';});
+  ma.querySelectorAll('[placeholder]').forEach(function(e){
+    var p=e.getAttribute('placeholder');
+    if(p&&p.charCodeAt(0)>127){
+      if(p.indexOf('earch')>-1)e.setAttribute('placeholder','Search items…');
+      else if(p.indexOf('arcode')>-1||p.indexOf('tem name')>-1)e.setAttribute('placeholder','Item name or barcode…');
+    }
+  });
+  ma.querySelectorAll('.m-section-title').forEach(function(e){
+    var t=e.textContent,n=t.indexOf('Need');
+    if(n>0)e.textContent='⚠️ '+t.slice(n);
+  });
+  ma.querySelectorAll('[onclick*="take"],[onclick*="Take"]').forEach(function(e){
+    if(e.textContent.indexOf('ake')>-1&&e.textContent.length<8)e.innerHTML='− Take';
   });
 })();
 </script>
