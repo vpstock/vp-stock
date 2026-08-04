@@ -1735,28 +1735,6 @@ function installApp(){
   deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; const b=document.getElementById('installBanner'); if(b) b.remove(); showToast('✅ App installed!','green'); });
 }
 </script>
-
-<!-- TAKE ITEM MODAL (user mode) -->
-/div>
-
-<!-- MANAGE USERS MODAL (admin only) -->
-<div class="modal-overlay admin-only" id="manageUsersModal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
-    <div style="padding:24px;">
-      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
-      <div id="userListEl" style="max-height:180px;overflow-y:auto;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;"></div>
-      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
-        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
-          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
-        </div>
-        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
-        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
-      </div>
-      <div style="font-size:0.75rem;f
-
 <!-- ===== VP STOCK MANAGER â MOBILE REDESIGN ===== -->
 <style id="vp-mobile-styles">
 @media (max-width: 640px) {
@@ -2716,3 +2694,25 @@ function installApp(){
   console.log('[VP Mobile] initialized');
 })();
 </script>
+
+
+<!-- TAKE ITEM MODAL (user mode) -->
+/div>
+
+<!-- MANAGE USERS MODAL (admin only) -->
+<div class="modal-overlay admin-only" id="manageUsersModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h2>👥 Manage Staff Users</h2><button class="modal-close" onclick="closeModal('manageUsersModal')">✕</button></div>
+    <div style="padding:24px;">
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">Staff can log in with their name and PIN. They can scan items to take stock but cannot edit, delete, or access settings.</p>
+      <div id="userListEl" style="max-height:180px;overflow-y:auto;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;"></div>
+      <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:12px;">Add New User</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="newUserName" placeholder="Name (e.g. Lachlan)" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" autocomplete="off" />
+          <input type="password" id="newUserPin" placeholder="PIN (4+ digits)" style="width:140px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:Inter,sans-serif;outline:none;color:#0f2137;" />
+        </div>
+        <button onclick="addUser()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1b3a5c,#2563a8);color:white;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;">➕ Add User</button>
+        <div id="userAddError" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-top:8px;"></div>
+      </div>
+      <div style="font-size:0.75rem;f
