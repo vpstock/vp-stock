@@ -2257,7 +2257,8 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   <!-- Home -->
   <div class="m-screen" id="m-home">
     <div class="m-scroll">
-      <div class="m-header">
+      <div class="m-header" style="position:relative;">
+        <button onclick="window.mLogout()" style="position:absolute;top:0;right:0;background:rgba(255,255,255,0.15);border:none;color:rgba(255,255,255,0.85);border-radius:20px;padding:5px 14px;font-size:0.78rem;cursor:pointer;font-weight:600;letter-spacing:0.02em;">Log out</button>
         <div class="m-greeting" id="m-greeting">Good morning</div>
         <div class="m-hname" id="m-hname">VP Stock</div>
         <div class="m-hsub">Your inventory at a glance</div>
@@ -2392,7 +2393,7 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
     <button class="m-nav-btn" id="m-nb-list" onclick="mGo('list')"><span class="m-nav-icon">ð¦</span><span class="m-nav-label">Stock</span></button>
     <button class="m-nav-scan-wrap" id="m-nb-scan" onclick="mGo('scan')"><div class="m-nav-scan-blob">ð·</div><span class="m-nav-scan-lbl">Scan</span></button>
     <button class="m-nav-btn" id="m-nb-add" onclick="mGo('add')"><span class="m-nav-icon">â</span><span class="m-nav-label">Add</span></button>
-    <button class="m-nav-btn" id="m-nb-tools" onclick="mGo('tools')"><span class="m-nav-icon">ð§</span><span class="m-nav-label">Tools</span></button>
+    <button class="m-nav-btn" id="m-nb-tools" onclick="mGo('tools')" style="display:none"><span class="m-nav-icon">ð§</span><span class="m-nav-label">Tools</span></button>
   </div>
 
   <!-- Toast -->
@@ -2512,9 +2513,14 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
     try{doAdminLogin();}catch(e){}
     localStorage.setItem=origSet;
     if(deskInp)deskInp.value=prev;
-    if(sessionWritten){resetBtns();setUser(name);mGo('home');}
-    else{errEl.textContent='Incorrect password.';resetBtns();}
+    if(sessionWritten){
+      window._mIsAdmin=true;
+      var tb=document.getElementById('m-nb-tools');
+      if(tb)tb.style.display='';
+      resetBtns();setUser(name);mGo('home');
+    }else{errEl.textContent='Incorrect password.';resetBtns();}
   }else{
+    window._mIsAdmin=false;
     fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_data/vp_users.json')
       .then(function(r){return r.json();})
       .then(function(users){
@@ -2819,5 +2825,54 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   ma.querySelectorAll('[onclick*="take"],[onclick*="Take"]').forEach(function(e){
     if(e.textContent.indexOf('ake')>-1&&e.textContent.length<8)e.innerHTML='− Take';
   });
+})();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  if(window.innerWidth>640)return;
+  window.mLoadStats=function(){
+    function applyStats(data){
+      var items=Array.isArray(data)?data:Object.values(data||{}).filter(Boolean);
+      var totalQty=0,lowStock=0,zeroStock=0,cats={};
+      items.forEach(function(item){
+        var qty=parseInt(item.qty||item.quantity||0,10);
+        totalQty+=qty;
+        if(qty===0)zeroStock++;
+        else if(qty<=5)lowStock++;
+        if(item.category)cats[item.category]=true;
+      });
+      var catCount=Object.keys(cats).length;
+      var el=function(id){return document.getElementById(id);};
+      if(el('m-s-total'))el('m-s-total').textContent=totalQty;
+      if(el('m-s-low'))el('m-s-low').textContent=lowStock;
+      if(el('m-s-cats'))el('m-s-cats').textContent=catCount;
+      if(el('m-s-zero'))el('m-s-zero').textContent=zeroStock;
+      var li=el('m-s-low-info');
+      if(li)li.textContent=lowStock===0?'all good':'items';
+      var attn=el('m-attn-list');
+      if(attn){
+        var html='';
+        items.filter(function(i){return parseInt(i.qty||0,10)===0;}).slice(0,6).forEach(function(i){html+='<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;"><span style="color:#ef4444;font-weight:600;">OUT</span> &mdash; '+i.name+'</div>';});
+        items.filter(function(i){var q=parseInt(i.qty||0,10);return q>0&&q<=5;}).slice(0,4).forEach(function(i){html+='<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;"><span style="color:#f59e0b;font-weight:600;">LOW</span> &mdash; '+i.name+' ('+i.qty+')</div>';});
+        attn.innerHTML=html||'<div style="color:#6b7280;font-size:0.85rem;padding:8px 0;">&#x2714; All stock levels healthy!</div>';
+      }
+    }
+    try{var c=localStorage.getItem('vp_stock_v1');if(c){var d=JSON.parse(c);applyStats(d);}}catch(e){}
+    fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_stock.json')
+      .then(function(r){return r.json();})
+      .then(function(data){if(data){try{localStorage.setItem('vp_stock_v1',JSON.stringify(data));}catch(e){}applyStats(data);}})
+      .catch(function(){});
+  };
+  var _origMGo=window.mGo;
+  window.mGo=function(screen){_origMGo(screen);if(screen==='home')window.mLoadStats();};
+  var _origLogout=window.mLogout;
+  window.mLogout=function(){
+    window._mIsAdmin=false;
+    var tb=document.getElementById('m-nb-tools');
+    if(tb)tb.style.display='none';
+    if(_origLogout)_origLogout();
+  };
 })();
 </script>
