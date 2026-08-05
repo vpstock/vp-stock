@@ -2235,15 +2235,15 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
         <div id="m-umode">
           <label class="m-login-label">USERNAME</label>
           <input id="m-username" class="m-login-input" type="text" placeholder="Enter your username" autocomplete="username" autocapitalize="none">
-          <label class="m-login-label">PIN</label>
-          <input id="m-pin" class="m-login-input" type="password" placeholder="Enter PIN" autocomplete="off">
+          <label class="m-login-label">PASSWORD</label>
+          <input id="m-pass" class="m-login-input" type="password" autocomplete="current-password">
           <button class="m-login-btn" id="m-signbtn" onclick="mLogin(false)">Sign In &#x2192;</button>
           <div class="m-login-err" id="m-login-err"></div>
           <div style="text-align:center;margin-top:1.1rem;"><span style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Admin? </span><button onclick="mToggleAdmin(true)" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.8rem;text-decoration:underline;cursor:pointer;padding:0;">Login here</button></div>
         </div>
         <div id="m-amode" style="display:none;">
-          <label class="m-login-label">USERNAME</label>
-          <input id="m-admin-user" class="m-login-input" type="text" placeholder="Enter admin username" autocomplete="username" autocapitalize="none">
+          <label class="m-login-label">ADMIN EMAIL</label>
+          <input id="m-admin-email" class="m-login-input" type="email" placeholder="admin@victorianprojects.com.au" autocomplete="email" autocapitalize="none">
           <label class="m-login-label">PASSWORD</label>
           <input id="m-admin-pass" class="m-login-input" type="password" autocomplete="current-password">
           <button class="m-login-btn" id="m-adminbtn" onclick="mLogin(true)">Admin Sign In &#x2192;</button>
@@ -2267,7 +2267,10 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
         <div class="m-stat-card"><div class="m-stat-lbl">TOTAL QTY</div><div class="m-stat-val" id="m-s-total">â</div><div class="m-stat-info">in stock</div></div>
         <div class="m-stat-card" id="m-s-low-card"><div class="m-stat-lbl">LOW STOCK</div><div class="m-stat-val" id="m-s-low">â</div><div class="m-stat-info" id="m-s-low-info">items</div></div>
         
-        <div class="m-stat-card"><div class="m-stat-lbl">ZERO STOCK</div><div class="m-stat-val" id="m-s-zero">â</div><div class="m-
+        <div class="m-stat-card"><div class="m-stat-lbl">ZERO STOCK</div><div class="m-stat-val" id="m-s-zero">â</div><div class="m-stat-info">items</div></div>
+        </div>
+      </div>
+    </div>
   <!-- Scan -->
   <div class="m-screen" id="m-scan-screen">
     <div class="m-scan-hdr">
@@ -2478,8 +2481,8 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   }
 
   window.mLogin = function(isAdmin){
-  var nameEl=isAdmin?document.getElementById('m-admin-user'):document.getElementById('m-username');
-  var codeEl=isAdmin?document.getElementById('m-admin-pass'):document.getElementById('m-pin');
+  var nameEl=isAdmin?document.getElementById('m-admin-email'):document.getElementById('m-username');
+  var codeEl=isAdmin?document.getElementById('m-admin-pass'):document.getElementById('m-pass');
   var errEl=document.getElementById(isAdmin?'m-login-admin-err':'m-login-err');
   var name=nameEl?nameEl.value.trim():'';
   var code=codeEl?codeEl.value.trim():'';
@@ -2489,23 +2492,9 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   btns.forEach(function(b){b.disabled=true;});
   function resetBtns(){btns.forEach(function(b){b.disabled=false;});}
   if(isAdmin){
-    var prevLen=0;try{prevLen=(JSON.parse(localStorage.getItem('vp_activity_log')||'[]')).length;}catch(e){}
-    var deskErr=document.getElementById('loginError');
-    if(deskErr)deskErr.textContent='';
-    var deskInp=document.getElementById('loginInput');
-    var prev=deskInp?deskInp.value:'';
-    if(deskInp)deskInp.value=code;
-    try{doAdminLogin();}catch(e){}
-    if(deskInp)deskInp.value=prev;
-    var newLen=0;try{newLen=(JSON.parse(localStorage.getItem('vp_activity_log')||'[]')).length;}catch(e){}
-    var noErr=!deskErr||!deskErr.textContent||!deskErr.textContent.trim();
-    var logOk=newLen>prevLen;
-    if(noErr&&logOk){
-      window._mIsAdmin=true;
-      var tb=document.getElementById('m-nb-tools');if(tb)tb.style.display='';
-      var ab=document.getElementById('m-nb-add');if(ab)ab.style.display='';
-      resetBtns();setUser(name);mGo('home');
-    }else{errEl.textContent='Incorrect password.';resetBtns();}
+        errEl.textContent='Admin login is not available on mobile. Please use the desktop app.';
+        resetBtns();
+      }else{errEl.textContent='Incorrect password.';resetBtns();}
   }else{
     window._mIsAdmin=false;
     fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_data/vp_users.json')
