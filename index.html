@@ -2494,7 +2494,7 @@ body > *:not(#mobileApp):not(style):not(script) { display: none !important; }
   if(isAdmin){
         errEl.textContent='Admin login is not available on mobile. Please use the desktop app.';
         resetBtns();
-      }else{errEl.textContent='Incorrect password.';resetBtns();}
+      
   }else{
     window._mIsAdmin=false;
     fetch('https://vp-stock-default-rtdb.firebaseio.com/vp_data/vp_users.json')
